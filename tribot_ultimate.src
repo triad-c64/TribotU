@@ -232,8 +232,7 @@ GETNODES:
 cosinus_similarity:
           jsr cosine_approximation
 
-          lda d0
-          cmp #DIM
+          cpx #DIM                     // in x - register dot product
           bne check_dist
           
           // found direct hit
@@ -244,16 +243,14 @@ cosinus_similarity:
           jmp MatchFound
 
 check_dist:
-          lda d0
-          cmp dist0
+          cpx dist0
           bcc continue_iterative_search      // carry=1 → a >= b → hier: größer
 update_founded:
           lda reubank
           sta bestBank 
           lda reuram
           sta bestram
-          lda d0
-          sta dist0
+          stx dist0
           jsr PlotAnswer 
 
   

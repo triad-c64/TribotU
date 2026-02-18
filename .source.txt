@@ -1,243 +1,438 @@
 /*********************************************************
  *     coded by Adder of Triad in 2026 for X2026         *
  *********************************************************/
-#importonce 
+#import "tokenize.src"
+#import "keyboard_best.src"
+#import "embedder.src"
+#import "extract.src"
 
-.const ngram_min     = 2
-.const ngram_max     = 3
-.const DIM           = 128
-.const ANSWER_LENGTH = 128
-.const MAXLENGHT     = 40
-
-//*******************************************************************************
-//*** REMEMBER REU-FILE-SIZE HAS TO BE IDENTICAL WITH THE CHOOSEN VALUE IN VICE  
-//*******************************************************************************
-.const EMBEDDER            = $0820
-.const MATH                = $0900
-.const TOKENIZER           = $0c00
-.const MY_HASH16           = $0d00
-.const PROGRAMM            = $0e00
-.const KEYBOARD            = $2400
-.const LoadTab             = $2700
-
-.var DATARAM               = $a000                  // Adresse des DATABLOCKS
-.var EMBEDDING_REU         = DATARAM
-.var BOT_ANSWER_REU        = EMBEDDING_REU  + DIM
-
-.const SCREEN              = $0400 + 80 + 5     // SCREENRAM Adress
-
-
-.const embeddingA          = $ef00
-.const temporer            = $2000
-.const STRING_FUNKTION     = $2100
-.const EXTRACTKEYWORDS     = $2300
-.const tokens              = $1100  // buffer für die tokens  "who\0is\0adder\0"
-.const final_answer        = $1600
-
-.const string1             = $c400
-.const string2             = $c500
-.const correct             = $c600
-.const input               = $c700
-
-.var   scrollLine          = $0400 + 40 * 16
-
-
-.var lookUpx127Lo          = $f200 
-.var lookUpx127Hi          = lookUpx127Lo + $0100
-.var lookUpAxALo           = lookUpx127Hi + $0100 
-.var lookUpAxAHi           = lookUpAxALo  + $0100 
-.var lookUpClamp           = lookUpAxAHi  + $0100
-.var square1_lo            = lookUpClamp  + $0100
-.var square1_hi            = square1_lo   + $0200
-.var square2_lo            = square1_hi   + $0200
-.var square2_hi            = square2_lo   + $0200
-
-// String Funktionen
-.var extrpos               = $8000
-.var text_rest_pos         = extrpos                 +  1
-.var possible_match        = text_rest_pos           +  1
-.var inputpos              = possible_match          +  1
-.var firstoccur            = inputpos                +  1 
-.var extractLenght         = firstoccur              +  1 
-.var text_rest_pos_plus_1  = extractLenght           +  1
-.var new_pos               = text_rest_pos_plus_1    +  1
-.var inp_char_nr           = new_pos                 +  1
-.var occur                 = inp_char_nr             +  1
-
-
-//*******************************************************************************
-//*** REU-Register
-//*******************************************************************************
-.const REUSTATUS           = $df00         //Statusregister (nur lesen, wird dann gelöscht!)
-.const REUCOMMAND          = $df01         //Befehlsregister
-.const REUC64RAM           = $df02         //RAM-Adresse im C64 (LSB/MSB)
-.const REURAM              = $df04         //Speicher Adresse in der REU (LSB/MSB)
-.const REUBANK             = $df06         //Bank in der REU
-.const REUBYTES            = $df07         //Anzahl der betroffenen BYTES (LSB/MSB)
-.const REUIRQMASK          = $df09         //Interruptmaske
-.const REUADRCONTROL       = $df0a         //Adress-Kontroll-Register
-
-//*******************************************************************************
-//*** REU-Befehle
-//*******************************************************************************
+.pc = $0801 "Basic Upstart"
+BasicUpstart(PROGRAMM) 
  
-//*** Standardbefehle mit AUTOLOAD, ohne $ff00
-//.const REU_STASH_A__       = $fc           // kopiere C64 -> REU
-.const REU_FETCH_A__         = $fd           // kopiere REU -> C64
-//.const REU_SWAP_A__        = $fe           // Speicherbereich tauschen
-//.const REU_VERIFY_A__      = $ff           // Speicherbereich vergleichen
- 
-//*** mit AUTOLOAD und mit $ff00
-//.const REU_STASH_A_F       = $ec           // kopiere C64 -> REU
-//.const REU_FETCH_A_F       = $ed           // kopiere REU -> C64
-//.const REU_SWAP_A_F        = $ee           // Speicherbereich tauschen
-//.const REU_VERIFY_A_F      = $ef           // Speicherbereich vergleichen
- 
-//*** ohne AUTOLOAD, ohne $ff00
-//.const REU_STASH____       = $dc           // kopiere C64 -> REU
-//.const REU_FETCH____       = $dd           // kopiere REU -> C64
-//.const REU_SWAP____        = $de           // Speicherbereich tauschen
-//.const REU_VERIFY____      = $df           // Speicherbereich vergleichen
- 
-//*** ohne AUTOLOAD, mit $ff00
-//.const REU_STASH___F       = $cc           // kopiere C64 -> REU
-//.const REU_FETCH___F       = $cd           // kopiere REU -> C64
-//.const REU_SWAP___F        = $ce           // Speicherbereich tauschen
-//.const REU_VERIFY___F      = $cf           // Speicherbereich vergleichen
+.pc = PROGRAMM "TRIBOT ULTIMATE"
+          
+          sei
+          lda #$7f
+          sta $dc0d
 
-.var o0         = $10
-.var o1         = $11
+          lda #$35
+          sta $01
+          
+          lda #$ff
+          cmp $d012
+          bne *-3
+          lda #$01
+          cmp $d012
+          bne *-3
+          lda #0
+          cmp $d012
+          bne *-3
 
-.var a0         = $18
-.var a1         = $19
+          jsr checkForREU                    // prüfen ob eine REU vorhanden ist
+          jsr Init
+          jsr CleanUp
+          
+          ldx #0
+PROMPT:
+          lda prompt,x
+          beq SetNMI
+          sta SCREEN - 5,x
+          inx
+          bne PROMPT
+SetNMI:
+          lda #<nmi
+          sta $fffa
+          lda #>nmi
+          sta $fffb
+         
+          lda #<irq
+          sta $fffe
+          lda #>irq
+          sta $ffff
+
+          lda #$a1
+          sta $d012
+          lda #$1b
+          sta $d011
+          lda #1
+          sta $d019
+          sta $d01a
+          cli
+botloop:   
+          jsr Input
+
+          ldx #0
+setQuery:
+          lda SCREEN,x
+          cmp #63 // fragezeichen
+          beq finalize_query
+sta_input:
+          sta string1,x
+          inx
+          bne setQuery
+
+finalize_query:
+          lda #$00
+          sta string1,x
+          stx len1
+          sei
+          jsr ExtractString
+          
+          lda #1
+          sta stop_input
+      
+          jsr worker 
+          lda #1
+          sta found_answer
+          cli
+ready:
+          jmp botloop                                
+//*******************************************************************************
+//*** Prüfen, ob eine REU angeschlossen ist. 
+//*** Um auch die 1700 zu erkennen wird NICHT so, wie auf der 1764 Demo-Disk mit
+//*** #$00 geprüft. Bei der 1700 kann $df00 den Wert #$00 annehmen!!
+//*******************************************************************************
+//*** Übergabe: -
+//*******************************************************************************
+//*** Rückgabe: Y = 0 REU vorhanden, sonst nicht!
+//*******************************************************************************
+//*** ändert  : A, X, Y, SR
+//*******************************************************************************
+checkForREU:
+         ldy #$ff                           // Erstmal von keiner REU ausgehen
+         lda REUSTATUS                      // Status-Register lesen, um Bit 7-5 zu löschen
+         sty REUSTATUS                      // schreiben wir zum Test mal #$ff hinein
+         cpy REUSTATUS                      // und schauen, ob der Wert erhalten bleibt
+         beq exit_check                     // wenn JA, KEINE REU!!!
+         ldx #$04                           // Wir testen nur Register 2-5 
+loop_check:
+         txa
+         sta REUCOMMAND,X                   // Testwert speichern
+         cmp REUCOMMAND,X                   // gleicher Wert?
+         bne exit_check                     // wenn nicht, KEINE REU!!!
+         dex                                // Schleifenzähler verringern
+         bne loop_check                     // wenn > 0, nochmal
+         ldy #GRAY                          // sonst wurde eine REU gefunden
+         sty $d020
+         sty $d021
+         rts
+exit_check:
+         ldy #RED                           // sonst wurde eine REU gefunden
+         sty $d020
+         sty $d021
+         rts                                // zurück
+stop_input:
+ .byte 0
+// ****************************************************************************************
+irq:
+         pha
+         txa
+         pha
+         tya
+         pha
+  
+         lda #$9f
+         cmp $d012
+         bne *-3
+         
+         lda found_answer
+         bne scroll_answer
+         
+         lda stop_input
+         bne returnIrq
+     
+         jsr if6bc
+
+         lda keyblock 
+         beq NormalizedInput
+
+         lda #0
+         sta keyblock
+
+NormalizedInput:
+         lda inputdone
+         bne returnIrq
+
+         inc frame
+         lda frame
+         cmp #10
+         bne returnIrq
+        
+         lda cursor
+         eor #$1
+         sta cursor
+         
+         beq ClearCursor
+            
+         ldy keypos
+         lda #100
+         sta SCREEN   ,y
+         jmp SetKeyboardBack
+ClearCursor:
+         ldy keypos
+         lda #$20
+         sta SCREEN   ,y
+SetKeyboardBack:
+         lda #0
+         sta frame
+         sta keyflag
+         sta lastkey
+        
+returnIrq: 
+       
+         lda #$9e
+         sta $d012
+         asl $d019
+         
+         pla
+         tay
+         pla
+         tax
+         pla
+
+         rti
+
+        
+scroll_answer: 
+         lda #$a1
+         cmp $d012
+         bne *-3
+         jsr scroll_soft
+
+         lda #$bd
+         cmp $d012
+         bne *-3
+
+         lda #$8
+         sta $d016
+
+         jmp returnIrq
 
 
-.var b0         = $20
-.var b1         = $21
+// ************************************
+// ** Worker                         **
+// ************************************
+worker:
+          jsr tokenize
+          jsr Embeddings
+          jsr start_check
+          rts
 
-.var T1         = $22
-.var T2         = $23
-.var PRODUCT    = $24
-.var PRODUCTHI  = $25
+start_check:
+  
+GETNODES:
+          lda reubank
+          sta REUBANK
+          lda reuram
+          sta REURAM + 1
 
+          lda #REU_FETCH_A__           // Befehl fürs Kopieren von der REU zum C64
+          sta REUCOMMAND               // mit AUTOLOAD ausführen
 
-.var t0         = $28
-.var t1         = $29
+cosinus_similarity:
+          jsr cosine_approximation
 
-.var tt0        = $2a
-.var tt1        = $2b
+          cpx #DIM                     // in x - register dot product
+          bne check_dist
+          
+          // found direct hit
+          lda reubank
+          sta bestBank 
+          lda reuram
+          sta bestram
+          jmp MatchFound
 
-.var quotient   = $2c
-.var quotientHi = $2d
-.var signflag   = $2e
+check_dist:
+          cpx dist0
+          bcc continue_iterative_search      // carry=1 → a >= b → hier: größer
+update_founded:
+          lda reubank
+          sta bestBank 
+          lda reuram
+          sta bestram
+          stx dist0
+          jsr PlotAnswer 
 
+  
+continue_iterative_search:
+          inc reuram
+          bne GETNODES
+          inc reubank
+          bne GETNODES
 
-.var tmp        = $30
-.var length     = $31
-.var CHAR       = $32
+MatchFound: 
+          lda bestBank
+          sta REUBANK
+          lda bestram
+          sta REURAM + 1
 
-.var FAC1       = $33
-.var FAC2       = $34
+          lda #REU_FETCH_A__           // Befehl fürs Kopieren von der REU zum C64
+          sta REUCOMMAND               // mit AUTOLOAD ausführen
 
-.var d0         = $35  // DIVIDEND  ALSO DOT PRODUCT
-.var d1         = $36
-.var d2         = $37
-.var d3         = $38
+          lda #GREEN
+          sta $d020
+          sta $d021
+PlotAnswer:
+          ldy #0
+GET_FINAL_ANWER:
+          lda BOT_ANSWER_REU        , y
+          beq returnFromSearch
+GiveOutFinal:
+          sta final_answer          , y
+          iny
+          cpy #ANSWER_LENGTH
+          bne GET_FINAL_ANWER
 
-.var v0         = $39  // DIVISOR
-.var v1         = $3a
+          lda #$20
+fillup:
+          sta final_answer           ,y
+          iny
+          bne fillup
 
-.var q0         = $3b  // QUOTIENT ALSO ERGEBNIS
-.var q1         = $3c
-.var q2         = $3d
-.var q3         = $3e
+returnFromSearch:
+          rts
 
-.var r0         = $3f
-.var r1         = $40
+CleanUp:
+          ldx #0
+cls:
+          lda #$20
+          sta $0400,x
+          sta $0500,x
+          sta $0600,x
+          sta $06f7,x
 
-.var count      = $41
+          lda #WHITE
+          sta $d800,x
+          sta $d900,x
+          sta $da00,x
+          sta $daf7,x
+          inx
+          bne cls
+       
+GetLoadLookup:
+          lda LoadTab     ,x
+SetLookup:
+          sta lookUpx127Lo   ,x
+          inx  
+          bne GetLoadLookup
+          inc GetLoadLookup  + 2
+          inc SetLookup      + 2
+          lda GetLoadLookup  + 2
+          cmp #$34
+          bne GetLoadLookup
+          rts
 
-.var x_save     = $42
-.var y_save     = $43
+Init:
+          lda #0
+          sta keypos
+          sta keyflag
+          sta keyblock
+          sta reuram
+          sta reubank
+          sta bestBank
+          sta bestram
+          sta REUBANK                     // 1. Bank (lfd.-Nr. 0)
+          sta REURAM                      // und beginnen auch direkt ab Adresse $0000
+          sta REURAM+1                    // in der Bank
+          sta frame                      
+          sta inputdone            
+          sta cursor 
+          sta stop_input
+          sta key_return
+          sta musicplay
+          sta dist0
+          sta check_summe
+          sta line_seq
 
-.var normALO    = $44
-.var normAHI    = $45
+          lda #<DATARAM                      // Beginn des Speichers der  
+          sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
+          lda #>DATARAM
+          sta REUC64RAM+1
 
-.var normBLO    = $46
-.var normBHI    = $47
+          lda #<($0100)                      // Die Anzahl der BYTEs ($0100)
+          sta REUBYTES                       // je Aktion der REU bekannt machen
+          lda #>($0100)
+          sta REUBYTES+1
 
-.var sign       = $48
+          ldx #0     
+cls_input:
+          lda #$20
+          sta SCREEN  ,x
+          lda #0
+          sta input   ,x
+          sta string1 ,x
+          sta correct ,x
+          inx 
+          bne cls_input
+          lda #GRAY
+          sta $d020
+          sta $d021
+          rts
 
-.var bufptr     = $49
-.var bufptrHi   = $4a
+scroll_soft:
+         lda smooth 
+         sec
+         sbc #1
+         and #%000000111
+         sta smooth
 
-.var tokptr     = $4b
-.var tokptrHi   = $4c
-  // aktueller Token-Pointer
-.var tokidx      = $4d     // Index in tokens[]
-.var i           = $4e
-.var n           = $4f
-.var L           = $50
-.var hash_lo     = $51
-.var hash_hi     = $52
-.var idx         = $53
+         lda $d016
+         and #%00010000
+         ora #%00010000
+         ora smooth
+         sta $d016  
+nonewpic: 
+         lda smooth
+         cmp #%00000111
+         bne leave_soft
+         jsr hardscroll
+leave_soft:  
+         rts
+hardscroll:
+         ldx #0
+         ldy answer_index
+position:
+         lda final_answer ,y
+         sta scrollLine + 39
+         lda #0 
+         sta line_seq
+hardscroll__:
+         lda scrollLine +1,x
+         cmp #$20
+         bne Copy_next_char
+         inc line_seq
+Copy_next_char:
+         sta scrollLine   ,x
+         inx
+         cpx #39
+         bne hardscroll__
 
-//.var substr_ptr  = $54
-//.var substr_ptrHi= $55
+         inc answer_index
+         lda line_seq 
+         cmp #39
+         bne ReturnFromHardScroll
+         lda #0
+         sta answer_index
+         sta found_answer
+         jsr Init
+ReturnFromHardScroll:
+         rts
 
-.var norm2       = $56
-.var norm2Hi     = $57
+line_seq:
+ .byte 0
 
-.var lo_SqrtIn   = $59
-.var hi_SqrtIn   = $5a
-.var lsby        = $5b
-.var msby        = $5c
+found_answer:
+  .byte 0
+answer_index:
+ .byte 0       
+smooth:
+    .byte 0
 
-.var val         = $60
-.var High_Byte   = $61
+hard_scroll:
+ .byte 0
 
-// 16 bit division
-.var remainder   = $62
-.var remainderHi = $63
-.var dividend    = $64
-.var dividendHi  = $65
-.var divisor     = $66
-
-
-.var dist0                 = $68
-.var dist1                 = dist0                   + 1
-.var dist2                 = dist1                   + 1
-.var dist3                 = dist2                   + 1
-.var bestBank              = dist3                   + 1
-.var bestram               = bestBank                + 1
-.var reuram                = bestram                 + 1  
-.var reubank               = reuram                  + 1
-.var hasAnAnswer           = reubank                 + 1
-.var diff_lo               = hasAnAnswer             + 1
-.var diff_hi               = diff_lo                 + 1
-.var neg_diff_lo           = diff_hi                 + 1
-.var neg_diff_hi           = neg_diff_lo             + 1
-.var token_length          = neg_diff_hi             + 1
-.var n_gram                = token_length            + 1
-.var i_token               = n_gram                  + 1
-.var frame                 = i_token                 + 1
-.var inputdone             = frame                   + 1
-.var cursor                = inputdone               + 1
-.var len1_unextracted      = cursor                  + 1 
-.var musicplay             = len1_unextracted        + 1 
-.var key_return            = musicplay               + 1
-.var active_music          = key_return              + 1
-.var keypos                = active_music            + 1
-.var just_music            = keypos                  + 1
-.var actkey	               = just_music              + 1
-.var keyblock              = actkey                  + 1
-.var keyflag               = keyblock                + 1 
-.var lastkey	             = keyflag                 + 1
-.var extract_addr          = lastkey                 + 1
-.var extract_addr_Hi       = extract_addr            + 1
-.var occour_in_query       = extract_addr_Hi         + 1
-.var len1                  = occour_in_query         + 1
-.var check_summe           = len1                    + 1
-
-.pc = LoadTab "x127 && AxA && clamp && multab"
-  .import binary "data/lookup_tables.bin"
+prompt:
+   .text "you: "
+   .byte 0
+nmi: 
+    rti  
