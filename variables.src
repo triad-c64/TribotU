@@ -19,7 +19,7 @@
 
 .var DATARAM               = $a000                  // Adresse des DATABLOCKS
 .var EMBEDDING_REU         = DATARAM
-.var BOT_ANSWER_REU        = EMBEDDING_REU  + 128
+.var BOT_ANSWER_REU        = EMBEDDING_REU  + DIM
 
 .const SCREEN              = $0400 + 80 + 5     // SCREENRAM Adress
 
