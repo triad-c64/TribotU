@@ -418,7 +418,6 @@ skip_hi_dec:
         
 EmbeddingEqual:
         inc d0
-        inc d1
 loop_cosinus_similarity:
         iny 
         cpy #DIM

@@ -325,11 +325,10 @@
          $0a74,$0a75,8,416,9,416,11
          $0a76,$0a76,8,417,9,417,11
          $0a77,$0a78,8,420,9,420,11
-         $0a79,$0a7a,8,421,9,421,11
-         $0a7b,$0a7b,8,423,9,423,11
+         $0a79,$0a79,8,422,9,422,11
+         $0a7a,$0a7b,8,423,9,423,11
          $0a7c,$0a7d,8,424,9,424,11
-         $0a7e,$0a7f,8,425,9,425,11
-         $0a80,$0a80,8,426,9,426,11
+         $0a7e,$0a7e,8,425,9,425,11
       </Block>
       <Block name="TOKENIZEER">
          $0c00,$0c01,6,8,9,8,11
@@ -1151,7 +1150,7 @@
       Default,$0a67,cosine_loop,8,407,1,407,12
       Default,$0a71,skip_hi_dec,8,413,1,413,12
       Default,$0a77,EmbeddingEqual,8,419,1,419,15
-      Default,$0a7b,loop_cosinus_similarity,8,422,1,422,24
+      Default,$0a79,loop_cosinus_similarity,8,421,1,421,24
       Default,$0d00,MY_HASH_16,1,7,1,7,11
       Default,$0d0f,GETCHAR,1,18,1,18,8
       Default,$0d15,begin_hash,1,22,1,22,11

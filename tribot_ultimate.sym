@@ -174,7 +174,7 @@
 .label Make32Negative=$9e3
 .label GETCHAR=$d0f
 .label ready=$e87
-.label loop_cosinus_similarity=$a7b
+.label loop_cosinus_similarity=$a79
 .label returnIrq=$f06
 .label ok=$241c
 .label smooth=$109b

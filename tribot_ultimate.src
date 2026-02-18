@@ -232,7 +232,7 @@ GETNODES:
 cosinus_similarity:
           jsr cosine_approximation
 
-          lda d1
+          lda d0
           cmp #DIM
           bne check_dist
           

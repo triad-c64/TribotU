@@ -175,7 +175,7 @@ al C:1097 .ReturnFromHardScroll
 al C:9e3 .Make32Negative
 al C:d0f .GETCHAR
 al C:e87 .ready
-al C:a7b .loop_cosinus_similarity
+al C:a79 .loop_cosinus_similarity
 al C:f06 .returnIrq
 al C:241c .ok
 al C:109b .smooth
