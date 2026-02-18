@@ -394,9 +394,9 @@ loop_cosinus_similarity:
         bne cosine_loop
         rts
        
-/* **********************************************************************
- * this is the fastest approximation for embedding - cosine simililarity 
- * **********************************************************************/
+/* ********************************************************************
+ * this is the fastest approximation for embedding - cosine similarity 
+ * ********************************************************************/
 cosine_approximation:
         ldy #DIM - 1
         ldx #0
