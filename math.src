@@ -316,7 +316,6 @@ cosine_similarity:
         sty d0
         sty d1
         sty d2
-        //sty d3
 
 cosine_loop:
         lda embeddingA    ,y
@@ -397,8 +396,7 @@ loop_cosinus_similarity:
        
 /* **********************************************************************
  * this is the fastest approximation for embedding - cosine simililarity 
- * **********************************************************************
-*/
+ * **********************************************************************/
 cosine_approximation:
         ldy #DIM - 1
         ldx #0
