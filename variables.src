@@ -1,3 +1,6 @@
+/*********************************************************
+ *     coded by Adder of Triad in 2026 for X2026         *
+ *********************************************************/
 #importonce 
 
 .const ngram_min     = 2
@@ -35,6 +38,9 @@
 .const string2             = $c500
 .const correct             = $c600
 .const input               = $c700
+
+.var   scrollLine          = $0400 + 40 * 16
+
 
 .var lookUpx127Lo          = $f200 
 .var lookUpx127Hi          = lookUpx127Lo + $0100

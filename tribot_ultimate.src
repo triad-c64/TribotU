@@ -396,16 +396,16 @@ hardscroll:
          ldy answer_index
 position:
          lda final_answer ,y
-         sta $0400 + 40 * 16 + 39
+         sta scrollLine + 39
          lda #0 
          sta line_seq
 hardscroll__:
-         lda $0400 + 40 * 16 +1,x
+         lda scrollLine +1,x
          cmp #$20
          bne Copy_next_char
          inc line_seq
 Copy_next_char:
-         sta $0400 + 40 * 16   ,x
+         sta scrollLine   ,x
          inx
          cpx #39
          bne hardscroll__

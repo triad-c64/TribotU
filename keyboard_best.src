@@ -1,4 +1,7 @@
- #import "variables.src"
+/*********************************************************
+ *     got it from sailor/ triad (kernal keyboard input) *
+ *********************************************************/
+#import "variables.src"
 
 .var adc00 = $dc00
 .var adc01 = $dc01
