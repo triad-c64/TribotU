@@ -1,441 +1,162 @@
 /*********************************************************
  *     coded by Adder of Triad in 2026 for X2026         *
  *********************************************************/
-#import "tokenize.src"
-#import "keyboard_best.src"
-#import "embedder.src"
-#import "extract.src"
+#import "variables.src"
+#import "math.src"
+#import "hash16.src"
 
-.pc = $0801 "Basic Upstart"
-BasicUpstart(PROGRAMM) 
- 
-.pc = PROGRAMM "TRIBOT ULTIMATE"
-          
-          sei
-          lda #$7f
-          sta $dc0d
+.pc = EMBEDDER "Embedder"
 
-          lda #$35
-          sta $01
-          
-          lda #$ff
-          cmp $d012
-          bne *-3
-          lda #$01
-          cmp $d012
-          bne *-3
-          lda #0
-          cmp $d012
-          bne *-3
-
-          jsr checkForREU                    // prüfen ob eine REU vorhanden ist
-          jsr Init
-          jsr CleanUp
-          
-          ldx #0
-PROMPT:
-          lda prompt,x
-          beq SetNMI
-          sta SCREEN - 5,x
-          inx
-          bne PROMPT
-SetNMI:
-          lda #<nmi
-          sta $fffa
-          lda #>nmi
-          sta $fffb
-         
-          lda #<irq
-          sta $fffe
-          lda #>irq
-          sta $ffff
-
-          lda #$a1
-          sta $d012
-          lda #$1b
-          sta $d011
-          lda #1
-          sta $d019
-          sta $d01a
-          cli
-botloop:   
-          jsr Input
-
-          ldx #0
-setQuery:
-          lda SCREEN,x
-          cmp #63 // fragezeichen
-          beq finalize_query
-sta_input:
-          sta string1,x
-          inx
-          bne setQuery
-
-finalize_query:
-          lda #$00
-          sta string1,x
-          stx len1
-          sei
-          jsr ExtractString
-          
-          lda #1
-          sta stop_input
-      
-          jsr worker 
-          lda #1
-          sta found_answer
-          cli
-ready:
-          jmp botloop                                
-//*******************************************************************************
-//*** Prüfen, ob eine REU angeschlossen ist. 
-//*** Um auch die 1700 zu erkennen wird NICHT so, wie auf der 1764 Demo-Disk mit
-//*** #$00 geprüft. Bei der 1700 kann $df00 den Wert #$00 annehmen!!
-//*******************************************************************************
-//*** Übergabe: -
-//*******************************************************************************
-//*** Rückgabe: Y = 0 REU vorhanden, sonst nicht!
-//*******************************************************************************
-//*** ändert  : A, X, Y, SR
-//*******************************************************************************
-checkForREU:
-         ldy #$ff                           // Erstmal von keiner REU ausgehen
-         lda REUSTATUS                      // Status-Register lesen, um Bit 7-5 zu löschen
-         sty REUSTATUS                      // schreiben wir zum Test mal #$ff hinein
-         cpy REUSTATUS                      // und schauen, ob der Wert erhalten bleibt
-         beq exit_check                     // wenn JA, KEINE REU!!!
-         ldx #$04                           // Wir testen nur Register 2-5 
-loop_check:
-         txa
-         sta REUCOMMAND,X                   // Testwert speichern
-         cmp REUCOMMAND,X                   // gleicher Wert?
-         bne exit_check                     // wenn nicht, KEINE REU!!!
-         dex                                // Schleifenzähler verringern
-         bne loop_check                     // wenn > 0, nochmal
-         ldy #GRAY                          // sonst wurde eine REU gefunden
-         sty $d020
-         sty $d021
-         rts
-exit_check:
-         ldy #RED                           // sonst wurde eine REU gefunden
-         sty $d020
-         sty $d021
-         rts                                // zurück
-stop_input:
- .byte 0
-// ****************************************************************************************
-irq:
-         pha
-         txa
-         pha
-         tya
-         pha
-  
-         lda #$9f
-         cmp $d012
-         bne *-3
-         
-         lda found_answer
-         bne scroll_answer
-         
-         lda stop_input
-         bne returnIrq
-     
-         jsr if6bc
-
-         lda keyblock 
-         beq NormalizedInput
-
-         lda #0
-         sta keyblock
-
-NormalizedInput:
-         lda inputdone
-         bne returnIrq
-
-         inc frame
-         lda frame
-         cmp #10
-         bne returnIrq
+Embeddings:
+        ldx #0
+        txa
+clr_loop:
+        sta temporer,x
+        inx
+        cpx #DIM
+        bne clr_loop
         
-         lda cursor
-         eor #$1
-         sta cursor
-         
-         beq ClearCursor
-            
-         ldy keypos
-         lda #100
-         sta SCREEN   ,y
-         jmp SetKeyboardBack
-ClearCursor:
-         ldy keypos
-         lda #$20
-         sta SCREEN   ,y
-SetKeyboardBack:
-         lda #0
-         sta frame
-         sta keyflag
-         sta lastkey
-        
-returnIrq: 
-       
-         lda #$9e
-         sta $d012
-         asl $d019
-         
-         pla
-         tay
-         pla
-         tax
-         pla
+        lda #<tokens
+        sta bufptr
+        lda #>tokens
+        sta bufptrHi
 
-         rti
+GetToken:  
+        jsr GetTokenLength      // stored in token_length
+
+        ldx #ngram_min
+ngram_loop:
+        stx n_gram
+        cpx token_length
+        bcs next_ngram
+
+        lda token_length
+        sec     
+        sbc n_gram
+        sta i_token_check + 1
+
+        ldy #0
+loop_i:
+        sty i_token
+        
+        lda n_gram
+        sta length
+
+        sty y_save
+        jsr MY_HASH_16
+        ldy y_save
+
+        lda o0
+        and #DIM -1
+        tax
+
+        lda o1
+        and #1
+        beq minus_temporer
+plus_temporer:
+        inc temporer, x
+        jmp continue_tok
+minus_temporer:
+        dec temporer, x
+
+continue_tok:
+        iny  
+i_token_check:
+        cpy #0
+        bne loop_i
+
+        ldx n_gram
+        inx     
+        cpx #ngram_max + 1
+        bne ngram_loop
+
+next_ngram:
+        lda bufptr
+        clc     
+        adc token_length
+        sta bufptr
+        bcc check_for_end_of_tokens_doubleNull
+        inc bufptrHi
+check_for_end_of_tokens_doubleNull:
+        ldy #1
+        lda (bufptr),y
+        bne GetToken      
+        
+done_tokens:
+        lda #0
+        sta norm2
+        sta norm2Hi
+
+        // L2-Norm in integer   
+        ldx #0                  // Index i=0
+sum_loop:
+        ldy temporer,x     
+        lda lookUpAxALo          ,y
+        clc     
+        adc norm2
+        sta norm2
+        lda lookUpAxAHi          ,y
+        adc norm2Hi
+        sta norm2Hi
+        
+        inx
+        cpx #DIM
+        bne sum_loop        
+
+L2Norm:   
+        lda norm2
+        ora norm2Hi
+        bne GetSqrt
+        lda #0
+        sta norm2Hi
+        lda #1 
+        sta norm2
+GetSqrt:
+        jsr SQRT
+    
+        lda norm2
+        bne MakeEmbeddings
+        lda #1 
+        sta norm2
+        
+MakeEmbeddings:
+        ldx #0
+embedding_loop:
+        ldy temporer         ,x    
+        lda lookUpx127Lo     ,y
+        sta dividend
+        lda lookUpx127Hi     ,y
+        sta dividend + 1
+        lda norm2
+        sta divisor
+         
+        stx x_save
+        jsr fast_div_s16_u8_to_s8
+        ldx x_save
+
+        ldy quotient
+        lda lookUpClamp       ,y 
+        sta embeddingA        ,x
+        clc     
+        adc check_summe
+        sta check_summe
+        inx  
+        cpx #DIM
+        bne embedding_loop
+ReturnFromEmbeddings:
+        rts
+
+
+GetTokenLength:
+        ldy #0
+loop_strln:
+        lda (bufptr),y
+        beq done_strln
+        iny
+        bne loop_strln
+done_strln:
+        iny
+        sty token_length
+        rts
 
         
-scroll_answer: 
-         lda #$a1
-         cmp $d012
-         bne *-3
-         jsr scroll_soft
-
-         lda #$bd
-         cmp $d012
-         bne *-3
-
-         lda #$8
-         sta $d016
-
-         jmp returnIrq
-
-
-// ************************************
-// ** Worker                         **
-// ************************************
-worker:
-          jsr tokenize
-          jsr Embeddings
-          jsr start_check
-          rts
-
-start_check:
-  
-GETNODES:
-          lda reubank
-          sta REUBANK
-          lda reuram
-          sta REURAM + 1
-
-          lda #REU_FETCH_A__           // Befehl fürs Kopieren von der REU zum C64
-          sta REUCOMMAND               // mit AUTOLOAD ausführen
-
-cosinus_similarity:
-          jsr cosine_approximation
-
-          lda d1
-          cmp #DIM
-          bne check_dist
-          
-          // found direct hit
-          lda reubank
-          sta bestBank 
-          lda reuram
-          sta bestram
-          jmp MatchFound
-
-check_dist:
-          lda d0
-          cmp dist0
-          bcc continue_iterative_search      // carry=1 → a >= b → hier: größer
-update_founded:
-          lda reubank
-          sta bestBank 
-          lda reuram
-          sta bestram
-          lda d0
-          sta dist0
-          jsr PlotAnswer 
-
-  
-continue_iterative_search:
-          inc reuram
-          bne GETNODES
-          inc reubank
-          bne GETNODES
-
-MatchFound: 
-          lda bestBank
-          sta REUBANK
-          lda bestram
-          sta REURAM + 1
-
-          lda #REU_FETCH_A__           // Befehl fürs Kopieren von der REU zum C64
-          sta REUCOMMAND               // mit AUTOLOAD ausführen
-
-          lda #GREEN
-          sta $d020
-          sta $d021
-PlotAnswer:
-          ldy #0
-GET_FINAL_ANWER:
-          lda BOT_ANSWER_REU        , y
-          beq returnFromSearch
-GiveOutFinal:
-          sta final_answer          , y
-          iny
-          cpy #ANSWER_LENGTH
-          bne GET_FINAL_ANWER
-
-          lda #$20
-fillup:
-          sta final_answer           ,y
-          iny
-          bne fillup
-
-returnFromSearch:
-          rts
-
-CleanUp:
-          ldx #0
-cls:
-          lda #$20
-          sta $0400,x
-          sta $0500,x
-          sta $0600,x
-          sta $06f7,x
-
-          lda #WHITE
-          sta $d800,x
-          sta $d900,x
-          sta $da00,x
-          sta $daf7,x
-          inx
-          bne cls
-       
-GetLoadLookup:
-          lda LoadTab     ,x
-SetLookup:
-          sta lookUpx127Lo   ,x
-          inx  
-          bne GetLoadLookup
-          inc GetLoadLookup  + 2
-          inc SetLookup      + 2
-          lda GetLoadLookup  + 2
-          cmp #$34
-          bne GetLoadLookup
-          rts
-
-Init:
-          lda #0
-          sta keypos
-          sta keyflag
-          sta keyblock
-          sta reuram
-          sta reubank
-          sta bestBank
-          sta bestram
-          sta REUBANK                     // 1. Bank (lfd.-Nr. 0)
-          sta REURAM                      // und beginnen auch direkt ab Adresse $0000
-          sta REURAM+1                    // in der Bank
-          sta frame                      
-          sta inputdone            
-          sta cursor 
-          sta stop_input
-          sta key_return
-          sta musicplay
-          sta dist0
-          sta check_summe
-          sta line_seq
-
-          lda #<DATARAM                      // Beginn des Speichers der  
-          sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
-          lda #>DATARAM
-          sta REUC64RAM+1
-
-          lda #<($0100)                      // Die Anzahl der BYTEs ($0100)
-          sta REUBYTES                       // je Aktion der REU bekannt machen
-          lda #>($0100)
-          sta REUBYTES+1
-
-          ldx #0     
-cls_input:
-          lda #$20
-          sta SCREEN  ,x
-          lda #0
-          sta input   ,x
-          sta string1 ,x
-          sta correct ,x
-          inx 
-          bne cls_input
-          lda #GRAY
-          sta $d020
-          sta $d021
-          rts
-
-scroll_soft:
-         lda smooth 
-         sec
-         sbc #1
-         and #%000000111
-         sta smooth
-
-         lda $d016
-         and #%00010000
-         ora #%00010000
-         ora smooth
-         sta $d016  
-nonewpic: 
-         lda smooth
-         cmp #%00000111
-         bne leave_soft
-         jsr hardscroll
-leave_soft:  
-         rts
-hardscroll:
-         ldx #0
-         ldy answer_index
-position:
-         lda final_answer ,y
-         sta $0400 + 40 * 16 + 39
-         lda #0 
-         sta line_seq
-hardscroll__:
-         lda $0400 + 40 * 16 +1,x
-         cmp #$20
-         bne Copy_next_char
-         inc line_seq
-Copy_next_char:
-         sta $0400 + 40 * 16   ,x
-         inx
-         cpx #39
-         bne hardscroll__
-
-         inc answer_index
-         lda line_seq 
-         cmp #39
-         bne ReturnFromHardScroll
-         lda #0
-         sta answer_index
-         sta found_answer
-         jsr Init
-ReturnFromHardScroll:
-         rts
-
-line_seq:
- .byte 0
-
-found_answer:
-  .byte 0
-answer_index:
- .byte 0       
-smooth:
-    .byte 0
-
-hard_scroll:
- .byte 0
-
-prompt:
-   .text "you: "
-   .byte 0
-nmi: 
-    rti  

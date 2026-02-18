@@ -1,5 +1,6 @@
-// Zero Page
-
+/*********************************************************
+ *     coded by Adder of Triad in 2026 for X2026         *
+ *********************************************************/
 #import "variables.src"
 #import "math.src"
 #import "hash16.src"
