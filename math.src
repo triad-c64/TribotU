@@ -397,6 +397,7 @@ loop_cosinus_similarity:
 /* ********************************************************************
  * this is the fastest approximation for embedding - cosine similarity 
  * ********************************************************************/
+.macro cosine_approx() {
 cosine_approximation:
         ldy #DIM - 1
         ldx #0
@@ -409,10 +410,11 @@ cosine_approx_loop:
         dex
         dey
         bpl cosine_approx_loop
-        rts
+        jmp quit_cosine_approx
         
 EmbeddingEqual:
         inx
         dey
         bpl cosine_approx_loop
-        rts
+quit_cosine_approx:
+}

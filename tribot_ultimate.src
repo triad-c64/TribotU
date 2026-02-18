@@ -230,7 +230,9 @@ GETNODES:
           sta REUCOMMAND               // mit AUTOLOAD ausführen
 
 cosinus_similarity:
-          jsr cosine_approximation
+    subroutine: {
+            cosine_approx()
+    }
 
           cpx #DIM                     // in x - register dot product
           bne check_dist
