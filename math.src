@@ -400,7 +400,7 @@ loop_cosinus_similarity:
  * **********************************************************************
 */
 cosine_approximation:
-        ldy #0
+        ldy #DIM - 1
         ldx #0
 
 cosine_approx_loop:
@@ -409,14 +409,12 @@ cosine_approx_loop:
         beq EmbeddingEqual
          
         dex
-        iny 
-        cpy #DIM
-        bne cosine_approx_loop
+        dey
+        bpl cosine_approx_loop
         rts
         
 EmbeddingEqual:
         inx
-        iny 
-        cpy #DIM
-        bne cosine_approx_loop
+        dey
+        bpl cosine_approx_loop
         rts

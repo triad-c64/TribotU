@@ -46,7 +46,7 @@ al C:a7c ._sm3
 al C:216d .FillNewString
 al C:a7f ._sm4
 al C:f5c .update_founded
-al C:b22 .EmbeddingEqual
+al C:b20 .EmbeddingEqual
 al C:258a .f0278
 al C:221e .set_Restore
 al C:2589 .f0277

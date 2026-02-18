@@ -46,7 +46,7 @@
 .label FillNewString=$216d
 .label _sm4=$a7f
 .label update_founded=$f5c
-.label EmbeddingEqual=$b22
+.label EmbeddingEqual=$b20
 .label f0278=$258a
 .label set_Restore=$221e
 .label f0277=$2589
