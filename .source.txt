@@ -246,13 +246,11 @@ check_dist:
           cpx dist0
           bcc continue_iterative_search      // carry=1 → a >= b → hier: größer
 update_founded:
+          stx dist0
           lda reubank
           sta bestBank 
           lda reuram
           sta bestram
-          stx dist0
-          jsr PlotAnswer 
-
   
 continue_iterative_search:
           inc reuram
