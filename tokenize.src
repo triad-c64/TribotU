@@ -1,0 +1,91 @@
+#import "variables.src"
+
+.pc = TOKENIZER "TOKENIZEER"
+tokenize:
+        ldx #0
+        txa
+cls_tokens:
+        sta tokens,x
+        sta tokens +$100,x
+        sta tokens +$200,x
+        inx
+        bne cls_tokens
+
+        lda #<tokens
+        sta bufptr
+        lda #>tokens
+        sta bufptrHi
+
+        ldx #0                  // input index
+        ldy #0                  // (zp),Y Zugriff
+
+// ---------------------------------------------------------
+// Zeichen überspringen (Whitespace)
+// ---------------------------------------------------------
+skip_ws:
+        lda input,x
+        beq done_double_null   // String-Ende
+        cmp #$20
+        beq ws
+        cmp #'.'               // TAB optional
+        beq ws
+        jmp start_token
+ws:
+        inx
+        jmp skip_ws
+
+// ---------------------------------------------------------
+// Token starten
+// ---------------------------------------------------------
+start_token:
+copy:
+        lda input,x
+        beq end_token
+        cmp #$20
+        beq end_token
+        cmp #'.'
+        beq end_token
+
+        sta (bufptr),y          // Zeichen kopieren
+/*        sec 
+        sbc #64
+tok_print:
+        sta $0400 + 6 *40,y
+        inc tok_print + 1
+        bne buf
+        inc tok_print + 2
+buf:
+//*/
+        inc bufptr
+        bne no_page
+        inc bufptrHi
+no_page:
+        inx
+        jmp copy
+
+// ---------------------------------------------------------
+// Token abschließen
+// ---------------------------------------------------------
+end_token:
+        lda #0
+        sta (bufptr),y          // Nullterminierung
+        inc bufptr
+        bne cont
+        inc bufptrHi
+cont:
+        inx
+        jmp skip_ws
+
+// ---------------------------------------------------------
+// Ende → doppeltes 0
+// ---------------------------------------------------------
+done_double_null:
+        lda #0
+        sta (bufptr),y
+        inc bufptr
+        bne done2
+        inc bufptrHi
+done2:
+        sta (bufptr),y          // zweites 0
+        rts
+        

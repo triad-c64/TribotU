@@ -1,0 +1,210 @@
+ #import "variables.src"
+
+.var adc00 = $dc00
+.var adc01 = $dc01
+.var adc0d = $dc0d
+
+.pc = KEYBOARD "KEYBOARD"
+
+Input: 
+
+GetChar:
+       jsr my_ffe4
+       beq GetChar
+Check_input:
+       cmp #13
+       bcc GetChar
+       cmp #17
+       beq GetChar
+       cmp #13
+       beq PaintReturn
+       cmp #20
+       beq PaintDel
+       cmp #$40	//convert to screen codes 
+       bmi ok
+       sec
+       sbc #$40
+ok:
+       ldy keypos
+       ldx #0
+CheckKey: 
+       cmp #$45
+       beq de_activateMusic
+       cmp validkeys,x
+       beq SetThisChar
+       inx
+       cpx #38
+       bne CheckKey
+       jmp GetChar	
+SetThisChar: 
+       cpy #MAXLENGHT - 1
+       bcs plus
+       sta SCREEN       ,y
+       lda #0
+       sta frame
+       lda #$ff
+       sta actkey
+       inc keypos
+plus:
+       jmp GetChar	
+de_activateMusic:
+  //     lda active_music
+  //     eor #1
+  //     sta active_music
+//       jsr PrintHeadLine
+       jmp GetChar
+PaintReturn:
+       ldy keypos
+       lda #63
+       sta SCREEN       ,y
+       lda #0
+       sta inputdone
+       sta keyblock
+       lda #1
+       sta key_return
+       lda #1
+       sta just_music
+       rts
+PaintDel:
+       dec keypos
+       lda keypos
+       cmp #$ff
+       bne CleanChar
+       lda #0
+       sta keypos
+CleanChar:
+       ldy #MAXLENGHT
+       lda #$20
+line:
+       sta SCREEN        ,y
+       dey 
+       cpy keypos
+       bpl line
+returnfromdel:
+       jmp GetChar
+
+my_ffe4:
+       lda ac6
+       beq if155
+ie5b4: ldy a0277
+       ldx #$00
+ie5b9: lda f0278,x
+       sta f0277,x
+       inx
+       cpx ac6
+       bne ie5b9
+       dec ac6
+       tya
+       cli
+if155:  
+       clc
+       rts
+
+ieafb1:	
+       jmp ieafb2
+
+// ====================================================================
+
+if6bc:  
+       lda adc01
+       cmp adc01
+       bne if6bc
+       tax
+       bmi if6dc
+       ldx #$bd
+       stx adc00
+if6cc:  ldx adc01
+       cpx adc01
+       bne if6cc
+       sta adc00
+if6dc:  ldy #$40
+       sty acb
+       lda #$00
+       sta adc00
+       ldx adc01
+       cpx #$ff
+       beq ieafb1
+       tay
+       lda #$fe
+       sta adc00
+ieaa8:  ldx #$08
+       pha
+ieaab:  lda adc01
+       cmp adc01
+       bne ieaab
+ieab3:  lsr 
+       bcs ieacc
+       sty acb
+ieacc:  iny
+       cpy #$41
+       bcs ieadc
+       dex
+       bne ieab3
+       sec
+       pla
+       rol
+       sta adc00
+       bne ieaa8
+ieadc:  pla
+       ldy acb
+       lda feb81,y
+       tax
+       cpy ac5
+       beq ieaf0
+       ldy #$10
+       sty a028c
+       bne ieb26
+ieaf0:  and #$7f
+       bit a028a
+       bmi ieb0d
+       bvs ieb42
+       cmp #$7f
+ieafb2: beq ieb26
+ieb0d:  ldy a028c
+       beq ieb17
+       dec a028c
+       bne ieb42
+ieb17:  dec a028b
+       bne ieb42
+       ldy #$04
+       sty a028b
+       ldy ac6
+       dey
+       bpl ieb42
+ieb26:  ldy acb
+       sty ac5
+       cpx #$ff
+       beq ieb42
+       txa
+       ldx ac6
+       sta f0277,x
+       inx
+       stx ac6
+ieb42:  
+       lda #$7f
+       sta adc00
+       rts
+
+a028a:	.byte $40	       // flag: repeat keys. $00 = repeat. $40 = no repeat. 
+a028b: .byte 4		// repeat key: speed counter
+a028c:	.byte 0		// repeat key: first repeat delay counter
+ac5: 	.byte 0
+ac6:	.byte 0
+acb:	.byte 0
+
+feb81:  .byte $14,$0d,$1d,$88,$85,$86,$87,$11	// keyboard 1 -- unshifted	
+       .byte $33,$57,$41,$34,$5a,$53,$45,$01
+       .byte $35,$52,$44,$36,$43,$46,$54,$58
+       .byte $37,$59,$47,$38,$42,$48,$55,$56
+       .byte $39,$49,$4a,$30,$4d,$4b,$4f,$4e
+       .byte $2b,$50,$4c,$2d,$2e,$3a,$40,$2c
+       .byte $5c,$2a,$3b,$13,$01,$3d,$5e,$2f
+       .byte $31,$5f,$04,$32,$20,$02,$51,$03
+       .byte $ff
+
+a0277:
+f0277:	.byte 0
+f0278:	.byte 0,0,0,0,0,0,0,0,0
+
+validkeys:
+.byte   1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,48,49,50,51,52,53,54,55,56,57,32

@@ -1,0 +1,75 @@
+//* coded by Adder 2026 solution working
+//*/
+#import "variables.src"
+
+.pc = MY_HASH16 "HASH16"
+MY_HASH_16:
+        lda #$ff
+        sta o0
+        sta o1       
+
+        lda i_token
+        tay
+        clc     
+        adc length
+        sta nGramLenght +1
+ 
+GETCHAR:
+        lda (bufptr)                     ,y
+        beq END_OF_HASH                      // null terminierung prüfen
+        sta CHAR 
+begin_hash:
+        jsr EOR_CHAR
+        jsr SHIFT_HASH_AROUND_5        // // 16-bit rot-left um 5
+        iny
+nGramLenght: 
+        cpy #0
+        bne GETCHAR
+END_OF_HASH:
+        rts
+
+
+
+EOR_CHAR:
+        lda CHAR
+        eor o0     // XOR mit LSB von Org
+        sta o0     // Ergebnis zurückschreiben
+        rts
+
+SHIFT_HASH_AROUND_5:
+        lda o0
+        sta b0
+        lda o1
+        sta b1
+  
+        lda o0
+        asl 
+        rol b1
+        asl 
+        rol b1
+        asl 
+        rol b1
+        asl 
+        rol b1
+        asl 
+        rol b1
+        sta b0
+
+        // von hier a0 - a1 SHIFT_RIGHT 11
+        lda o1
+        lsr 
+        lsr 
+        lsr 
+        sta a0
+        lda #0
+        sta a1 
+
+        lda a0 
+        ora b0
+        sta o0
+
+        lda a1
+        ora b1
+        sta o1
+
+        rts

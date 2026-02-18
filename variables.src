@@ -1,0 +1,237 @@
+#importonce 
+
+.const ngram_min     = 2
+.const ngram_max     = 3
+.const DIM           = 128
+.const ANSWER_LENGTH = 128
+.const MAXLENGHT     = 40
+
+//*******************************************************************************
+//*** REMEMBER REU-FILE-SIZE HAS TO BE IDENTICAL WITH THE CHOOSEN VALUE IN VICE  
+//*******************************************************************************
+.const EMBEDDER            = $0820
+.const MATH                = $0900
+.const TOKENIZER           = $0c00
+.const MY_HASH16           = $0d00
+.const PROGRAMM            = $0e00
+.const KEYBOARD            = $2400
+.const LoadTab             = $2700
+
+.var DATARAM               = $a000                  // Adresse des DATABLOCKS
+.var EMBEDDING_REU         = DATARAM
+.var BOT_ANSWER_REU        = EMBEDDING_REU  + 128
+
+.const SCREEN              = $0400 + 80 + 5     // SCREENRAM Adress
+
+
+.const embeddingA          = $ef00
+.const temporer            = $2000
+.const STRING_FUNKTION     = $2100
+.const EXTRACTKEYWORDS     = $2300
+.const tokens              = $1100  // buffer für die tokens  "who\0is\0adder\0"
+.const final_answer        = $1600
+
+.const string1             = $c400
+.const string2             = $c500
+.const correct             = $c600
+.const input               = $c700
+
+.var lookUpx127Lo          = $f200 
+.var lookUpx127Hi          = lookUpx127Lo + $0100
+.var lookUpAxALo           = lookUpx127Hi + $0100 
+.var lookUpAxAHi           = lookUpAxALo  + $0100 
+.var lookUpClamp           = lookUpAxAHi  + $0100
+.var square1_lo            = lookUpClamp  + $0100
+.var square1_hi            = square1_lo   + $0200
+.var square2_lo            = square1_hi   + $0200
+.var square2_hi            = square2_lo   + $0200
+
+// String Funktionen
+.var extrpos               = $8000
+.var text_rest_pos         = extrpos                 +  1
+.var possible_match        = text_rest_pos           +  1
+.var inputpos              = possible_match          +  1
+.var firstoccur            = inputpos                +  1 
+.var extractLenght         = firstoccur              +  1 
+.var text_rest_pos_plus_1  = extractLenght           +  1
+.var new_pos               = text_rest_pos_plus_1    +  1
+.var inp_char_nr           = new_pos                 +  1
+.var occur                 = inp_char_nr             +  1
+
+
+//*******************************************************************************
+//*** REU-Register
+//*******************************************************************************
+.const REUSTATUS           = $df00         //Statusregister (nur lesen, wird dann gelöscht!)
+.const REUCOMMAND          = $df01         //Befehlsregister
+.const REUC64RAM           = $df02         //RAM-Adresse im C64 (LSB/MSB)
+.const REURAM              = $df04         //Speicher Adresse in der REU (LSB/MSB)
+.const REUBANK             = $df06         //Bank in der REU
+.const REUBYTES            = $df07         //Anzahl der betroffenen BYTES (LSB/MSB)
+.const REUIRQMASK          = $df09         //Interruptmaske
+.const REUADRCONTROL       = $df0a         //Adress-Kontroll-Register
+
+//*******************************************************************************
+//*** REU-Befehle
+//*******************************************************************************
+ 
+//*** Standardbefehle mit AUTOLOAD, ohne $ff00
+//.const REU_STASH_A__       = $fc           // kopiere C64 -> REU
+.const REU_FETCH_A__         = $fd           // kopiere REU -> C64
+//.const REU_SWAP_A__        = $fe           // Speicherbereich tauschen
+//.const REU_VERIFY_A__      = $ff           // Speicherbereich vergleichen
+ 
+//*** mit AUTOLOAD und mit $ff00
+//.const REU_STASH_A_F       = $ec           // kopiere C64 -> REU
+//.const REU_FETCH_A_F       = $ed           // kopiere REU -> C64
+//.const REU_SWAP_A_F        = $ee           // Speicherbereich tauschen
+//.const REU_VERIFY_A_F      = $ef           // Speicherbereich vergleichen
+ 
+//*** ohne AUTOLOAD, ohne $ff00
+//.const REU_STASH____       = $dc           // kopiere C64 -> REU
+//.const REU_FETCH____       = $dd           // kopiere REU -> C64
+//.const REU_SWAP____        = $de           // Speicherbereich tauschen
+//.const REU_VERIFY____      = $df           // Speicherbereich vergleichen
+ 
+//*** ohne AUTOLOAD, mit $ff00
+//.const REU_STASH___F       = $cc           // kopiere C64 -> REU
+//.const REU_FETCH___F       = $cd           // kopiere REU -> C64
+//.const REU_SWAP___F        = $ce           // Speicherbereich tauschen
+//.const REU_VERIFY___F      = $cf           // Speicherbereich vergleichen
+
+.var o0         = $10
+.var o1         = $11
+
+.var a0         = $18
+.var a1         = $19
+
+
+.var b0         = $20
+.var b1         = $21
+
+.var T1         = $22
+.var T2         = $23
+.var PRODUCT    = $24
+.var PRODUCTHI  = $25
+
+
+.var t0         = $28
+.var t1         = $29
+
+.var tt0        = $2a
+.var tt1        = $2b
+
+.var quotient   = $2c
+.var quotientHi = $2d
+.var signflag   = $2e
+
+
+.var tmp        = $30
+.var length     = $31
+.var CHAR       = $32
+
+.var FAC1       = $33
+.var FAC2       = $34
+
+.var d0         = $35  // DIVIDEND  ALSO DOT PRODUCT
+.var d1         = $36
+.var d2         = $37
+.var d3         = $38
+
+.var v0         = $39  // DIVISOR
+.var v1         = $3a
+
+.var q0         = $3b  // QUOTIENT ALSO ERGEBNIS
+.var q1         = $3c
+.var q2         = $3d
+.var q3         = $3e
+
+.var r0         = $3f
+.var r1         = $40
+
+.var count      = $41
+
+.var x_save     = $42
+.var y_save     = $43
+
+.var normALO    = $44
+.var normAHI    = $45
+
+.var normBLO    = $46
+.var normBHI    = $47
+
+.var sign       = $48
+
+.var bufptr     = $49
+.var bufptrHi   = $4a
+
+.var tokptr     = $4b
+.var tokptrHi   = $4c
+  // aktueller Token-Pointer
+.var tokidx      = $4d     // Index in tokens[]
+.var i           = $4e
+.var n           = $4f
+.var L           = $50
+.var hash_lo     = $51
+.var hash_hi     = $52
+.var idx         = $53
+
+//.var substr_ptr  = $54
+//.var substr_ptrHi= $55
+
+.var norm2       = $56
+.var norm2Hi     = $57
+
+.var lo_SqrtIn   = $59
+.var hi_SqrtIn   = $5a
+.var lsby        = $5b
+.var msby        = $5c
+
+.var val         = $60
+.var High_Byte   = $61
+
+// 16 bit division
+.var remainder   = $62
+.var remainderHi = $63
+.var dividend    = $64
+.var dividendHi  = $65
+.var divisor     = $66
+
+
+.var dist0                 = $68
+.var dist1                 = dist0                   + 1
+.var dist2                 = dist1                   + 1
+.var dist3                 = dist2                   + 1
+.var bestBank              = dist3                   + 1
+.var bestram               = bestBank                + 1
+.var reuram                = bestram                 + 1  
+.var reubank               = reuram                  + 1
+.var hasAnAnswer           = reubank                 + 1
+.var diff_lo               = hasAnAnswer             + 1
+.var diff_hi               = diff_lo                 + 1
+.var neg_diff_lo           = diff_hi                 + 1
+.var neg_diff_hi           = neg_diff_lo             + 1
+.var token_length          = neg_diff_hi             + 1
+.var n_gram                = token_length            + 1
+.var i_token               = n_gram                  + 1
+.var frame                 = i_token                 + 1
+.var inputdone             = frame                   + 1
+.var cursor                = inputdone               + 1
+.var len1_unextracted      = cursor                  + 1 
+.var musicplay             = len1_unextracted        + 1 
+.var key_return            = musicplay               + 1
+.var active_music          = key_return              + 1
+.var keypos                = active_music            + 1
+.var just_music            = keypos                  + 1
+.var actkey	               = just_music              + 1
+.var keyblock              = actkey                  + 1
+.var keyflag               = keyblock                + 1 
+.var lastkey	             = keyflag                 + 1
+.var extract_addr          = lastkey                 + 1
+.var extract_addr_Hi       = extract_addr            + 1
+.var occour_in_query       = extract_addr_Hi         + 1
+.var len1                  = occour_in_query         + 1
+.var check_summe           = len1                    + 1
+
+.pc = LoadTab "x127 && AxA && clamp && multab"
+  .import binary "data/lookup_tables.bin"

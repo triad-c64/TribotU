@@ -1,0 +1,224 @@
+/*********************************************************
+ *     coded by Adder of Triad in 2025 / 2026 for X2026  *
+ *********************************************************/
+
+#import "variables.src"
+
+.pc = STRING_FUNKTION "STRING_FUNCTION"
+
+ExtractString: 
+   lda #<extract
+   sta extract_addr
+   lda #>extract
+   sta extract_addr + 1
+
+Extract:
+   ldy #0
+Checklength:
+   lda (extract_addr)          ,y
+   cmp #','
+   beq WriteLength
+   cmp #0
+   bne length__
+   jmp output
+length__:
+   iny
+   bne Checklength
+
+WriteLength:
+   sty extractLenght
+   jsr CopyString                          // len1 needed
+   jsr ResetAlgorithm
+   
+CheckString:
+   ldx inp_char_nr
+   ldy extrpos
+   cpy extractLenght
+   bne Extrahiere
+
+   jsr ResetExtract          
+Extrahiere:
+   inc occour_in_query
+   lda string1                 ,x
+   cmp (extract_addr)          ,y
+   bne CheckPossibleMatch
+
+   lda firstoccur
+   bne add_possible_match
+   stx inputpos
+   lda #1
+   sta firstoccur
+add_possible_match:
+   inc possible_match
+CheckPossibleMatch:
+   lda possible_match
+   cmp extractLenght
+   bne CheckInputCharDiffers
+   cmp occour_in_query
+   bne CheckInputCharDiffers
+   
+   lda string1  +  1           ,x
+   cmp #$20
+   beq GetMatch
+
+   inx
+   cpx len1
+   bne CheckInputCharDiffers
+   
+GetMatch:                          // possible_match
+   ldx #0
+   clc
+   lda text_rest_pos
+   adc #1
+   sta text_rest_pos_plus_1
+FillNewString:
+   cpx text_rest_pos_plus_1
+   bcc t_smaller_input
+   beq t_smaller_input
+   ldy new_pos
+   lda string1                 ,x
+   sta correct                 ,y
+   inc new_pos
+   jmp SetResultString
+t_smaller_input:
+   cpx inputpos
+   bcs SetResultString
+   
+   // TODO
+   ldy new_pos
+   
+   lda string1                 ,x
+   sta correct                 ,y
+   inc new_pos
+SetResultString:
+   inx
+   cpx len1
+   bne FillNewString
+   lda new_pos
+   sta len1
+   jsr ResetExtract
+   jmp Identify
+
+CheckInputCharDiffers:
+   ldx inp_char_nr
+   ldy extrpos
+   lda string1                 ,x
+   cmp (extract_addr)          ,y
+   beq loop_input
+
+   jsr ResetExtract 
+   jmp loop_search_and_replace 
+loop_input:
+   inc extrpos
+   inc text_rest_pos
+loop_search_and_replace:
+   inc inp_char_nr
+   ldx inp_char_nr
+   cpx len1
+   beq Identify
+   jmp CheckString
+
+Identify:
+   ldy #0
+identify_word:
+   lda correct                 ,y
+   sta string1                 ,y 
+   iny
+   cpy len1
+   bne identify_word
+   
+   ldy extractLenght
+   iny
+   lda (extract_addr)          ,y
+   beq output
+   tya
+   clc
+   adc extract_addr
+   sta extract_addr
+   bcc continue_to_extract_string
+   inc extract_addr            +1 
+continue_to_extract_string:
+   jmp Extract
+
+output:
+   ldx #0
+   ldy #0
+WriteResult:
+   lda string1                 ,x
+  // cmp #$20
+  //beq increment_to_char
+   cmp #63
+   beq set_len
+printf:  
+   sta string1                 ,y
+ //  Debug 
+ // sta $0400    + 40           ,y 
+
+   cmp #'a'        // kleiner als 'A'?
+   bcc c64_char    // ja → nichts ändern
+   cmp #'z'+1      // größer als 'Z'?
+   bcs c64_char    // ja → nichts ändern
+
+   clc
+   adc #64         // nur A–Z werden umgewandelt
+c64_char:
+   sta input                   ,y
+   iny
+increment_to_char:
+   inx
+   cpx len1
+   bne WriteResult
+   cpy len1_unextracted
+   beq new_len_1
+set_len:
+   sty len1
+new_len_1:
+ //  iny
+ //  sty len1_plus_1
+   rts
+
+ResetExtract:
+   lda inp_char_nr
+   cmp len1 
+   bcc set_Restore
+   lda len1
+set_Restore:
+   sta inputpos
+   sta text_rest_pos
+   lda #0
+   sta extrpos
+   sta possible_match
+   rts
+
+ResetAlgorithm:
+   lda #0
+   sta extrpos
+   sta text_rest_pos
+   sta possible_match
+   sta inputpos
+   sta firstoccur
+   sta occour_in_query
+   sta text_rest_pos_plus_1
+   sta new_pos
+   sta inp_char_nr
+   rts
+
+CopyString:
+   ldy #0 
+copystring:
+   lda string1                 ,y
+   sta correct                 ,y
+   iny
+   cpy len1
+   bne copystring
+   rts
+
+.pc = EXTRACTKEYWORDS "EXTRACT KEYWORDS"
+extract: 
+   .text "what,where,when,who,whom,which,why,how,do,does,"
+   .text "did,have,has,had,can,could,will,would,shall,"
+   .text "should,may,might,must,is,are,was,where,am,"
+   .text "any,ever,much,many,kind,type,time,place,reason,"
+   .text "why,there,tell,the,me,about,end"
+   .byte 0, 0, 0
+   

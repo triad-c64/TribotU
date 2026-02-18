@@ -1,0 +1,161 @@
+// Zero Page
+
+#import "variables.src"
+#import "math.src"
+#import "hash16.src"
+
+.pc = EMBEDDER "Embedder"
+
+Embeddings:
+        ldx #0
+        txa
+clr_loop:
+        sta temporer,x
+        inx
+        cpx #DIM
+        bne clr_loop
+        
+        lda #<tokens
+        sta bufptr
+        lda #>tokens
+        sta bufptrHi
+
+GetToken:  
+        jsr GetTokenLength      // stored in token_length
+
+        ldx #ngram_min
+ngram_loop:
+        stx n_gram
+        cpx token_length
+        bcs next_ngram
+
+        lda token_length
+        sec     
+        sbc n_gram
+        sta i_token_check + 1
+
+        ldy #0
+loop_i:
+        sty i_token
+        
+        lda n_gram
+        sta length
+
+        sty y_save
+        jsr MY_HASH_16
+        ldy y_save
+
+        lda o0
+        and #DIM -1
+        tax
+
+        lda o1
+        and #1
+        beq minus_temporer
+plus_temporer:
+        inc temporer, x
+        jmp continue_tok
+minus_temporer:
+        dec temporer, x
+
+continue_tok:
+        iny  
+i_token_check:
+        cpy #0
+        bne loop_i
+
+        ldx n_gram
+        inx     
+        cpx #ngram_max + 1
+        bne ngram_loop
+
+next_ngram:
+        lda bufptr
+        clc     
+        adc token_length
+        sta bufptr
+        bcc check_for_end_of_tokens_doubleNull
+        inc bufptrHi
+check_for_end_of_tokens_doubleNull:
+        ldy #1
+        lda (bufptr),y
+        bne GetToken      
+        
+done_tokens:
+        lda #0
+        sta norm2
+        sta norm2Hi
+
+        // L2-Norm in integer   
+        ldx #0                  // Index i=0
+sum_loop:
+        ldy temporer,x     
+        lda lookUpAxALo          ,y
+        clc     
+        adc norm2
+        sta norm2
+        lda lookUpAxAHi          ,y
+        adc norm2Hi
+        sta norm2Hi
+        
+        inx
+        cpx #DIM
+        bne sum_loop        
+
+L2Norm:   
+        lda norm2
+        ora norm2Hi
+        bne GetSqrt
+        lda #0
+        sta norm2Hi
+        lda #1 
+        sta norm2
+GetSqrt:
+        jsr SQRT
+    
+        lda norm2
+        bne MakeEmbeddings
+        lda #1 
+        sta norm2
+        
+MakeEmbeddings:
+        ldx #0
+embedding_loop:
+        ldy temporer         ,x    
+        lda lookUpx127Lo     ,y
+        sta dividend
+        lda lookUpx127Hi     ,y
+        sta dividend + 1
+        lda norm2
+        sta divisor
+         
+        stx x_save
+        jsr fast_div_s16_u8_to_s8
+        ldx x_save
+
+        ldy quotient
+        lda lookUpClamp       ,y 
+        sta embeddingA        ,x
+        clc     
+        adc check_summe
+        sta check_summe
+        inx  
+        cpx #DIM
+        bne embedding_loop
+ReturnFromEmbeddings:
+        rts
+
+
+GetTokenLength:
+        ldy #0
+loop_strln:
+        lda (bufptr),y
+        beq done_strln
+        iny
+        bne loop_strln
+done_strln:
+        iny
+        sty token_length
+        rts
+
+        

@@ -1,0 +1,426 @@
+#import "variables.src"
+
+.pc = MATH "Math"
+SQRT:
+        ldy #$01         // lsby der ersten ungeraden zahl = 1
+        sty lsby
+        dey
+        sty msby         // msby der ersten ungeraden zahl (sqrt = 0)
+again:
+        sec
+        lda norm2        // rest in x-register speichern
+        tax              // ungerade lo von integer lo subtrahieren
+        sbc lsby
+        sta norm2
+        lda norm2Hi      // ungerade hi von integer hi subtrahieren
+        sbc msby
+        sta norm2Hi      // ist das ergebnis negativ?
+        bcc nomore       // nein. quadratwurzel erhöhen
+        iny
+        lda lsby         // nächste ungerade zahl berechnen
+        adc #$01
+        sta lsby
+        bcc again
+        inc msby
+        jmp again
+nomore:
+        sty norm2        // fertig, quadratwurzel speichern
+        stx norm2Hi      // und rest
+        rts
+
+
+fast_div_s16_u8_to_s8:
+        lda #0
+        sta signflag
+        sta quotient
+
+        // --- Dividend negativ? ---
+        lda dividend+1
+        bpl abs_done
+        jsr negate_dividend
+        inc signflag
+
+abs_done:
+// --- 8-bit Division ---
+do_div:
+        ldx #8
+divloop:
+        asl dividend
+        rol dividend+1
+        rol quotient
+
+        lda dividend+1
+        cmp divisor
+        bcc skip
+        sbc divisor
+        sta dividend+1
+        inc quotient
+
+skip:
+        dex
+        bne divloop
+
+        // --- Vorzeichen anwenden ---
+        lda signflag
+        beq done
+        jsr negate_quotient
+
+done:
+        rts
+
+negate_dividend:
+        lda dividend
+        eor #$FF
+        clc
+        adc #1
+        sta dividend
+        lda dividend+1
+        eor #$FF
+        adc #0
+        sta dividend+1
+        rts
+
+negate_quotient:
+        lda quotient
+        eor #$FF
+        clc
+        adc #1
+        sta quotient
+        rts
+
+Bit32Div16Signed:
+        // ----------------------------
+        // Vorzeichen merken (Dividend XOR Divisor)
+        // ----------------------------
+        lda #0
+        sta sign        // sign = 0 = positiv, 1 = negativ
+
+        // Dividend prüfen
+        lda d3
+        bpl chkDivisor
+        lda #1
+        sta sign        // Negatives Ergebnis merken
+        jsr Make32Positive // -Dividend -> d0..d3
+
+chkDivisor:
+        lda v1
+        bpl div_pos
+        lda sign
+        eor #1          // XOR: Vorzeichen Ergebnis umdrehen
+        sta sign
+        jsr Make16Positive // -Divisor -> v0..v1
+
+div_pos:
+        // ----------------------------
+        // Quotient & Rest auf 0 setzen
+        // ----------------------------
+        lda #0
+        sta q0
+        sta q1
+        sta q2
+        sta q3
+        sta r0
+        sta r1
+
+        lda #32
+        sta count       // 32 Bit Schleife
+
+div_loop:
+        // ----------------------------
+        // Rest << 1
+        // ----------------------------
+        asl r0
+        rol r1
+
+        // Dividend << 1, MSB -> Rest LSB
+        asl d0
+        rol d1
+        rol d2
+        rol d3
+        bcc no_carry
+        inc r0
+no_carry:
+
+        // Rest - Divisor
+        lda r0
+        sec
+        sbc v0
+        tax
+        lda r1
+        sbc v1
+        bcc div_skip
+
+        // Rest >= Divisor -> Rest speichern, Quotientbit=1
+        stx r0
+        sta r1
+
+        asl q0
+        rol q1
+        rol q2
+        rol q3
+        inc q0
+        jmp div_next
+
+div_skip:
+        // Rest < Divisor -> Quotientbit=0
+        asl q0
+        rol q1
+        rol q2
+        rol q3
+
+div_next:
+        dec count
+        bne div_loop
+
+        // ----------------------------
+        // Vorzeichen anwenden
+        // ----------------------------
+        lda sign
+        beq div_done  // positiv, fertig
+
+        // Negatives Ergebnis -> Quotient = -Quotient
+        jsr Make32Negative
+
+div_done:
+        rts
+
+// ============================================================
+// Hilfsroutinen
+// ============================================================
+
+// 32-bit negative (Zweierkomplement)
+Make32Negative:
+        lda q0
+        eor #$FF
+        sta q0
+        lda q1
+        eor #$FF
+        sta q1
+        lda q2
+        eor #$FF
+        sta q2
+        lda q3
+        eor #$FF
+        sta q3
+        clc
+        lda q0
+        adc #1
+        sta q0
+        lda q1
+        adc #0
+        sta q1
+        lda q2
+        adc #0
+        sta q2
+        lda q3
+        adc #0
+        sta q3
+        rts
+
+// 32-bit positive (Zweierkomplement)
+Make32Positive:
+        lda d0
+        eor #$FF
+        sta d0
+        lda d1
+        eor #$FF
+        sta d1
+        lda d2
+        eor #$FF
+        sta d2
+        lda d3
+        eor #$FF
+        sta d3
+        clc
+        lda d0
+        adc #1
+        sta d0
+        lda d1
+        adc #0
+        sta d1
+        lda d2
+        adc #0
+        sta d2
+        lda d3
+        adc #0
+        sta d3
+        rts
+
+// 16-bit positive (Zweierkomplement)
+Make16Positive:
+        lda v0
+        eor #$FF
+        sta v0
+        lda v1
+        eor #$FF
+        sta v1
+        clc
+        lda v0
+        adc #1
+        sta v0
+        lda v1
+        adc #0
+        sta v1
+        rts
+
+/*
+multiply_8bit_signed:
+        lda T1
+        sta sm1+1
+        sta sm3+1
+        eor #$FF
+        sta sm2+1
+        sta sm4+1
+skip_fixup:
+
+        ldx T2
+        sec
+
+sm1:    lda square1_lo,x
+sm2:    sbc square2_lo,x
+        sta PRODUCT+0
+
+sm3:    lda square1_hi,x
+sm4:    sbc square2_hi,x
+        sta PRODUCT+1
+
+        // ------------------------------
+        // Apply sign
+        // ------------------------------
+        lda T1
+        bpl skip_neg_T1
+        sec
+        lda PRODUCT+1
+        sbc T2
+        sta PRODUCT+1
+skip_neg_T1:
+
+        lda T2
+        bpl skip_neg_T2
+        sec
+        lda PRODUCT+1
+        sbc T1
+        sta PRODUCT+1
+skip_neg_T2:
+        rts
+*/
+/*
+cosine_similarity:
+        ldy #0
+        sty d0
+        sty d1
+        sty d2
+        //sty d3
+
+cosine_loop:
+        lda embeddingA    ,y
+        sta T1
+
+        lda EMBEDDING_REU ,y
+        sta T2
+
+        lda T1
+        sta sm1+1
+        sta sm3+1
+        eor #$FF
+        sta sm2+1
+        sta sm4+1
+skip_fixup:
+
+        ldx T2
+        sec
+
+sm1:    lda square1_lo,x
+sm2:    sbc square2_lo,x
+        sta PRODUCT+0
+
+sm3:    lda square1_hi,x
+sm4:    sbc square2_hi,x
+        sta PRODUCT+1
+
+        // ------------------------------
+        // Apply sign
+        // ------------------------------
+        lda T1
+        bpl skip_neg_T1
+        sec
+        lda PRODUCT+1
+        sbc T2
+        sta PRODUCT+1
+skip_neg_T1:
+
+        lda T2
+        bpl skip_neg_T2
+        sec
+        lda PRODUCT+1
+        sbc T1
+        sta PRODUCT+1
+skip_neg_T2:
+
+
+        clc
+        lda PRODUCT
+        adc d0
+        sta d0
+
+        lda PRODUCTHI
+        adc d1
+        sta d1
+
+        lda PRODUCTHI
+        bmi negativ
+
+        lda #$00
+        adc d2
+        sta d2
+
+       // lda #$00
+       // adc d3
+       // sta d3
+        
+        iny 
+        cpy #DIM
+        bne cosine_loop
+        rts
+
+negativ:
+        lda #$ff
+        adc d2
+        sta d2
+
+       // lda #$ff
+       // adc d3
+       // sta d3
+
+loop_cosinus_similarity:
+        iny 
+        cpy #DIM
+        bne cosine_loop
+        rts
+       */
+       
+cosine_approximation:
+        ldy #0
+        sty d0
+        sty d1
+
+cosine_loop:
+        lda embeddingA    ,y
+        cmp EMBEDDING_REU ,y
+        beq EmbeddingEqual
+         
+        dec d0
+skip_hi_dec:
+        iny 
+        cpy #DIM
+        bne cosine_loop
+        rts
+        
+EmbeddingEqual:
+        inc d0
+        inc d1
+loop_cosinus_similarity:
+        iny 
+        cpy #DIM
+        bne cosine_loop
+        rts
