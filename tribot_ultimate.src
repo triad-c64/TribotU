@@ -274,7 +274,6 @@ PlotAnswer:
           ldy #0
 GET_FINAL_ANWER:
           lda BOT_ANSWER_REU        , y
-          beq returnFromSearch
 GiveOutFinal:
           sta final_answer          , y
           iny
@@ -286,8 +285,6 @@ fillup:
           sta final_answer           ,y
           iny
           bne fillup
-
-returnFromSearch:
           rts
 
 CleanUp:
