@@ -3,10 +3,10 @@
  *********************************************************/
 #importonce 
 
-.const ngram_min     = 2
-.const ngram_max     = 3
-.const DIM           = 128
-.const ANSWER_LENGTH = 128
+.const ngram_min     = 1
+.const ngram_max     = 8
+.const DIM           = 64
+.const ANSWER_LENGTH = 192
 .const MAXLENGHT     = 40
 
 //*******************************************************************************
