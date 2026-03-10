@@ -49,7 +49,7 @@ loop_i:
         lda o0
         and #DIM -1
         tax
-
+  
         lda o1
         and #1
         beq minus_temporer

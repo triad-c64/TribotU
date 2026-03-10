@@ -369,7 +369,7 @@ cls_input:
 scroll_soft:
          lda smooth 
          sec
-         sbc #1
+         sbc #2
          and #%000000111
          sta smooth
 
@@ -380,7 +380,7 @@ scroll_soft:
          sta $d016  
 nonewpic: 
          lda smooth
-         cmp #%00000111
+         cmp #%00000110
          bne leave_soft
          jsr hardscroll
 leave_soft:  

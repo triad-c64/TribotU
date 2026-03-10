@@ -5,14 +5,14 @@
 
 .const ngram_min     = 1
 .const ngram_max     = 8
-.const DIM           = 64
-.const ANSWER_LENGTH = 192
+.const DIM           = 16
+.const ANSWER_LENGTH = 256 - DIM
 .const MAXLENGHT     = 40
 
 //*******************************************************************************
 //*** REMEMBER REU-FILE-SIZE HAS TO BE IDENTICAL WITH THE CHOOSEN VALUE IN VICE  
 //*******************************************************************************
-.const EMBEDDER            = $0820
+.const EMBEDDER            = $0810
 .const MATH                = $0900
 .const TOKENIZER           = $0c00
 .const MY_HASH16           = $0d00
@@ -24,7 +24,7 @@
 .var EMBEDDING_REU         = DATARAM
 .var BOT_ANSWER_REU        = EMBEDDING_REU  + DIM
 
-.const SCREEN              = $0400 + 80 + 5     // SCREENRAM Adress
+.const SCREEN              = $0400 + 80 + 5         // SCREENRAM Adress
 
 
 .const embeddingA          = $ef00
@@ -51,6 +51,7 @@
 .var square1_hi            = square1_lo   + $0200
 .var square2_lo            = square1_hi   + $0200
 .var square2_hi            = square2_lo   + $0200
+.var modulo                = square2_hi   + $0200
 
 // String Funktionen
 .var extrpos               = $8000
