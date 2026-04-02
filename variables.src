@@ -8,7 +8,7 @@
 .const DIM           = 64
 .const ANSWER_LENGTH = 256 - DIM
 .const MAXLENGHT     = 40
-.const COUNT_ENTRIES = $74b8
+.const COUNT_ENTRIES = $ce10
 
 //*******************************************************************************
 //*** REMEMBER REU-FILE-SIZE HAS TO BE IDENTICAL WITH THE CHOOSEN VALUE IN VICE  
@@ -240,6 +240,9 @@
 .var occour_in_query       = extract_addr_Hi         + 1
 .var len1                  = occour_in_query         + 1
 .var check_summe           = len1                    + 1
+.var s0                    = check_summe             + 1
+.var s1                    = s0                      + 1
+.var s2                    = s1                      + 1
 
 .pc = LoadTab "x127 && AxA && clamp && multab"
   .import binary "data/lookup_tables.bin"

@@ -318,6 +318,56 @@ cosine_similarity:
         sty d2
 
 cosine_loop:
+        lda embeddingA ,y       
+        sta T1
+
+        lda EMBEDDING_REU ,y   
+        sta T2
+
+        lda T1
+        sta sm1+1
+        sta sm3+1
+        eor #$FF               
+        sta sm2+1
+        sta sm4+1
+
+        ldx T2
+        sec                    
+
+sm1:    lda square1_lo, x     
+sm2:    sbc square2_lo, x       
+        sta PRODUCT+0          
+
+sm3:    lda square1_hi, x     
+sm4:    sbc square2_hi, x      
+        sta PRODUCT+1          
+
+        clc                     
+        lda PRODUCT             
+        adc d0                  
+        sta d0                  
+
+        lda PRODUCTHI           
+        adc d1                  
+        sta d1                  
+
+        lda #$00
+        adc d2                   
+        sta d2                  
+
+        iny                      
+        cpy #DIM                 
+        bne cosine_loop          
+quit_cosine_real:
+        rts                     
+/*
+cosine_similarity:
+        ldy #0
+        sty d0
+        sty d1
+        sty d2
+
+cosine_loop:
         lda embeddingA    ,y
         sta T1
 
@@ -361,7 +411,6 @@ skip_neg_T1:
         sta PRODUCT+1
 skip_neg_T2:
 
-
         clc
         lda PRODUCT
         adc d0
@@ -388,16 +437,15 @@ negativ:
         adc d2
         sta d2
 
-loop_cosinus_similarity:
         iny 
         cpy #DIM
         bne cosine_loop
-        rts
-       
+quit_cosine_real:  
+        rts 
+*/
 /* ********************************************************************
  * this is the fastest approximation for embedding - cosine similarity 
  * ********************************************************************/
-.macro cosine_approx() {
 cosine_approximation:
         ldy #DIM 
         ldx #0
@@ -410,11 +458,12 @@ cosine_approx_loop:
         dex
         dey
         bne cosine_approx_loop
-        jmp quit_cosine_approx
+        rts
         
 EmbeddingEqual:
         inx
         dey
         bne cosine_approx_loop
 quit_cosine_approx:
-}
+        rts
+

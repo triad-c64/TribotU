@@ -6,7 +6,7 @@
 
    <Segment name="Default" dest="" values="START,END,FILE_IDX,LINE1,COL1,LINE2,COL2">
       <Block name="x127 &amp;&amp; AxA &amp;&amp; clamp &amp;&amp; multab">
-         $2700,$2bff,0,244,3,244,9
+         $2700,$33ff,0,248,3,248,9
       </Block>
    </Segment>
 
