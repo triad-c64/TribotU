@@ -255,11 +255,36 @@ update_founded:
           sta bestram
   
 continue_iterative_search:
+          lda reuram
+          cmp #<COUNT_ENTRIES
+          beq check_bank
           inc reuram
           bne GETNODES
           inc reubank
           bne GETNODES
-
+          jmp check_founded
+check_bank:
+          lda reubank
+          cmp #>COUNT_ENTRIES
+          beq check_founded
+          inc reuram
+          bne GETNODES
+          inc reubank
+          bne GETNODES
+          
+check_founded:
+          lda bestram
+          bne MatchFound
+          lda bestBank
+          bne MatchFound
+        
+          ldy #0
+doPrintNothing:
+          lda nothing     ,y
+          beq fillUP
+          sta final_answer,y
+          iny
+          bne doPrintNothing
 MatchFound: 
           lda bestBank
           sta REUBANK
@@ -282,6 +307,7 @@ GiveOutFinal:
           cpy #ANSWER_LENGTH
           bne GET_FINAL_ANWER
 
+fillUP:
           lda #$20
 fillup:
           sta final_answer           ,y
@@ -433,3 +459,7 @@ prompt:
    .byte 0
 nmi: 
     rti  
+
+nothing: 
+  .text "sorry, i do not understand!"
+  .byte 0

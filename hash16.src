@@ -22,6 +22,7 @@ GETCHAR:
 begin_hash:
         jsr EOR_CHAR
         jsr SHIFT_HASH_AROUND_5        // // 16-bit rot-left um 5
+        jsr SHIFT_HASH_RIGHT_7_EOR
         iny
 nGramLenght: 
         cpy #0
@@ -38,6 +39,7 @@ EOR_CHAR:
         rts
 
 SHIFT_HASH_AROUND_5:
+        clc
         lda o0
         sta b0
         lda o1
@@ -71,6 +73,30 @@ SHIFT_HASH_AROUND_5:
 
         lda a1
         ora b1
+        sta o1
+
+        rts
+
+SHIFT_HASH_RIGHT_7_EOR: 
+
+        lda o0
+        sta a0
+        lda o1
+        sta a1
+
+        ldx #7
+@loop:
+        lsr a1
+        ror a0
+        dex
+        bne @loop
+
+        lda o0
+        eor a0
+        sta o0
+
+        lda o1
+        eor a1
         sta o1
 
         rts
