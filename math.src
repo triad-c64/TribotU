@@ -447,17 +447,13 @@ quit_cosine_real:
  * this is the fastest approximation for embedding - cosine similarity 
  * ********************************************************************/
 cosine_approximation:
-        ldy #DIM 
         ldx #$0
-
-cosine_approx_loop:
-        lda embeddingA    - 1 ,y
-        cmp EMBEDDING_REU - 1 ,y
+.for (var i = 0; i < DIM; i++) {
+        lda embeddingA     + i
+        cmp EMBEDDING_REU  + i
         bne EmbeddingNotEqual
         inx
 EmbeddingNotEqual:
-        dey
-        bne cosine_approx_loop
-quit_cosine_approx:
-        rts
+}
+         rts
 

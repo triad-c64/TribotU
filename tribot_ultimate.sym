@@ -142,7 +142,6 @@
 .label cosine_loop=$36a3
 .label NormalizedInput=$ef5
 .label done2=$c60
-.label EmbeddingNotEqual=$36f6
 .label Make32Positive=$3615
 .label multiply_8bit_signed=$3661
 .label scroll_soft=$107d
@@ -165,7 +164,6 @@
 .label divloop=$353b
 .label GET_FINAL_ANWER=$fd2
 .label ie5b9=$2483
-.label quit_cosine_approx=$36f9
 .label no_page=$c44
 .label Copy_next_char=$10ba
 .label MakeEmbeddings=$8af
@@ -204,7 +202,6 @@
 .label PaintDel=$245e
 .label embedding_loop=$8b1
 .label PlotAnswer=$fd0
-.label cosine_approx_loop=$36ed
 .label ResetAlgorithm=$222d
 .label ieadc=$24ec
 .label end_token=$c48
