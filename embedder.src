@@ -45,11 +45,15 @@ loop_i:
         sty y_save
         jsr MY_HASH_16
         ldy y_save
-
+/*
         lda o0
         and #DIM -1
         tax
-  
+  */
+        ldx o0
+        lda modulo,x
+        tax 
+        
         lda o1
         and #1
         beq minus_temporer

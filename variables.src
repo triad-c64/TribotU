@@ -8,13 +8,13 @@
 .const DIM           = 64
 .const ANSWER_LENGTH = 256 - DIM
 .const MAXLENGHT     = 40
-.const COUNT_ENTRIES = $ce10
+
 
 //*******************************************************************************
 //*** REMEMBER REU-FILE-SIZE HAS TO BE IDENTICAL WITH THE CHOOSEN VALUE IN VICE  
 //*******************************************************************************
 .const EMBEDDER            = $0810
-.const MATH                = $0900
+.const MATH                = $3500
 .const TOKENIZER           = $0c00
 .const MY_HASH16           = $0d00
 .const PROGRAMM            = $0e00
@@ -28,7 +28,7 @@
 .const SCREEN              = $0400 + 80 + 5         // SCREENRAM Adress
 
 
-.const embeddingA          = $ef00
+.const embeddingA          = $ff00
 .const temporer            = $2000
 .const STRING_FUNKTION     = $2100
 .const EXTRACTKEYWORDS     = $2300
@@ -43,7 +43,7 @@
 .var   scrollLine          = $0400 + 40 * 16
 
 
-.var lookUpx127Lo          = $f200 
+.var lookUpx127Lo          = $e000 
 .var lookUpx127Hi          = lookUpx127Lo + $0100
 .var lookUpAxALo           = lookUpx127Hi + $0100 
 .var lookUpAxAHi           = lookUpAxALo  + $0100 
@@ -243,6 +243,8 @@
 .var s0                    = check_summe             + 1
 .var s1                    = s0                      + 1
 .var s2                    = s1                      + 1
+.var COUNT_ENTRIES_LO      = s2                      + 1
+.var COUNT_ENTRIES_HI      = COUNT_ENTRIES_LO        + 1
 
 .pc = LoadTab "x127 && AxA && clamp && multab"
   .import binary "data/lookup_tables.bin"

@@ -448,20 +448,14 @@ quit_cosine_real:
  * ********************************************************************/
 cosine_approximation:
         ldy #DIM 
-        ldx #0
+        ldx #$0
 
 cosine_approx_loop:
         lda embeddingA    - 1 ,y
         cmp EMBEDDING_REU - 1 ,y
-        beq EmbeddingEqual
-         
-        dex
-        dey
-        bne cosine_approx_loop
-        rts
-        
-EmbeddingEqual:
+        bne EmbeddingNotEqual
         inx
+EmbeddingNotEqual:
         dey
         bne cosine_approx_loop
 quit_cosine_approx:
