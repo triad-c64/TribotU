@@ -384,9 +384,6 @@ Init:
           sta dist0
           sta check_summe
           sta line_seq
-          sta s0
-          sta s1
-          sta s2
 
           lda #<DATARAM                      // Beginn des Speichers der  
           sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
