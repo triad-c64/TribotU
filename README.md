@@ -49,7 +49,12 @@ Type a question and press Return. Tribot+ searches the database and returns a re
 
 ## Documentation
 
-The full technical specification is in [`docs/tribot-plus-spec.md`](docs/tribot-plus-spec.md). It covers visual style, layout, boot sequence, input behavior, execution flow, and response rendering.
+The full technical specification is available in two languages:
+
+- [English](docs/tribot-plus-spec-english.md)
+- [Deutsch](docs/tribot-plus-spec-deutsch.md)
+
+Both documents cover visual style, layout, boot sequence, input behavior, execution flow, and response rendering.
 
 ---
 
