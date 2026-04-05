@@ -262,6 +262,39 @@ Responses move through states as new content arrives.
 
 ---
 
+## Music
+
+Tribot+ plays SID music during normal use. Music is on by default and resets to on each time the program loads.
+
+### Commands
+
+Music is controlled via two commands:
+
+    /music        Toggle music on / off
+    /tune 1-4     Select tune (1, 2, 3 or 4)
+
+### Behavior
+
+- Music starts when the program is ready for input.
+- `/music` toggles playback on and off immediately.
+- `/tune X` switches to the selected tune immediately.
+- Toggling music off stops playback immediately.
+- Toggling music on resumes the last selected tune.
+- Settings reset to default on each program load: music on, tune 1.
+
+### Tunes
+
+| Number | Title          |
+| ------ | -------------- |
+| 1      | Tune one       |
+| 2      | Tune two       |
+| 3      | Tune three     |
+| 4      | Tune four      |
+
+Tune titles are placeholders and will be updated once SID files are selected.
+
+---
+
 ## Commands
 
 Commands use the same input field as questions. All commands require a `/` prefix.
@@ -290,6 +323,18 @@ Displays the Tribot+ logo, a short introduction, and technical details about the
 
     /info
 
+### Music
+
+Toggles music on and off.
+
+    /music
+
+### Tune
+
+Selects one of four available tunes. Replace X with a number between 1 and 4.
+
+    /tune X
+
 ---
 
 ## Open Points
@@ -298,3 +343,4 @@ Displays the Tribot+ logo, a short introduction, and technical details about the
 - Confirm font scaling approach (2×1, 1×2, 2×2) - Skyhawk and Taper
 - Define what qualifies as a database match - Adder, Taper and Bepp
 - Define hardware checks and technical details for Stage 2 - Taper
+- Select SID files and confirm tune titles - Taper
