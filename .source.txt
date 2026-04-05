@@ -13,59 +13,59 @@
 
 .pc = ELIZA "ELIZA"
 
-          lda #0
-          sta eliza_entries  + 1
-          lda #<final_answer 
-          sta out_answer_e      + 1
-          sta out_answer_n      + 1
-          sta clean_rest_answer + 1
+        lda #0
+        sta eliza_entries     + 1
+        lda #<final_answer 
+        sta out_answer_e      + 1
+        sta out_answer_n      + 1
+        sta clean_rest_answer + 1
 
-          lda #>final_answer 
-          sta out_answer_e      + 2
-          sta out_answer_n      + 2
-          sta clean_rest_answer + 2
+        lda #>final_answer 
+        sta out_answer_e      + 2
+        sta out_answer_n      + 2
+        sta clean_rest_answer + 2
 
-          lda #128                   // OFFSET ELIZA
-          sta REUBANK
+        lda #128                   // OFFSET ELIZA
+        sta REUBANK
 eliza_entries:
-          lda #0
-          sta REURAM + 1
+        lda #0
+        sta REURAM + 1
 
-          lda #REU_FETCH_A__            
-          sta REUCOMMAND                
+        lda #REU_FETCH_A__            
+        sta REUCOMMAND                
             
-          jsr GetResponse
+        jsr GetResponse
 
-          lda eliza_answer
-          bne here_wait
-          inc eliza_entries + 1
-          lda eliza_entries + 1 
-          cmp ELIZA_ENTRIES
-          bne eliza_entries
+        lda eliza_answer
+        bne here_wait
+        inc eliza_entries + 1
+        lda eliza_entries + 1 
+        cmp ELIZA_ENTRIES
+        bne eliza_entries
           
-          lda eliza_answer
-          beq fallback_eliza
+        lda eliza_answer
+        beq fallback_eliza
 
-          jmp here_wait
+        jmp here_wait
 fallback_eliza:
          
-          ldy #$00
+        ldy #$00
 copy_fallback:
-          lda fallback,y
-          beq cnup
-          sta final_answer,y
-          iny
-          jmp copy_fallback
+        lda fallback,y
+        beq cnup
+        sta final_answer,y
+        iny
+        jmp copy_fallback
 
 cnup:
-          lda #$20
+        lda #$20
 clean_rest_bck_answer:
-          sta final_answer           ,y
-          iny
-          bne clean_rest_bck_answer
+        sta final_answer           ,y
+        iny
+        bne clean_rest_bck_answer
 
 here_wait:
-          rts
+        rts
 
 
 matches:
