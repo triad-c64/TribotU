@@ -5,6 +5,7 @@
 #import "keyboard_best.src"
 #import "embedder.src"
 #import "extract.src"
+#import "eliza.src"
 
 .pc = $0801 "Basic Upstart"
 BasicUpstart(PROGRAMM) 
@@ -130,6 +131,9 @@ loop_check:
          sta COUNT_ENTRIES_LO
          lda DATARAM + 1
          sta COUNT_ENTRIES_HI
+
+         lda DATARAM + 2
+         sta ELIZA_ENTRIES
          
          jsr Init
          rts
@@ -141,7 +145,7 @@ exit_check:
 stop_input:
  .byte 0
 // ****************************************************************************************
-irq:
+irq: 
          pha
          txa
          pha
@@ -230,6 +234,7 @@ scroll_answer:
 // ** Worker                         **7
 // ************************************
 worker:
+          jmp ELIZA
           jsr tokenize
           jsr Embeddings
           jsr start_check

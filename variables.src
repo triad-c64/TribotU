@@ -20,6 +20,8 @@
 .const PROGRAMM            = $0e00
 .const KEYBOARD            = $2400
 .const LoadTab             = $2700
+.const ELIZA               = $6000
+.const EXTRACTED_ELIZA     = $8000
 
 .var DATARAM               = $a000                  // Adresse des DATABLOCKS
 .var EMBEDDING_REU         = DATARAM
@@ -39,6 +41,7 @@
 .const string2             = $c500
 .const correct             = $c600
 .const input               = $c700
+.const input_eliza         = $c800
 
 .var   scrollLine          = $0400 + 40 * 16
 
@@ -209,8 +212,8 @@
 .var dist0                 = $68
 .var dist1                 = dist0                   + 1
 .var dist2                 = dist1                   + 1
-.var dist3                 = dist2                   + 1
-.var bestBank              = dist3                   + 1
+.var position_answer       = dist2                   + 1
+.var bestBank              = position_answer         + 1
 .var bestram               = bestBank                + 1
 .var reuram                = bestram                 + 1  
 .var reubank               = reuram                  + 1
@@ -242,6 +245,8 @@
 .var check_summe           = len1                    + 1
 .var COUNT_ENTRIES_LO      = check_summe             + 1
 .var COUNT_ENTRIES_HI      = COUNT_ENTRIES_LO        + 1
+.var eliza_answer          = COUNT_ENTRIES_HI        + 1
+.var ELIZA_ENTRIES         = eliza_answer            + 1
 
 .pc = LoadTab "x127 && AxA && clamp && multab"
   .import binary "data/lookup_tables.bin"
