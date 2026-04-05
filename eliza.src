@@ -3,17 +3,6 @@
  *********************************************************/
 #import "variables.src"
 
-.var resp_ptr_lo = $f2
-.var resp_ptr_hi = $f3
-
-// -------------------------------------------------
-// getresponse 6510-asm
-// input: $0600
-// output: $0700
-// patterns: $0800, responses: $0900
-// random counter: $00F0
-// -------------------------------------------------
-
 .pc = ELIZA "ELIZA"
 
         lda #0

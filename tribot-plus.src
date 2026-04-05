@@ -35,7 +35,7 @@ BasicUpstart(PROGRAMM)
 
           ldx #0
 PROMPT:
-          lda prompt,x
+          lda prompt    ,x
           beq SetNMI
           sta SCREEN - 2,x
           inx
