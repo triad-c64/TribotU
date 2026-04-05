@@ -31,12 +31,13 @@ BasicUpstart(PROGRAMM)
 
           jsr checkForREU                    // prüfen ob eine REU vorhanden ist
           jsr CleanUp
-          
+          jsr PrintHeadLine_Tribot
+
           ldx #0
 PROMPT:
           lda prompt,x
           beq SetNMI
-          sta SCREEN - 5,x
+          sta SCREEN - 2,x
           inx
           bne PROMPT
 SetNMI:
@@ -234,8 +235,11 @@ scroll_answer:
 // ** Worker                         **7
 // ************************************
 worker:
+          lda active_bot
+          beq Tribot
           jsr ELIZA
           rts
+Tribot:     
           jsr tokenize
           jsr Embeddings
           jsr start_check
@@ -341,6 +345,7 @@ fillup:
 
 CleanUp:
           ldx #0
+          stx active_bot
 cls:
           lda #$20
           sta $0400,x
@@ -479,7 +484,7 @@ hard_scroll:
  .byte 0
 
 prompt:
-   .text "you: "
+   .text "> "
    .byte 0
 nmi: 
     rti  

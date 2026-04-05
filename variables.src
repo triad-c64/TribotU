@@ -29,7 +29,7 @@
 .var EMBEDDING_REU         = DATARAM
 .var BOT_ANSWER_REU        = EMBEDDING_REU  + DIM
 
-.const SCREEN              = $0400 + 80 + 5         // SCREENRAM Adress
+.const SCREEN              = $0400 + 80 + 2         // SCREENRAM Adress
 
 
 .const embeddingA          = $ff00
@@ -249,6 +249,7 @@
 .var COUNT_ENTRIES_HI      = COUNT_ENTRIES_LO        + 1
 .var eliza_answer          = COUNT_ENTRIES_HI        + 1
 .var ELIZA_ENTRIES         = eliza_answer            + 1
+.var active_bot            = ELIZA_ENTRIES           + 1
 
 .pc = LoadTab "x127 && AxA && clamp && multab"
   .import binary "data/lookup_tables.bin"
