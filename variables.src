@@ -7,7 +7,9 @@
 .const ngram_max     = 3
 .const DIM           = 64
 .const ANSWER_LENGTH = 256 - DIM
-.const MAXLENGHT     = 40
+.const MAXLENGHT     = 38
+.const ELIZA_QUEST   = 16
+.const ELIZA_ANSW    = 50
 
 
 //*******************************************************************************

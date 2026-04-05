@@ -234,7 +234,8 @@ scroll_answer:
 // ** Worker                         **7
 // ************************************
 worker:
-          jmp ELIZA
+          jsr ELIZA
+          rts
           jsr tokenize
           jsr Embeddings
           jsr start_check

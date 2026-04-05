@@ -13,6 +13,17 @@
 
 .pc = ELIZA "ELIZA"
 
+          lda #0
+          sta eliza_entries  + 1
+          lda #<final_answer 
+          sta out_answer_e      + 1
+          sta out_answer_n      + 1
+          sta clean_rest_answer + 1
+
+          lda #>final_answer 
+          sta out_answer_e      + 2
+          sta out_answer_n      + 2
+          sta clean_rest_answer + 2
 
           lda #128                   // OFFSET ELIZA
           sta REUBANK
@@ -24,6 +35,7 @@ eliza_entries:
           sta REUCOMMAND                
             
           jsr GetResponse
+
           lda eliza_answer
           bne here_wait
           inc eliza_entries + 1
@@ -37,29 +49,35 @@ eliza_entries:
           jmp here_wait
 fallback_eliza:
          
-          ldx #$00
+          ldy #$00
 copy_fallback:
-          lda fallback,x
-          sta $0740,x
-          inx
-          cpx #$13            // 19 bytes
-          bne copy_fallback
+          lda fallback,y
+          beq cnup
+          sta final_answer,y
+          iny
+          jmp copy_fallback
 
+cnup:
+          lda #$20
+clean_rest_bck_answer:
+          sta final_answer           ,y
+          iny
+          bne clean_rest_bck_answer
 
 here_wait:
-          jmp here_wait
+          rts
 
 
 matches:
-        ldx #0          // x = offset im input
+        ldx #0          
 
 search_loop:
         lda string1           ,x
-        beq quit_w_no_match    // ende input, kein match
-        ldy #0                 // y = offset im pattern
+        beq quit_w_no_match     
+        ldy #0                 
 match_pattern:
         lda DATARAM           ,y
-        beq pattern_matched   // ende pattern -> match
+        beq pattern_matched    
         cmp #$30
         beq pattern_matched
         lda string1           ,x
@@ -70,13 +88,10 @@ match_pattern:
         jmp match_pattern
 
 pattern_matched:
-        // kopiere rest von input in extracted
-      //  inx                // start nach pattern
         ldy #0
 copy_rest:
         lda string1           ,x
         sta EXTRACTED_ELIZA   ,y
-       // sta $0400             ,y
         beq return_from_extr
         iny
         inx
@@ -103,9 +118,12 @@ next_pattern:
         
         jsr matches         // prüfe, ob pattern matcht
         cpx #0
-        beq no_match
-
-
+        bne match
+no_match:
+        lda #0
+        sta eliza_answer
+        rts
+match:
         ldy #$00
 
         lda $d012
@@ -113,24 +131,32 @@ next_pattern:
         beq prep_resp0
         cmp #1
         beq prep_resp1
-        lda #128 +64
+        cmp #2
+        beq prep_resp2
+prep_resp3:
+        lda #ELIZA_QUEST + ELIZA_ANSW *3
         sta plot_response + 1
         sta plot_answer   + 1
         jmp plot_response
 prep_resp0:
-        lda #64
+        lda #ELIZA_QUEST
         sta plot_response + 1
         sta plot_answer   + 1
         jmp plot_response
 prep_resp1:
-        lda #128
+        lda #ELIZA_QUEST + ELIZA_ANSW 
         sta plot_response + 1
         sta plot_answer   + 1
-    
+        jmp plot_response
+prep_resp2:
+        lda #ELIZA_QUEST + ELIZA_ANSW * 2
+        sta plot_response + 1
+        sta plot_answer   + 1
+        jmp plot_response
 
 plot_response:
-        lda DATARAM + DIM   ,y
-        cmp #$30 // '0' ersetzen mit EXTRACTED            
+        lda DATARAM           ,y
+        cmp #$30                        // '0' ersetzen mit EXTRACTED            
         bne plot_answer
  
 // --- MATCH FOUND ---
@@ -139,32 +165,36 @@ replace_loop:
         lda EXTRACTED_ELIZA,x
         beq continue_with_answer
 out_answer_e:
-        sta $0700           
-        inc out_answer_e + 1
-        inc out_answer_n + 1
+        sta final_answer           
+        inc out_answer_e      + 1
+        inc out_answer_n      + 1
+        inc clean_rest_answer + 1
         inx
         cpx #DIM           
         bne replace_loop
 continue_with_answer:
         iny 
 plot_answer:  
-        lda DATARAM + DIM   ,y
+        lda DATARAM           ,y
         beq return_from_response
 out_answer_n:
-        sta $0700   
-        inc out_answer_e + 1
-        inc out_answer_n + 1        
+        sta final_answer 
+        inc out_answer_e      + 1
+        inc out_answer_n      + 1 
+        inc clean_rest_answer + 1       
         iny
         bne plot_response
 return_from_response:
+        lda #$20
+clean_rest_answer:
+        sta final_answer     
+        inc clean_rest_answer + 1
+        bne clean_rest_answer
+
         lda #1 
         sta eliza_answer
         rts
 
-no_match:
-        lda #0
-        sta eliza_answer
-        rts
 
 // -------------------------------------------------
 // daten
