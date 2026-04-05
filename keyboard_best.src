@@ -239,9 +239,9 @@ ret_from_headline:
        rts
 
 tribot: 
-  .text "f1 switch to eliza "
+  .text "f1 switch to eliza  (currently tribot)"
   .byte 0
 
 eliza: 
-  .text "f1 switch to tribot"
+  .text "f1 switch to tribot  (currently eliza)"
   .byte 0

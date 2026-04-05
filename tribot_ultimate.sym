@@ -162,7 +162,7 @@
 .label ieb26=$2538
 .label leave_soft=$10b1
 .label out_answer_e=$60ea
-.label eliza=$25fb
+.label eliza=$260e
 .label nmi=$10f2
 .label out_answer_n=$6101
 .label ieb0d=$251e

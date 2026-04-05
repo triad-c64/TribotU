@@ -1,494 +1,247 @@
 /*********************************************************
- *     coded by Adder of Triad in 2026 for X2026         *
+ *     got it from sailor/ triad (kernal keyboard input) *
  *********************************************************/
-#import "tokenize.src"
-#import "keyboard_best.src"
-#import "embedder.src"
-#import "extract.src"
-#import "eliza.src"
+#import "variables.src"
 
-.pc = $0801 "Basic Upstart"
-BasicUpstart(PROGRAMM) 
- 
-.pc = PROGRAMM "TRIBOT ULTIMATE"
-          
-          sei
-          lda #$7f
-          sta $dc0d
+.var adc00 = $dc00
+.var adc01 = $dc01
+.var adc0d = $dc0d
 
-          lda #$35
-          sta $01
-          
-          lda #$ff
-          cmp $d012
-          bne *-3
-          lda #$01
-          cmp $d012
-          bne *-3
-          lda #0
-          cmp $d012
-          bne *-3
+.pc = KEYBOARD "KEYBOARD"
 
-          jsr checkForREU                    // prüfen ob eine REU vorhanden ist
-          jsr CleanUp
-          jsr PrintHeadLine_Tribot
+Input: 
 
-          ldx #0
-PROMPT:
-          lda prompt,x
-          beq SetNMI
-          sta SCREEN - 2,x
-          inx
-          bne PROMPT
-SetNMI:
-          lda #<nmi
-          sta $fffa
-          lda #>nmi
-          sta $fffb
-         
-          lda #<irq
-          sta $fffe
-          lda #>irq
-          sta $ffff
+GetChar:
+       jsr my_ffe4
+       beq GetChar
+Check_input:
+       cmp #13
+       bcc GetChar
+       cmp #17
+       beq GetChar
+       cmp #13
+       beq PaintReturn
+       cmp #20
+       beq PaintDel
+       cmp #$40	//convert to screen codes 
+       bmi ok
+       sec
+       sbc #$40
+ok:
+       ldy keypos
+       ldx #0
+CheckKey: 
+       cmp #$45
+       beq choose_bot
+       cmp validkeys,x
+       beq SetThisChar
+       inx
+       cpx #38
+       bne CheckKey
+       jmp GetChar	
+SetThisChar: 
+       cpy #MAXLENGHT - 1
+       bcs plus
+       sta SCREEN       ,y
+       lda #0
+       sta frame
+       lda #$ff
+       sta actkey
+       inc keypos
+plus:
+       jmp GetChar	
+choose_bot:
+       lda active_bot
+       eor #1
+       sta active_bot
+       beq Tribot_bot
+Eliza_bot:
+       jsr PrintHeadLine_Eliza
+       jmp GetChar
+Tribot_bot:       
+       jsr PrintHeadLine_Tribot
+       jmp GetChar
+PaintReturn:
+       ldy keypos
+       lda #63
+       sta SCREEN       ,y
+       lda #0
+       sta inputdone
+       sta keyblock
+       lda #1
+       sta key_return
+       lda #1
+       sta just_music
+       rts
+PaintDel:
+       dec keypos
+       lda keypos
+       cmp #$ff
+       bne CleanChar
+       lda #0
+       sta keypos
+CleanChar:
+       ldy #MAXLENGHT
+       lda #$20
+line:
+       sta SCREEN        ,y
+       dey 
+       cpy keypos
+       bpl line
+returnfromdel:
+       jmp GetChar
 
-          lda #$a1
-          sta $d012
-          lda #$1b
-          sta $d011
-          lda #1
-          sta $d019
-          sta $d01a
-          cli
-botloop:   
-          jsr Input
+my_ffe4:
+       lda ac6
+       beq if155
+ie5b4: ldy a0277
+       ldx #$00
+ie5b9: lda f0278,x
+       sta f0277,x
+       inx
+       cpx ac6
+       bne ie5b9
+       dec ac6
+       tya
+       cli
+if155:  
+       clc
+       rts
 
-          ldx #0
-setQuery:
-          lda SCREEN,x
-          cmp #63 // fragezeichen
-          beq finalize_query
-sta_input:
-          sta string1,x
-          inx
-          bne setQuery
+ieafb1:	
+       jmp ieafb2
 
-finalize_query:
-          lda #$00
-          sta string1,x
-          stx len1
-          sei
-          jsr ExtractString
-          
-          lda #1
-          sta stop_input
-      
-          jsr worker 
-          lda #1
-          sta found_answer
-          cli
-ready:
-          jmp botloop                                
-//*******************************************************************************
-//*** Prüfen, ob eine REU angeschlossen ist. 
-//*** Um auch die 1700 zu erkennen wird NICHT so, wie auf der 1764 Demo-Disk mit
-//*** #$00 geprüft. Bei der 1700 kann $df00 den Wert #$00 annehmen!!
-//*******************************************************************************
-//*** Übergabe: -
-//*******************************************************************************
-//*** Rückgabe: Y = 0 REU vorhanden, sonst nicht!
-//*******************************************************************************
-//*** ändert  : A, X, Y, SR
-//*******************************************************************************
-checkForREU:
-         ldy #$ff                           // Erstmal von keiner REU ausgehen
-         lda REUSTATUS                      // Status-Register lesen, um Bit 7-5 zu löschen
-         sty REUSTATUS                      // schreiben wir zum Test mal #$ff hinein
-         cpy REUSTATUS                      // und schauen, ob der Wert erhalten bleibt
-         beq exit_check                     // wenn JA, KEINE REU!!!
-         ldx #$04                           // Wir testen nur Register 2-5 
-loop_check:
-         txa
-         sta REUCOMMAND,X                   // Testwert speichern
-         cmp REUCOMMAND,X                   // gleicher Wert?
-         bne exit_check                     // wenn nicht, KEINE REU!!!
-         dex                                // Schleifenzähler verringern
-         bne loop_check                     // wenn > 0, nochmal
-         ldy #GRAY                          // sonst wurde eine REU gefunden
-         sty $d020
-         sty $d021
+// ====================================================================
 
-         jsr Init
+if6bc:  
+       lda adc01
+       cmp adc01
+       bne if6bc
+       tax
+       bmi if6dc
+       ldx #$bd
+       stx adc00
+if6cc:  ldx adc01
+       cpx adc01
+       bne if6cc
+       sta adc00
+if6dc:  ldy #$40
+       sty acb
+       lda #$00
+       sta adc00
+       ldx adc01
+       cpx #$ff
+       beq ieafb1
+       tay
+       lda #$fe
+       sta adc00
+ieaa8:  ldx #$08
+       pha
+ieaab:  lda adc01
+       cmp adc01
+       bne ieaab
+ieab3:  lsr 
+       bcs ieacc
+       sty acb
+ieacc:  iny
+       cpy #$41
+       bcs ieadc
+       dex
+       bne ieab3
+       sec
+       pla
+       rol
+       sta adc00
+       bne ieaa8
+ieadc:  pla
+       ldy acb
+       lda feb81,y
+       tax
+       cpy ac5
+       beq ieaf0
+       ldy #$10
+       sty a028c
+       bne ieb26
+ieaf0:  and #$7f
+       bit a028a
+       bmi ieb0d
+       bvs ieb42
+       cmp #$7f
+ieafb2: beq ieb26
+ieb0d:  ldy a028c
+       beq ieb17
+       dec a028c
+       bne ieb42
+ieb17:  dec a028b
+       bne ieb42
+       ldy #$04
+       sty a028b
+       ldy ac6
+       dey
+       bpl ieb42
+ieb26:  ldy acb
+       sty ac5
+       cpx #$ff
+       beq ieb42
+       txa
+       ldx ac6
+       sta f0277,x
+       inx
+       stx ac6
+ieb42:  
+       lda #$7f
+       sta adc00
+       rts
 
-         // GETNROFENTRIES
-         lda #255
-         sta REUBANK
-         lda #255
-         sta REURAM + 1
+a028a:	.byte $40	       // flag: repeat keys. $00 = repeat. $40 = no repeat. 
+a028b: .byte 4		// repeat key: speed counter
+a028c:	.byte 0		// repeat key: first repeat delay counter
+ac5: 	.byte 0
+ac6:	.byte 0
+acb:	.byte 0
 
-         lda #REU_FETCH_A__           // Befehl fürs Kopieren von der REU zum C64
-         sta REUCOMMAND               // mit AUTOLOAD ausführen
-        
-         lda DATARAM
-         sta COUNT_ENTRIES_LO
-         lda DATARAM + 1
-         sta COUNT_ENTRIES_HI
+feb81:  .byte $14,$0d,$1d,$88,$85,$86,$87,$11	// keyboard 1 -- unshifted	
+       .byte $33,$57,$41,$34,$5a,$53,$45,$01
+       .byte $35,$52,$44,$36,$43,$46,$54,$58
+       .byte $37,$59,$47,$38,$42,$48,$55,$56
+       .byte $39,$49,$4a,$30,$4d,$4b,$4f,$4e
+       .byte $2b,$50,$4c,$2d,$2e,$3a,$40,$2c
+       .byte $5c,$2a,$3b,$13,$01,$3d,$5e,$2f
+       .byte $31,$5f,$04,$32,$20,$02,$51,$03
+       .byte $ff
 
-         lda DATARAM + 2
-         sta ELIZA_ENTRIES
-         
-         jsr Init
-         rts
-exit_check:
-         ldy #RED                           // sonst wurde eine REU gefunden
-         sty $d020
-         sty $d021
-         rts                                // zurück
-stop_input:
- .byte 0
-// ****************************************************************************************
-irq: 
-         pha
-         txa
-         pha
-         tya
-         pha
-  
-         lda #$9f
-         cmp $d012
-         bne *-3
-         
-         lda found_answer
-         bne scroll_answer
-         
-         lda stop_input
-         bne returnIrq
-     
-         jsr if6bc
+a0277:
+f0277:	.byte 0
+f0278:	.byte 0,0,0,0,0,0,0,0,0
 
-         lda keyblock 
-         beq NormalizedInput
-
-         lda #0
-         sta keyblock
-
-NormalizedInput:
-         lda inputdone
-         bne returnIrq
-
-         inc frame
-         lda frame
-         cmp #10
-         bne returnIrq
-        
-         lda cursor
-         eor #$1
-         sta cursor
-         
-         beq ClearCursor
-            
-         ldy keypos
-         lda #100
-         sta SCREEN   ,y
-         jmp SetKeyboardBack
-ClearCursor:
-         ldy keypos
-         lda #$20
-         sta SCREEN   ,y
-SetKeyboardBack:
-         lda #0
-         sta frame
-         sta keyflag
-         sta lastkey
-        
-returnIrq: 
-       
-         lda #$9e
-         sta $d012
-         asl $d019
-         
-         pla
-         tay
-         pla
-         tax
-         pla
-
-         rti
-
-        
-scroll_answer: 
-         lda #$a1
-         cmp $d012
-         bne *-3
-         jsr scroll_soft
-
-         lda #$bd
-         cmp $d012
-         bne *-3
-
-         lda #$8
-         sta $d016
-
-         jmp returnIrq
+validkeys:
+.byte   1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,48,49,50,51,52,53,54,55,56,57,32
 
 
-// ************************************
-// ** Worker                         **7
-// ************************************
-worker:
-          lda active_bot
-          beq Tribot
-          jsr ELIZA
-          rts
-Tribot:     
-          jsr tokenize
-          jsr Embeddings
-          jsr start_check
-          rts
+PrintHeadLine_Tribot:
+       ldx #0
+tri:
+       lda tribot,x
+       beq ret_from_headline
+       sta $0400,x
+       inx
+       jmp tri
 
-start_check:
-  
-GETNODES:
-          lda reubank
-          sta REUBANK
-          lda reuram
-          sta REURAM + 1
+PrintHeadLine_Eliza:
+       ldx #0
+eliz:
+       lda eliza,x
+       beq ret_from_headline
+       sta $0400,x
+       inx
+       jmp eliz
+ret_from_headline:
+       rts
 
-          lda #REU_FETCH_A__           // Befehl fürs Kopieren von der REU zum C64
-          sta REUCOMMAND               // mit AUTOLOAD ausführen
-           
-          jsr cosine_approximation
-          cpx #DIM                     // in x - register dot product
-          bne check_dist
-    
-          // found direct hit
-          lda reubank
-          sta bestBank 
-          lda reuram
-          sta bestram
-          jmp MatchFound
-   
-diff_bne:  // help jmp
-          jmp GETNODES
-
-check_dist:
-          cpx dist0
-          bcc continue_iterative_search      // carry=1 → a >= b → hier: größer
-update_founded:
-          stx dist0
-
-set_latest_entry:
-          lda reubank
-          sta bestBank 
-          lda reuram
-          sta bestram
-  
-continue_iterative_search:
-          lda reuram
-          cmp COUNT_ENTRIES_LO
-          beq check_bank
-          inc reuram
-          bne diff_bne
-          inc reubank
-          bne diff_bne
-          jmp check_founded
-check_bank:
-          lda reubank
-          cmp COUNT_ENTRIES_HI
-          beq check_founded
-          inc reuram
-          bne diff_bne
-          inc reubank
-          bne diff_bne
-          
-check_founded:
-          lda bestram
-          bne MatchFound
-          lda bestBank
-          bne MatchFound
-        
-          ldy #0
-doPrintNothing:
-          lda nothing     ,y
-          beq fillUP
-          sta final_answer,y
-          iny
-          bne doPrintNothing
-MatchFound: 
-          lda bestBank
-          sta REUBANK
-          lda bestram
-          sta REURAM + 1
-
-          lda #REU_FETCH_A__           // Befehl fürs Kopieren von der REU zum C64
-          sta REUCOMMAND               // mit AUTOLOAD ausführen
-
-          lda #GREEN
-          sta $d020
-          sta $d021
-PlotAnswer:
-          ldy #0
-GET_FINAL_ANWER:
-          lda BOT_ANSWER_REU        , y
-GiveOutFinal:
-          sta final_answer          , y
-          iny
-          cpy #ANSWER_LENGTH
-          bne GET_FINAL_ANWER
-
-fillUP:
-          lda #$20
-fillup:
-          sta final_answer           ,y
-          iny
-          bne fillup
-          rts
-
-CleanUp:
-          ldx #0
-          stx active_bot
-cls:
-          lda #$20
-          sta $0400,x
-          sta $0500,x
-          sta $0600,x
-          sta $06f7,x
-
-          lda #WHITE
-          sta $d800,x
-          sta $d900,x
-          sta $da00,x
-          sta $daf7,x
-          inx
-          bne cls
-       
-GetLoadLookup:
-          lda LoadTab        ,x
-SetLookup:
-          sta lookUpx127Lo   ,x
-          inx  
-          bne GetLoadLookup
-          inc GetLoadLookup  + 2
-          inc SetLookup      + 2
-          lda GetLoadLookup  + 2
-          cmp #$35
-          bne GetLoadLookup
-          rts
-
-Init:
-          lda #0
-          sta keypos
-          sta keyflag
-          sta keyblock
-          sta reuram
-          sta reubank
-          sta bestBank
-          sta bestram
-          sta REUBANK                     // 1. Bank (lfd.-Nr. 0)
-          sta REURAM                      // und beginnen auch direkt ab Adresse $0000
-          sta REURAM+1                    // in der Bank
-          sta frame                      
-          sta inputdone            
-          sta cursor 
-          sta stop_input
-          sta key_return
-          sta musicplay
-          sta dist0
-          sta check_summe
-          sta line_seq
-
-          lda #<DATARAM                      // Beginn des Speichers der  
-          sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
-          lda #>DATARAM
-          sta REUC64RAM+1
-
-          lda #<($0100)                      // Die Anzahl der BYTEs ($0100)
-          sta REUBYTES                       // je Aktion der REU bekannt machen
-          lda #>($0100)
-          sta REUBYTES+1
-
-          ldx #0     
-cls_input:
-          lda #$20
-          sta SCREEN  ,x
-          lda #0
-          sta input   ,x
-          sta string1 ,x
-          sta correct ,x
-          inx 
-          bne cls_input
-          lda #GRAY
-          sta $d020
-          sta $d021
-          rts
-
-scroll_soft:
-         lda smooth 
-         sec
-         sbc #2
-         and #%000000111
-         sta smooth
-
-         lda $d016
-         and #%00010000
-         ora #%00010000
-         ora smooth
-         sta $d016  
-nonewpic: 
-         lda smooth
-         cmp #%00000110
-         bne leave_soft
-         jsr hardscroll
-leave_soft:  
-         rts
-hardscroll:
-         ldx #0
-         ldy answer_index
-position:
-         lda final_answer ,y
-         sta scrollLine + 39
-         lda #0 
-         sta line_seq
-hardscroll__:
-         lda scrollLine +1,x
-         cmp #$20
-         bne Copy_next_char
-         inc line_seq
-Copy_next_char:
-         sta scrollLine   ,x
-         inx
-         cpx #39
-         bne hardscroll__
-
-         inc answer_index
-         lda line_seq 
-         cmp #39
-         bne ReturnFromHardScroll
-         lda #0
-         sta answer_index
-         sta found_answer
-         jsr Init
-ReturnFromHardScroll:
-         rts
-
-line_seq:
- .byte 0
-
-found_answer:
+tribot: 
+  .text "f1 switch to eliza  (currently tribot)"
   .byte 0
-answer_index:
- .byte 0       
-smooth:
-    .byte 0
 
-hard_scroll:
- .byte 0
-
-prompt:
-   .text "> "
-   .byte 0
-nmi: 
-    rti  
-
-nothing: 
-  .text "sorry, i do not understand!"
+eliza: 
+  .text "f1 switch to tribot  (currently eliza)"
   .byte 0

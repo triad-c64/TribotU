@@ -71,7 +71,7 @@ al C:2538 .ieb26
 al C:2558 .acb
 al C:10b1 .leave_soft
 al C:60ea .out_answer_e
-al C:25fb .eliza
+al C:260e .eliza
 al C:2162 .GetMatch
 al C:6020 .eliza_entries
 al C:24dc .ieaa8
