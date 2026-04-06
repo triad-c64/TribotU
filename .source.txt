@@ -1,196 +1,224 @@
 /*********************************************************
- *     coded by Adder of Triad in 2026 for X2026         *
+ *     coded by Adder of Triad in 2025 / 2026 for X2026  *
  *********************************************************/
+
 #import "variables.src"
 
-.pc = ELIZA "ELIZA"
+.pc = STRING_FUNKTION "STRING_FUNCTION"
 
-        lda #0
-        sta eliza_entries     + 1
-        lda #<final_answer 
-        sta out_answer_e      + 1
-        sta out_answer_n      + 1
-        sta clean_rest_answer + 1
+ExtractString: 
+   lda #<extract
+   sta extract_addr
+   lda #>extract
+   sta extract_addr + 1
 
-        lda #>final_answer 
-        sta out_answer_e      + 2
-        sta out_answer_n      + 2
-        sta clean_rest_answer + 2
+Extract:
+   ldy #0
+Checklength:
+   lda (extract_addr)          ,y
+   cmp #','
+   beq WriteLength
+   cmp #0
+   bne length__
+   jmp output
+length__:
+   iny
+   bne Checklength
 
-        lda #128                   // OFFSET ELIZA
-        sta REUBANK
-eliza_entries:
-        lda #0
-        sta REURAM + 1
+WriteLength:
+   sty extractLenght
+   jsr CopyString                          // len1 needed
+   jsr ResetAlgorithm
+   
+CheckString:
+   ldx inp_char_nr
+   ldy extrpos
+   cpy extractLenght
+   bne Extrahiere
 
-        lda #REU_FETCH_A__            
-        sta REUCOMMAND                
-            
-        jsr GetResponse
+   jsr ResetExtract          
+Extrahiere:
+   inc occour_in_query
+   lda string1                 ,x
+   cmp (extract_addr)          ,y
+   bne CheckPossibleMatch
 
-        lda eliza_answer
-        bne here_wait
-        inc eliza_entries + 1
-        lda eliza_entries + 1 
-        cmp ELIZA_ENTRIES
-        bne eliza_entries
-          
-        lda eliza_answer
-        beq fallback_eliza
+   lda firstoccur
+   bne add_possible_match
+   stx inputpos
+   lda #1
+   sta firstoccur
+add_possible_match:
+   inc possible_match
+CheckPossibleMatch:
+   lda possible_match
+   cmp extractLenght
+   bne CheckInputCharDiffers
+   cmp occour_in_query
+   bne CheckInputCharDiffers
+   
+   lda string1  +  1           ,x
+   cmp #$20
+   beq GetMatch
 
-        jmp here_wait
-fallback_eliza:
-         
-        ldy #$00
-copy_fallback:
-        lda fallback,y
-        beq cnup
-        sta final_answer,y
-        iny
-        jmp copy_fallback
+   inx
+   cpx len1
+   bne CheckInputCharDiffers
+   
+GetMatch:                          // possible_match
+   ldx #0
+   clc
+   lda text_rest_pos
+   adc #1
+   sta text_rest_pos_plus_1
+FillNewString:
+   cpx text_rest_pos_plus_1
+   bcc t_smaller_input
+   beq t_smaller_input
+   ldy new_pos
+   lda string1                 ,x
+   sta correct                 ,y
+   inc new_pos
+   jmp SetResultString
+t_smaller_input:
+   cpx inputpos
+   bcs SetResultString
+   
+   // TODO
+   ldy new_pos
+   
+   lda string1                 ,x
+   sta correct                 ,y
+   inc new_pos
+SetResultString:
+   inx
+   cpx len1
+   bne FillNewString
+   lda new_pos
+   sta len1
+   jsr ResetExtract
+   jmp Identify
 
-cnup:
-        lda #$20
-clean_rest_bck_answer:
-        sta final_answer           ,y
-        iny
-        bne clean_rest_bck_answer
+CheckInputCharDiffers:
+   ldx inp_char_nr
+   ldy extrpos
+   lda string1                 ,x
+   cmp (extract_addr)          ,y
+   beq loop_input
 
-here_wait:
-        rts
+   jsr ResetExtract 
+   jmp loop_search_and_replace 
+loop_input:
+   inc extrpos
+   inc text_rest_pos
+loop_search_and_replace:
+   inc inp_char_nr
+   ldx inp_char_nr
+   cpx len1
+   beq Identify
+   jmp CheckString
 
+Identify:
+   ldy #0
+identify_word:
+   lda correct                 ,y
+   sta string1                 ,y 
+   iny
+   cpy len1
+   bne identify_word
+   
+   ldy extractLenght
+   iny
+   lda (extract_addr)          ,y
+   beq output
+   tya
+   clc
+   adc extract_addr
+   sta extract_addr
+   bcc continue_to_extract_string
+   inc extract_addr            +1 
+continue_to_extract_string:
+   jmp Extract
 
-matches:
-        ldx #0          
+output:
+   ldx #0
+   ldy #0
+WriteResult:
+   lda string1                 ,x
+  // cmp #$20
+  //beq increment_to_char
+   cmp #63
+   beq set_len
+printf:  
+   sta string1                 ,y
+ //  Debug 
+ // sta $0400    + 40           ,y 
 
-search_loop:
-        lda string1           ,x
-        beq quit_w_no_match     
-        ldy #0                 
-match_pattern:
-        lda DATARAM           ,y
-        beq pattern_matched    
-        cmp #$30
-        beq pattern_matched
-        lda string1           ,x
-        cmp DATARAM           ,y
-        bne next_char
-        iny
-        inx
-        jmp match_pattern
+   cmp #'a'        // kleiner als 'A'?
+   bcc c64_char    // ja → nichts ändern
+   cmp #'z'+1      // größer als 'Z'?
+   bcs c64_char    // ja → nichts ändern
 
-pattern_matched:
-        ldy #0
-copy_rest:
-        lda string1           ,x
-        sta EXTRACTED_ELIZA   ,y
-        beq return_from_extr
-        iny
-        inx
-        jmp copy_rest
+   clc
+   adc #64         // nur A–Z werden umgewandelt
+c64_char:
+   sta input                   ,y
+   iny
+increment_to_char:
+   inx
+   cpx len1
+   bne WriteResult
+   cpy len1_unextracted
+   beq new_len_1
+set_len:
+   sty len1
+new_len_1:
+ //  iny
+ //  sty len1_plus_1
+   rts
 
-return_from_extr:
-        ldx #1
-        rts
+ResetExtract:
+   lda inp_char_nr
+   cmp len1 
+   bcc set_Restore
+   lda len1
+set_Restore:
+   sta inputpos
+   sta text_rest_pos
+   lda #0
+   sta extrpos
+   sta possible_match
+   rts
 
-next_char:
-        inx
-        jmp search_loop
+ResetAlgorithm:
+   lda #0
+   sta extrpos
+   sta text_rest_pos
+   sta possible_match
+   sta inputpos
+   sta firstoccur
+   sta occour_in_query
+   sta text_rest_pos_plus_1
+   sta new_pos
+   sta inp_char_nr
+   rts
 
-quit_w_no_match:
-        ldx #0
-        rts
+CopyString:
+   ldy #0 
+copystring:
+   lda string1                 ,y
+   sta correct                 ,y
+   iny
+   cpy len1
+   bne copystring
+   rts
 
-
-// --------------------------------------------------------------------------------------------------------------
-
-GetResponse:
-        ldx #$00            // pattern index x = 0
-next_pattern:
-        
-        jsr matches         // prüfe, ob pattern matcht
-        cpx #0
-        bne match
-no_match:
-        lda #0
-        sta eliza_answer
-        rts
-match:
-        ldy #$00
-
-        lda $d012
-        and #$03
-        beq prep_resp0
-        cmp #1
-        beq prep_resp1
-        cmp #2
-        beq prep_resp2
-prep_resp3:
-        lda #ELIZA_QUEST + ELIZA_ANSW *3
-        sta plot_response + 1
-        sta plot_answer   + 1
-        jmp plot_response
-prep_resp0:
-        lda #ELIZA_QUEST
-        sta plot_response + 1
-        sta plot_answer   + 1
-        jmp plot_response
-prep_resp1:
-        lda #ELIZA_QUEST + ELIZA_ANSW 
-        sta plot_response + 1
-        sta plot_answer   + 1
-        jmp plot_response
-prep_resp2:
-        lda #ELIZA_QUEST + ELIZA_ANSW * 2
-        sta plot_response + 1
-        sta plot_answer   + 1
-        jmp plot_response
-
-plot_response:
-        lda DATARAM           ,y
-        cmp #$30                        // '0' ersetzen mit EXTRACTED            
-        bne plot_answer
- 
-// --- MATCH FOUND ---
-        ldx #0
-replace_loop:
-        lda EXTRACTED_ELIZA,x
-        beq continue_with_answer
-out_answer_e:
-        sta final_answer           
-        inc out_answer_e      + 1
-        inc out_answer_n      + 1
-        inc clean_rest_answer + 1
-        inx
-        cpx #DIM           
-        bne replace_loop
-continue_with_answer:
-        iny 
-plot_answer:  
-        lda DATARAM           ,y
-        beq return_from_response
-out_answer_n:
-        sta final_answer 
-        inc out_answer_e      + 1
-        inc out_answer_n      + 1 
-        inc clean_rest_answer + 1       
-        iny
-        bne plot_response
-return_from_response:
-        lda #$20
-clean_rest_answer:
-        sta final_answer     
-        inc clean_rest_answer + 1
-        bne clean_rest_answer
-
-        lda #1 
-        sta eliza_answer
-        rts
-
-
-// -------------------------------------------------
-// daten
-// -------------------------------------------------
-fallback:
-        .text "please tell me more"
-        .byte 0
+.pc = EXTRACTKEYWORDS "EXTRACT KEYWORDS"
+extract: 
+   .text "what,where,when,who,whom,which,why,how,do,does,"
+   .text "did,have,has,had,can,could,will,would,shall,"
+   .text "should,may,might,must,is,are,was,where,am,"
+   .text "any,ever,much,many,kind,type,time,place,reason,"
+   .text "why,there,tell,the,me,about,end"
+   .byte 0, 0, 0
+   
