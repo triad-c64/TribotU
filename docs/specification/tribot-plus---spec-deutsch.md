@@ -301,12 +301,12 @@ Die Musik wird über zwei Befehle gesteuert:
 
 ### Titel
 
-| Number | Title      | Autor |
-| ------ | ---------- | ----- |
-| 1      | Tune one   |       |
-| 2      | Tune two   |       |
-| 3      | Tune three |       |
-| 4      | Tune four  |       |
+| Number | Title      | Autor       |
+| ------ | ---------- | ----------- |
+| 1      | Tune one   | Autor one   |
+| 2      | Tune two   | Autor two   |
+| 3      | Tune three | Autor three |
+| 4      | Tune four  | Autor four  |
 
 Titelbezeichnungen sind Platzhalter und werden aktualisiert, sobald die SID-Dateien ausgewählt sind.
 

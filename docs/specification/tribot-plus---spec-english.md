@@ -301,12 +301,12 @@ Music is controlled via two commands:
 
 ### Tunes
 
-| Number | Title      | Author |
-| ------ | ---------- | ------ |
-| 1      | Tune one   |        |
-| 2      | Tune two   |        |
-| 3      | Tune three |        |
-| 4      | Tune four  |        |
+| Number | Title      | Author       |
+| ------ | ---------- | ------------ |
+| 1      | Tune one   | Author one   |
+| 2      | Tune two   | Author two   |
+| 3      | Tune three | Author three |
+| 4      | Tune four  | Author four  |
 
 Tune titles are placeholders and will be updated once SID files are selected.
 
