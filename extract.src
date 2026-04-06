@@ -219,6 +219,6 @@ extract:
    .text "did,have,has,had,can,could,will,would,shall,"
    .text "should,may,might,must,is,are,was,where,am,"
    .text "any,ever,much,many,kind,type,time,place,reason,"
-   .text "why,there,tell,the,me,about,end"
+   .text "why,there,tell,me,about,the,end"
    .byte 0, 0, 0
    
