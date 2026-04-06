@@ -150,6 +150,23 @@ Wenn die Eingabe 38 Zeichen erreicht, stoppt die Eingabe. Weitere Zeichen werden
 
 ---
 
+## Scrollback
+
+Der Ausgabebereich unterstützt die Scrollback-Navigation über die Funktionstasten.
+
+| Taste | Aktion                    |
+| ----- | ------------------------- |
+| F1    | 12 Zeilen zurückscrollen  |
+| F7    | 12 Zeilen vorscrollen     |
+
+Jeder Tastendruck scrollt den Ausgabebereich um 12 Zeilen, die Hälfte der 25-zeiligen Bildschirmhöhe. Dies gibt ein gestuftes Gefühl, das dem Scrollback-Verhalten einer CLI entspricht. Wiederholtes Drücken von F1 scrollt zurück bis zur ersten Ausgabe. Wiederholtes Drücken von F7 scrollt vorwärts bis zur letzten Ausgabe.
+
+Das Gedrückthalten von F1 oder F7 scrollt kontinuierlich in 12-Zeilen-Schritten, bis die Taste losgelassen wird oder der Anfang bzw. das Ende der Ausgabe erreicht ist.
+
+Wenn der Benutzer eine neue Frage stellt, während er zurückgescrollt ist, springt der Ausgabebereich zur letzten Ausgabe, bevor die neue Antwort angefügt wird. Die Scrollback-Position hat keinen Einfluss auf die Eingabe oder Ausführung.
+
+---
+
 ## Ausführungsablauf
 
 Das Eingabefeld akzeptiert Fragen und Befehle.
@@ -284,12 +301,12 @@ Die Musik wird über zwei Befehle gesteuert:
 
 ### Titel
 
-| Nummer | Titel        |
-| ------ | ------------ |
-| 1      | Titel eins   |
-| 2      | Titel zwei   |
-| 3      | Titel drei   |
-| 4      | Titel vier   |
+| Number | Title      | Autor |
+| ------ | ---------- | ----- |
+| 1      | Tune one   |       |
+| 2      | Tune two   |       |
+| 3      | Tune three |       |
+| 4      | Tune four  |       |
 
 Titelbezeichnungen sind Platzhalter und werden aktualisiert, sobald die SID-Dateien ausgewählt sind.
 

@@ -150,6 +150,23 @@ When input reaches 38 characters, input stops. No further characters are accepte
 
 ---
 
+## Scrollback
+
+The output area supports scrollback navigation using the function keys.
+
+| Key | Action                  |
+| --- | ----------------------- |
+| F1  | Scroll back 12 lines    |
+| F7  | Scroll forward 12 lines |
+
+Each key press scrolls the output area by 12 lines, half of the 25-line screen height. This gives a stepped feel consistent with CLI scrollback behavior. Repeated presses of F1 scroll back to the first output. Repeated presses of F7 scroll forward to the last output.
+
+Holding F1 or F7 scrolls continuously in 12-line increments until the key is released or the boundary of the output is reached.
+
+When the user submits a new question while scrolled back, the output area jumps to the last output before appending the new response. Scrollback position does not affect input or execution.
+
+---
+
 ## Execution Flow
 
 The input field accepts questions and commands.
@@ -284,12 +301,12 @@ Music is controlled via two commands:
 
 ### Tunes
 
-| Number | Title          |
-| ------ | -------------- |
-| 1      | Tune one       |
-| 2      | Tune two       |
-| 3      | Tune three     |
-| 4      | Tune four      |
+| Number | Title      | Author |
+| ------ | ---------- | ------ |
+| 1      | Tune one   |        |
+| 2      | Tune two   |        |
+| 3      | Tune three |        |
+| 4      | Tune four  |        |
 
 Tune titles are placeholders and will be updated once SID files are selected.
 
