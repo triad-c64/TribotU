@@ -1,24 +1,31 @@
 #!/usr/bin/env bash
 # Assembles tribot-plus using KickAssembler.
-# Requires Java and KickAss.jar on the path or in the same directory.
 #
 # Usage:
 #   ./build.sh [path/to/KickAss.jar]
+#
+# Defaults to tools/KickAss.jar if no argument is given.
 
 set -euo pipefail
 
-KICKASS="${1:-KickAss.jar}"
-SOURCE="src/tribot-plus.src"
-OUTPUT="tribot-plus.prg"
+REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
+KICKASS="${1:-$REPO_ROOT/tools/KickAss.jar}"
+BUILD_DIR="$REPO_ROOT/build"
 
 if [[ ! -f "$KICKASS" ]]; then
-    echo "KickAss.jar not found. Pass the path as the first argument:"
-    echo "  ./build.sh /path/to/KickAss.jar"
+    echo "KickAss.jar not found at: $KICKASS"
+    echo "Usage: ./build.sh [path/to/KickAss.jar]"
     exit 1
 fi
 
-mkdir -p build
+mkdir -p "$BUILD_DIR"
 
-echo "Assembling $SOURCE ..."
-java -jar "$KICKASS" "$SOURCE" -o "build/$OUTPUT"
-echo "Done → build/$OUTPUT"
+echo "Assembling src/tribot-plus.src ..."
+# Run from src/ so KickAssembler resolves all output paths relative to the sources.
+cd "$REPO_ROOT/src"
+java -jar "$KICKASS" tribot-plus.src -o "$BUILD_DIR/tribot-plus.prg" -showmem
+
+# KickAssembler writes the symbol file next to the output; move it into build/.
+[[ -f "$REPO_ROOT/src/tribot-plus.sym" ]] && mv "$REPO_ROOT/src/tribot-plus.sym" "$BUILD_DIR/tribot-plus.sym"
+
+echo "Done → build/tribot-plus.prg"

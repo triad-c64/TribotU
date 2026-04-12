@@ -1,5 +1,6 @@
-# Build artifacts
-*.prg
+# Build output
+build/
+
+# Stray KickAssembler artifacts if they end up outside build/
 *.dbg
-*.sym
 *.vs
