@@ -38,6 +38,11 @@ assert_min_size()  {
     bytes=$(wc -c < "$1" 2>/dev/null || echo 0)
     [[ $bytes -ge $2 ]] && ok "$3" || fail "$3 (got ${bytes}B, want >=${2}B)"
 }
+assert_max_size()  {
+    local bytes
+    bytes=$(wc -c < "$1" 2>/dev/null || echo 0)
+    [[ $bytes -le $2 ]] && ok "$3" || fail "$3 (got ${bytes}B, want <=${2}B)"
+}
 assert_contains()  { echo "$1" | grep -qF "$2" && ok "$3" || fail "$3"; }
 
 # ── setup ────────────────────────────────────────────────────────────────────
@@ -72,6 +77,9 @@ assert_min_size "data/lookup_tables.bin" 1 "lookup_tables.bin non-empty"
 assert_exists "tools/KickAss.jar"  "tools/KickAss.jar present"
 assert_min_size "tools/KickAss.jar" 100000 "KickAss.jar looks like a real jar (>=100KB)"
 
+assert_exists "tools/exomizer"  "tools/exomizer present"
+[[ -x "tools/exomizer" ]] && ok "tools/exomizer is executable" || fail "tools/exomizer is not executable"
+
 # ── 3. Build script ──────────────────────────────────────────────────────────
 
 echo
@@ -80,9 +88,25 @@ echo "Build script"
 assert_exists "build.sh" "build.sh present"
 [[ -x "build.sh" ]] && ok "build.sh is executable" || fail "build.sh is not executable"
 
+# No command → prints usage, exits 0
+OUT=$(bash build.sh 2>&1)
+assert_exit_ok $? "build.sh exits 0 with no command"
+assert_contains "$OUT" "Usage:" "build.sh shows usage with no command"
+
+# Unknown command → exits non-zero
+OUT=$(bash build.sh unknowncmd 2>&1)
+assert_exit_fail $? "build.sh exits non-zero for unknown command"
+assert_contains "$OUT" "Unknown command" "build.sh labels unknown command"
+
+# help command → exits 0, shows usage
+OUT=$(bash build.sh help 2>&1)
+assert_exit_ok $? "build.sh help exits 0"
+assert_contains "$OUT" "build" "build.sh help mentions build command"
+assert_contains "$OUT" "dist"  "build.sh help mentions dist command"
+
 # Missing jar → non-zero exit
-OUT=$(bash build.sh /nonexistent/KickAss.jar 2>&1)
-assert_exit_fail $? "build.sh exits non-zero when jar not found"
+OUT=$(KICKASS=/nonexistent/KickAss.jar bash build.sh build 2>&1)
+assert_exit_fail $? "build.sh build exits non-zero when jar not found"
 assert_contains "$OUT" "not found" "build.sh prints helpful error for missing jar"
 
 # ── 4. Full assembly ─────────────────────────────────────────────────────────
@@ -91,10 +115,10 @@ echo
 echo "Full assembly"
 
 rm -rf build/
-OUT=$(bash build.sh 2>&1)
+OUT=$(bash build.sh build 2>&1)
 BUILD_STATUS=$?
 
-assert_exit_ok $BUILD_STATUS "build.sh exits 0"
+assert_exit_ok $BUILD_STATUS "build.sh build exits 0"
 assert_contains "$OUT" "Done →" "build.sh reports success"
 assert_exists "build/tribot-plus.prg" "tribot-plus.prg created in build/"
 assert_min_size "build/tribot-plus.prg" 8192 "tribot-plus.prg is at least 8KB"
@@ -123,6 +147,27 @@ SEGMENTS=("Basic Upstart" "Embedder" "TOKENIZEER" "HASH16" "TRIBOT ULTIMATE"
 for SEG in "${SEGMENTS[@]}"; do
     assert_contains "$OUT" "$SEG" "segment '$SEG' assembled"
 done
+
+# ── 6. Dist (exomize) ────────────────────────────────────────────────────────
+
+echo
+echo "Dist (exomize)"
+
+rm -rf dist/
+OUT=$(bash build.sh dist 2>&1)
+DIST_STATUS=$?
+
+assert_exit_ok $DIST_STATUS "build.sh dist exits 0"
+assert_contains "$OUT" "Exomizing" "build.sh dist reports exomizing step"
+assert_contains "$OUT" "dist/tribot-plus-exo.prg" "build.sh dist reports dist output path"
+assert_exists "dist/tribot-plus-exo.prg" "tribot-plus-exo.prg created in dist/"
+assert_min_size "dist/tribot-plus-exo.prg" 1024 "tribot-plus-exo.prg is non-trivially sized"
+
+BUILD_SIZE=$(wc -c < "build/tribot-plus.prg")
+DIST_SIZE=$(wc -c < "dist/tribot-plus-exo.prg")
+[[ $DIST_SIZE -lt $BUILD_SIZE ]] \
+    && ok "exomized file is smaller than uncompressed (${DIST_SIZE}B vs ${BUILD_SIZE}B)" \
+    || fail "exomized file should be smaller than uncompressed (${DIST_SIZE}B vs ${BUILD_SIZE}B)"
 
 # ── summary ──────────────────────────────────────────────────────────────────
 

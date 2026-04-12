@@ -47,6 +47,44 @@ Type a question and press Return. Tribot+ searches the database and returns a re
 
 ---
 
+## Building from source
+
+### Requirements
+
+- Java (for KickAssembler)
+- `tools/KickAss.jar` — KickAssembler v5.25
+- `tools/exomizer` — Exomizer binary (Linux x86-64)
+
+### Commands
+
+```
+./build.sh build   Assemble source  →  build/tribot-plus.prg
+./build.sh dist    Assemble + crunch →  build/tribot-plus.prg
+                                        dist/tribot-plus-exo.prg  (self-extracting)
+./build.sh help    Show usage
+```
+
+`build` produces a standard PRG loading at $0801. `dist` runs the assembled PRG through Exomizer (`sfx sys`) to produce a self-decrunching PRG — roughly 78% smaller than the uncompressed build.
+
+Tool paths can be overridden via environment variables:
+
+```
+KICKASS=/path/to/KickAss.jar ./build.sh build
+EXOMIZER=/path/to/exomizer   ./build.sh dist
+```
+
+The `build/` and `dist/` directories are tracked in the repository as empty. Their contents are ignored by git.
+
+### Tests
+
+```
+./test.sh
+```
+
+Runs the full build test suite (49 tests). Covers source layout, required assets, build script behaviour, assembly output, memory map segments, and exomizer dist output.
+
+---
+
 ## Documentation
 
 The full technical specification is available in two languages:
