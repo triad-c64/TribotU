@@ -51,8 +51,8 @@ Type a question and press Return. Tribot+ searches the database and returns a re
 
 The full technical specification is available in two languages:
 
-- [English](docs/tribot-plus-spec-english.md)
-- [Deutsch](docs/tribot-plus-spec-deutsch.md)
+- [English](docs/specification/tribot-plus---spec-english.md)
+- [Deutsch](docs/specification/tribot-plus---spec-deutsch.md)
 
 Both documents cover visual style, layout, boot sequence, input behavior, execution flow, and response rendering.
 

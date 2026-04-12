@@ -2,7 +2,7 @@
  *     coded by Adder of Triad in 2026 for X2026         *
  *********************************************************/
 #import "tokenize.src"
-#import "keyboard_best.src"
+#import "keyboard.src"
 #import "embedder.src"
 #import "extract.src"
 #import "eliza.src"
