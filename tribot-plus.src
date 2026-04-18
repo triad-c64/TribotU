@@ -6,6 +6,7 @@
 #import "embedder.src"
 #import "extract.src"
 #import "eliza.src"
+#import "boot.src"
 
 .pc = $0801 "Basic Upstart"
 BasicUpstart(PROGRAMM) 
@@ -29,7 +30,17 @@ BasicUpstart(PROGRAMM)
           cmp $d012
           bne *-3
 
+          lda #0
+          sta $d020
+          sta $d021
+           
+          jsr Init
+REU_CHECK:
           jsr checkForREU                    // prüfen ob eine REU vorhanden ist
+          cpx #0
+          beq REU_CHECK
+          
+          jsr Init
           jsr CleanUp
           jsr PrintHeadLine_Tribot
 
@@ -88,61 +99,7 @@ finalize_query:
           cli
 ready:
           jmp botloop                                
-//*******************************************************************************
-//*** Prüfen, ob eine REU angeschlossen ist. 
-//*** Um auch die 1700 zu erkennen wird NICHT so, wie auf der 1764 Demo-Disk mit
-//*** #$00 geprüft. Bei der 1700 kann $df00 den Wert #$00 annehmen!!
-//*******************************************************************************
-//*** Übergabe: -
-//*******************************************************************************
-//*** Rückgabe: Y = 0 REU vorhanden, sonst nicht!
-//*******************************************************************************
-//*** ändert  : A, X, Y, SR
-//*******************************************************************************
-checkForREU:
-         ldy #$ff                           // Erstmal von keiner REU ausgehen
-         lda REUSTATUS                      // Status-Register lesen, um Bit 7-5 zu löschen
-         sty REUSTATUS                      // schreiben wir zum Test mal #$ff hinein
-         cpy REUSTATUS                      // und schauen, ob der Wert erhalten bleibt
-         beq exit_check                     // wenn JA, KEINE REU!!!
-         ldx #$04                           // Wir testen nur Register 2-5 
-loop_check:
-         txa
-         sta REUCOMMAND,X                   // Testwert speichern
-         cmp REUCOMMAND,X                   // gleicher Wert?
-         bne exit_check                     // wenn nicht, KEINE REU!!!
-         dex                                // Schleifenzähler verringern
-         bne loop_check                     // wenn > 0, nochmal
-         ldy #GRAY                          // sonst wurde eine REU gefunden
-         sty $d020
-         sty $d021
-
-         jsr Init
-
-         // GETNROFENTRIES
-         lda #255
-         sta REUBANK
-         lda #255
-         sta REURAM + 1
-
-         lda #REU_FETCH_A__           // Befehl fürs Kopieren von der REU zum C64
-         sta REUCOMMAND               // mit AUTOLOAD ausführen
-        
-         lda DATARAM
-         sta COUNT_ENTRIES_LO
-         lda DATARAM + 1
-         sta COUNT_ENTRIES_HI
-
-         lda DATARAM + 2
-         sta ELIZA_ENTRIES
-         
-         jsr Init
-         rts
-exit_check:
-         ldy #RED                           // sonst wurde eine REU gefunden
-         sty $d020
-         sty $d021
-         rts                                // zurück
+                      // zurück
 stop_input:
  .byte 0
 // ****************************************************************************************
@@ -219,14 +176,7 @@ scroll_answer:
          lda #$a1
          cmp $d012
          bne *-3
-         jsr scroll_soft
-
-         lda #$bd
-         cmp $d012
-         bne *-3
-
-         lda #$8
-         sta $d016
+         jsr scrolling
 
          jmp returnIrq
 
@@ -235,10 +185,11 @@ scroll_answer:
 // ** Worker                         **7
 // ************************************
 worker:
-          lda active_bot
+       /*   lda active_bot
           beq Tribot
           jsr ELIZA
           rts
+          */
 Tribot:     
           jsr tokenize
           jsr Embeddings
@@ -321,10 +272,6 @@ MatchFound:
 
           lda #REU_FETCH_A__           // Befehl fürs Kopieren von der REU zum C64
           sta REUCOMMAND               // mit AUTOLOAD ausführen
-
-          lda #GREEN
-          sta $d020
-          sta $d021
 PlotAnswer:
           ldy #0
 GET_FINAL_ANWER:
@@ -345,21 +292,6 @@ fillup:
 
 CleanUp:
           ldx #0
-          stx active_bot
-cls:
-          lda #$20
-          sta $0400,x
-          sta $0500,x
-          sta $0600,x
-          sta $06f7,x
-
-          lda #WHITE
-          sta $d800,x
-          sta $d900,x
-          sta $da00,x
-          sta $daf7,x
-          inx
-          bne cls
        
 GetLoadLookup:
           lda LoadTab        ,x
@@ -410,59 +342,30 @@ Init:
 cls_input:
           lda #$20
           sta SCREEN  ,x
+          inx 
+          cpx #MAXLENGHT
+          bne cls_input
+
+          ldx #0
           lda #0
+cls_input_strings:
           sta input   ,x
           sta string1 ,x
           sta correct ,x
-          inx 
-          bne cls_input
-          lda #GRAY
-          sta $d020
-          sta $d021
+          inx
+          bne cls_input_strings
           rts
 
-scroll_soft:
-         lda smooth 
-         sec
-         sbc #2
-         and #%000000111
-         sta smooth
+scrolling:
+         ldy #0
+GetAnswer:
+         lda final_answer,                                                      y
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , y       
+         iny
+         cpy #40
+         bne GetAnswer
+         jsr scroll_up
 
-         lda $d016
-         and #%00010000
-         ora #%00010000
-         ora smooth
-         sta $d016  
-nonewpic: 
-         lda smooth
-         cmp #%00000110
-         bne leave_soft
-         jsr hardscroll
-leave_soft:  
-         rts
-hardscroll:
-         ldx #0
-         ldy answer_index
-position:
-         lda final_answer ,y
-         sta scrollLine + 39
-         lda #0 
-         sta line_seq
-hardscroll__:
-         lda scrollLine +1,x
-         cmp #$20
-         bne Copy_next_char
-         inc line_seq
-Copy_next_char:
-         sta scrollLine   ,x
-         inx
-         cpx #39
-         bne hardscroll__
-
-         inc answer_index
-         lda line_seq 
-         cmp #39
-         bne ReturnFromHardScroll
          lda #0
          sta answer_index
          sta found_answer

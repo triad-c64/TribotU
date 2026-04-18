@@ -219,6 +219,7 @@ validkeys:
 
 
 PrintHeadLine_Tribot:
+       rts
        ldx #0
 tri:
        lda tribot,x
@@ -228,6 +229,7 @@ tri:
        jmp tri
 
 PrintHeadLine_Eliza:
+       rts
        ldx #0
 eliz:
        lda eliza,x

@@ -10,6 +10,11 @@
 .const MAXLENGHT     = 38
 .const ELIZA_QUEST   = 16
 .const ELIZA_ANSW    = 50
+.const DELAYTIME     = 10
+.const SCROLLSCREENS = 8
+.const TOTALLINES    = 25
+.const LASTLINE      = 23
+.const LAST_VISIBLE  = TOTALLINES - LASTLINE
 
 
 //*******************************************************************************
@@ -23,20 +28,26 @@
 .const KEYBOARD            = $2400
 .const LoadTab             = $2700
 .const ELIZA               = $6000
-.const EXTRACTED_ELIZA     = $8000
+.const LOGO                = $6200
+.const BOOT                = $6400
+.const EXTRACTED_ELIZA     = $6500
+.const SCROLLING           = $6600
+.const SCREENS             = $7000                  // + $2000
+.const COLORS              = $9000                  // + $2000
 
-.var DATARAM               = $a000                  // Adresse des DATABLOCKS
+.var DATARAM               = $0300                  // Adresse des DATABLOCKS
 .var EMBEDDING_REU         = DATARAM
 .var BOT_ANSWER_REU        = EMBEDDING_REU  + DIM
 
-.const SCREEN              = $0400 + 80 + 2         // SCREENRAM Adress
+.const SCREEN              = $0400 + 40 * 24 + 2         // SCREENRAM Adress
 
 
 .const embeddingA          = $ff00
-.const temporer            = $2000
-.const STRING_FUNKTION     = $2100
-.const EXTRACTKEYWORDS     = $2300
-.const tokens              = $1100  // buffer für die tokens  "who\0is\0adder\0"
+.const temporer            = $1100
+.const tokens              = $1200  // buffer für die tokens  "who\0is\0adder\0"
+.const STRING_FUNKTION     = $1300
+.const EXTRACTKEYWORDS     = $1500
+
 .const final_answer        = $1600
 
 .const string1             = $c400
@@ -60,7 +71,7 @@
 .var modulo                = square2_hi   + $0200
 
 // String Funktionen
-.var extrpos               = $8000
+.var extrpos               = $c100
 .var text_rest_pos         = extrpos                 +  1
 .var possible_match        = text_rest_pos           +  1
 .var inputpos              = possible_match          +  1
@@ -189,8 +200,8 @@
 .var hash_hi     = $52
 .var idx         = $53
 
-//.var substr_ptr  = $54
-//.var substr_ptrHi= $55
+.var LineZero_LO = $54
+.var LineZero_HI = $55   
 
 .var norm2       = $56
 .var norm2Hi     = $57
@@ -199,6 +210,10 @@
 .var hi_SqrtIn   = $5a
 .var lsby        = $5b
 .var msby        = $5c
+
+
+.var LineOne_LO  = $5e
+.var LineOne_HI  = $5f
 
 .var val         = $60
 .var High_Byte   = $61
@@ -209,7 +224,6 @@
 .var dividend    = $64
 .var dividendHi  = $65
 .var divisor     = $66
-
 
 .var dist0                 = $68
 .var dist1                 = dist0                   + 1
@@ -250,6 +264,10 @@
 .var eliza_answer          = COUNT_ENTRIES_HI        + 1
 .var ELIZA_ENTRIES         = eliza_answer            + 1
 .var active_bot            = ELIZA_ENTRIES           + 1
+.var ColorLineZero_LO      = active_bot              + 1
+.var ColorLineZero_HI      = ColorLineZero_LO        + 1
+.var ColorLineOne_LO       = ColorLineZero_HI        + 1
+.var ColorLineOne_HI       = ColorLineOne_LO         + 1
 
 .pc = LoadTab "x127 && AxA && clamp && multab"
   .import binary "data/lookup_tables.bin"

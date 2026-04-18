@@ -1,0 +1,209 @@
+// *******************************************
+// implemented by Adder Triad 2026
+// *******************************************
+
+#import "variables.src"
+#import "image_routines.src"
+
+.pc = BOOT "BOOT SEQUENCE"
+checkForREU:
+         
+         lda #23
+         sta $d018
+         jsr CLEAR_SCREEN
+          
+         ldx #0
+Booting:
+         lda booting,x
+         beq DETECT
+         sta $0400 +40 ,   x
+         inx
+         jmp Booting
+    
+DETECT:
+         ldx #0
+DETECTION_STATUS_OFF:
+         lda REU_NOT_FOUND,   x
+         beq CHECK_LOOP
+         sta $0400 + 80   ,   x
+         lda #WHITE
+         sta $d800 + 80   ,   x
+         inx
+         jmp DETECTION_STATUS_OFF
+
+CHECK_LOOP:
+         lda $d012
+         cmp #$f0
+         bne CHECK_LOOP
+
+         lda #<DATARAM                      // Beginn des Speichers der  
+         sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
+         lda #>DATARAM
+         sta REUC64RAM+1
+
+         lda #<($0100)                      // Die Anzahl der BYTEs ($0100)
+         sta REUBYTES                       // je Aktion der REU bekannt machen
+         lda #>($0100)
+         sta REUBYTES+1
+
+         // GETNROFENTRIES
+         lda #255
+         sta REUBANK
+         lda #255
+         sta REURAM + 1
+
+         lda #REU_FETCH_A__           // Befehl fürs Kopieren von der REU zum C64
+         sta REUCOMMAND               // mit AUTOLOAD ausführen
+        
+         lda DATARAM
+         sta COUNT_ENTRIES_LO
+         lda DATARAM + 1
+         sta COUNT_ENTRIES_HI
+
+         lda DATARAM + 2
+         sta ELIZA_ENTRIES
+
+         //check for REU
+         ldx #0
+scan_REU:
+         stx check_reu_byte + 1
+         lda DATARAM + 3,x
+check_reu_byte:
+         cmp #0
+         bne CHECK_LOOP
+         inx
+         cpx #16
+         bne scan_REU
+
+         ldx #0
+DETECTION_STATUS_ON:
+         lda REU_FOUND,   x
+         beq LEAVE
+         sta $0400 + 80   ,   x
+         lda #WHITE
+         sta $d800 + 80   ,   x
+         inx
+         jmp DETECTION_STATUS_ON
+
+LEAVE:
+         jsr DELAY
+         
+         jsr CLEAR_SCREEN
+
+         ldx #$f1
+logoloop:    
+         ldy #7
+logoptr:
+         lsr logo
+         bcc notchar
+         asl $053e,x
+notchar:
+         dex
+         dey
+         bpl logoptr
+         inc logoptr+1
+         lda logoptr+1
+         cmp #$1E
+         bne logoloop
+
+         ldx #0 
+GetSlogan:
+         lda Slogan ,x
+         beq wait_logo
+         sta $0600 + 138 ,x
+         inx
+         bne GetSlogan
+         
+wait_logo:
+         jsr DELAY
+         jsr CLEAR_SCREEN
+         
+         ldx #0
+GetLoading:
+         lda Loading   ,x
+         beq leave_loading
+         sta $0600 + 24,x
+         inx
+         jmp GetLoading
+
+leave_loading:
+         jsr DELAY
+         jsr CLEAR_SCREEN
+
+         jsr PaintStart
+
+         jsr DELAY
+    
+         ldx #1
+         rts
+exit_check:
+         ldx #0
+         rts          
+
+frames_wait_REU:
+ .byte 0
+REU_FOUND:
+ .text "REU Detected     @"
+ 
+REU_NOT_FOUND:
+ .text "REU Not found!@"
+
+Slogan:
+ .text "Dealer Quality Botnet@"
+
+Loading:
+ .text "Loading...@"
+
+booting:
+ .text "Booting...@"
+
+DELAY:
+         lda #0 
+         sta frames_wait_REU
+WAIT:      
+         lda $d012
+         cmp #$f0
+         bne WAIT
+
+         ldx #0 
+delay:
+         inx
+         bne delay
+
+         inc frames_wait_REU
+         lda frames_wait_REU
+         cmp #DELAYTIME
+         bne WAIT
+
+         rts
+
+CLEAR_SCREEN:
+      
+         ldx #0
+         stx frames_wait_REU
+CLEARSCREEN:
+         lda #$20
+         sta $0400,x
+         sta $0500,x
+         sta $0600,x
+         sta $06f8,x
+
+         lda #WHITE
+         sta $d800,x
+         sta $d900,x
+         sta $da00,x
+         sta $daf8,x
+
+         inx 
+         bne CLEARSCREEN
+         rts
+
+.pc = LOGO 
+logo:      
+	.byte $fe, $fe, $6f, $61, $18 
+	.byte $c1, $0c, $66, $66, $18   
+	.byte $c1, $18, $63, $7c, $18    
+	.byte $c1, $b0, $61, $61, $18   
+	.byte $01, $e0, $60, $01, $18  
+	.byte $fe, $40, $60, $7e, $ff 
+
