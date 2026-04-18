@@ -72,7 +72,10 @@ SetNMI:
           cli
 botloop:   
           jsr Input
-
+          
+          lda #1
+          sta stop_input
+  
           ldx #0
 setQuery:
           lda SCREEN,x
@@ -87,15 +90,11 @@ finalize_query:
           lda #$00
           sta string1,x
           stx len1
+
           sei
           jsr ExtractString
           
-          lda #1
-          sta stop_input
-      
           jsr worker 
-          lda #1
-          sta found_answer
           cli
 ready:
           jmp botloop                                
@@ -113,13 +112,10 @@ irq:
          lda #$9f
          cmp $d012
          bne *-3
-         
-         lda found_answer
-         bne scroll_answer
-         
+     
          lda stop_input
          bne returnIrq
-     
+   
          jsr if6bc
 
          lda keyblock 
@@ -170,16 +166,6 @@ returnIrq:
          pla
 
          rti
-
-        
-scroll_answer: 
-         lda #$a1
-         cmp $d012
-         bne *-3
-         jsr scrolling
-
-         jmp returnIrq
-
 
 // ************************************
 // ** Worker                         **7
@@ -256,14 +242,7 @@ check_founded:
           bne MatchFound
           lda bestBank
           bne MatchFound
-        
-          ldy #0
-doPrintNothing:
-          lda nothing     ,y
-          beq fillUP
-          sta final_answer,y
-          iny
-          bne doPrintNothing
+
 MatchFound: 
           lda bestBank
           sta REUBANK
@@ -277,17 +256,13 @@ PlotAnswer:
 GET_FINAL_ANWER:
           lda BOT_ANSWER_REU        , y
 GiveOutFinal:
-          sta final_answer          , y
+          sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , y 
           iny
-          cpy #ANSWER_LENGTH
+          cpy #40//#ANSWER_LENGTH
           bne GET_FINAL_ANWER
-
-fillUP:
-          lda #$20
-fillup:
-          sta final_answer           ,y
-          iny
-          bne fillup
+          
+          jsr scroll_up
+          jsr Init
           rts
 
 CleanUp:
@@ -326,7 +301,6 @@ Init:
           sta musicplay
           sta dist0
           sta check_summe
-          sta line_seq
 
           lda #<DATARAM                      // Beginn des Speichers der  
           sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
@@ -356,42 +330,8 @@ cls_input_strings:
           bne cls_input_strings
           rts
 
-scrolling:
-         ldy #0
-GetAnswer:
-         lda final_answer,                                                      y
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , y       
-         iny
-         cpy #40
-         bne GetAnswer
-         jsr scroll_up
-
-         lda #0
-         sta answer_index
-         sta found_answer
-         jsr Init
-ReturnFromHardScroll:
-         rts
-
-line_seq:
- .byte 0
-
-found_answer:
-  .byte 0
-answer_index:
- .byte 0       
-smooth:
-    .byte 0
-
-hard_scroll:
- .byte 0
-
 prompt:
    .text "> "
    .byte 0
 nmi: 
     rti  
-
-nothing: 
-  .text "sorry, i do not understand!"
-  .byte 0

@@ -10,7 +10,7 @@
 .const MAXLENGHT     = 38
 .const ELIZA_QUEST   = 16
 .const ELIZA_ANSW    = 50
-.const DELAYTIME     = 10
+.const DELAYTIME     = 25
 .const SCROLLSCREENS = 8
 .const TOTALLINES    = 25
 .const LASTLINE      = 23
@@ -24,7 +24,7 @@
 .const MATH                = $3500
 .const TOKENIZER           = $0c00
 .const MY_HASH16           = $0d00
-.const PROGRAMM            = $0e00
+.const PROGRAMM            = $c000
 .const KEYBOARD            = $2400
 .const LoadTab             = $2700
 .const ELIZA               = $6000
@@ -35,7 +35,7 @@
 .const SCREENS             = $7000                  // + $2000
 .const COLORS              = $9000                  // + $2000
 
-.var DATARAM               = $0300                  // Adresse des DATABLOCKS
+.var DATARAM               = $0e00                  // Adresse des DATABLOCKS
 .var EMBEDDING_REU         = DATARAM
 .var BOT_ANSWER_REU        = EMBEDDING_REU  + DIM
 
@@ -47,14 +47,13 @@
 .const tokens              = $1200  // buffer für die tokens  "who\0is\0adder\0"
 .const STRING_FUNKTION     = $1300
 .const EXTRACTKEYWORDS     = $1500
-
 .const final_answer        = $1600
 
-.const string1             = $c400
-.const string2             = $c500
-.const correct             = $c600
-.const input               = $c700
-.const input_eliza         = $c800
+.const string1             = $b000
+.const string2             = $b100
+.const correct             = $b200
+.const input               = $b300
+.const input_eliza         = $b400
 
 .var   scrollLine          = $0400 + 40 * 16
 
@@ -71,7 +70,7 @@
 .var modulo                = square2_hi   + $0200
 
 // String Funktionen
-.var extrpos               = $c100
+.var extrpos               = $cf00
 .var text_rest_pos         = extrpos                 +  1
 .var possible_match        = text_rest_pos           +  1
 .var inputpos              = possible_match          +  1

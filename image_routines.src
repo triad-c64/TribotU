@@ -24,7 +24,6 @@ scroll_up:
     sta LineOne_HI
 
 
-
     lda #>COLORS
     clc
     adc #$20                  // 8 screens

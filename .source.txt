@@ -1,251 +1,272 @@
-
 /*********************************************************
  *     coded by Adder of Triad in 2026 for X2026         *
  *********************************************************/
-#import "variables.src"
+#importonce 
 
-.pc = SCROLLING "SCROLL SCREENS"
-
-scroll_up:
-    lda #>SCREENS
-    clc
-    adc #$20                  // 8 screens
-    sta LineZero_HI
-    sta LineOne_HI
-
-    lda #<SCREENS
-    sta LineZero_LO
-    sec
-    sbc #40
-    sta LineOne_LO
-
-    lda LineOne_HI
-    sbc #0
-    sta LineOne_HI
+.const ngram_min     = 2
+.const ngram_max     = 3
+.const DIM           = 64
+.const ANSWER_LENGTH = 256 - DIM
+.const MAXLENGHT     = 38
+.const ELIZA_QUEST   = 16
+.const ELIZA_ANSW    = 50
+.const DELAYTIME     = 25
+.const SCROLLSCREENS = 8
+.const TOTALLINES    = 25
+.const LASTLINE      = 23
+.const LAST_VISIBLE  = TOTALLINES - LASTLINE
 
 
+//*******************************************************************************
+//*** REMEMBER REU-FILE-SIZE HAS TO BE IDENTICAL WITH THE CHOOSEN VALUE IN VICE  
+//*******************************************************************************
+.const EMBEDDER            = $0810
+.const MATH                = $3500
+.const TOKENIZER           = $0c00
+.const MY_HASH16           = $0d00
+.const PROGRAMM            = $c000
+.const KEYBOARD            = $2400
+.const LoadTab             = $2700
+.const ELIZA               = $6000
+.const LOGO                = $6200
+.const BOOT                = $6400
+.const EXTRACTED_ELIZA     = $6500
+.const SCROLLING           = $6600
+.const SCREENS             = $7000                  // + $2000
+.const COLORS              = $9000                  // + $2000
 
-    lda #>COLORS
-    clc
-    adc #$20                  // 8 screens
-    sta ColorLineZero_HI
-    sta ColorLineOne_HI
+.var DATARAM               = $0e00                  // Adresse des DATABLOCKS
+.var EMBEDDING_REU         = DATARAM
+.var BOT_ANSWER_REU        = EMBEDDING_REU  + DIM
 
-    lda #<COLORS
-    sta ColorLineZero_LO
-    sec
-    sbc #40
-    sta ColorLineOne_LO
-
-    lda ColorLineOne_HI
-    sbc #0
-    sta ColorLineOne_HI
-
-    ldx #$0
-ScrollArea:
-    ldy #$0
-loop_scroll:
-    lda (LineOne_LO) ,y     
-    sta (LineZero_LO),y
-    lda (ColorLineOne_LO) ,y     
-    sta (ColorLineZero_LO),y
-    iny
-    cpy #40
-    bne loop_scroll  
-
-    lda LineOne_LO
-    sec
-    sbc #40
-    sta LineOne_LO
-    lda LineOne_HI
-    sbc #0
-    sta LineOne_HI
-
-    lda LineZero_LO
-    sec
-    sbc #40
-    sta LineZero_LO
-    lda LineZero_HI
-    sbc #0
-    sta LineZero_HI
+.const SCREEN              = $0400 + 40 * 24 + 2         // SCREENRAM Adress
 
 
-    lda ColorLineOne_LO
-    sec
-    sbc #40
-    sta ColorLineOne_LO
-    lda ColorLineOne_HI
-    sbc #0
-    sta ColorLineOne_HI
+.const embeddingA          = $ff00
+.const temporer            = $1100
+.const tokens              = $1200  // buffer für die tokens  "who\0is\0adder\0"
+.const STRING_FUNKTION     = $1300
+.const EXTRACTKEYWORDS     = $1500
+.const final_answer        = $1600
 
-    lda ColorLineZero_LO
-    sec
-    sbc #40
-    sta ColorLineZero_LO
-    lda ColorLineZero_HI
-    sbc #0
-    sta ColorLineZero_HI
+.const string1             = $b000
+.const string2             = $b100
+.const correct             = $b200
+.const input               = $b300
+.const input_eliza         = $b400
 
-    inx 
-    cpx #198
-    bne ScrollArea 
-
-    jsr PlotScreen
-    rts
+.var   scrollLine          = $0400 + 40 * 16
 
 
+.var lookUpx127Lo          = $e000 
+.var lookUpx127Hi          = lookUpx127Lo + $0100
+.var lookUpAxALo           = lookUpx127Hi + $0100 
+.var lookUpAxAHi           = lookUpAxALo  + $0100 
+.var lookUpClamp           = lookUpAxAHi  + $0100
+.var square1_lo            = lookUpClamp  + $0100
+.var square1_hi            = square1_lo   + $0200
+.var square2_lo            = square1_hi   + $0200
+.var square2_hi            = square2_lo   + $0200
+.var modulo                = square2_hi   + $0200
 
-PlotScreen:
-    lda #$0
-    sta s_to_d           + 1
-    sta s_to_d_color     + 1
-    lda #$04
-    sta s_to_d           + 2
-    lda #$d8
-    sta s_to_d_color     + 2
-
-
-    lda #<(SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000))
-    sta source_to_dest   + 1
-    lda #>(SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000))    
-    sta source_to_dest   + 2
-
-    lda #<(COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000))
-    sta source_to_dest_color   + 1
-    lda #>(COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000))    
-    sta source_to_dest_color   + 2
-
-    ldx #$0
-SOURCE_TO_DESTINATION:
-    ldy #$0
-source_to_dest:
-    lda SCREENS         ,y
-s_to_d:
-    sta $0400           ,y
-source_to_dest_color:
-    lda COLORS          ,y
-s_to_d_color:
-    sta $d800           ,y
-    
-    iny
-    cpy #40
-    bne source_to_dest
-
-    lda source_to_dest  + 1
-    sec
-    sbc #40
-    sta source_to_dest  + 1
-    lda source_to_dest  + 2
-    sbc #0
-    sta source_to_dest  + 2
+// String Funktionen
+.var extrpos               = $cf00
+.var text_rest_pos         = extrpos                 +  1
+.var possible_match        = text_rest_pos           +  1
+.var inputpos              = possible_match          +  1
+.var firstoccur            = inputpos                +  1 
+.var extractLenght         = firstoccur              +  1 
+.var text_rest_pos_plus_1  = extractLenght           +  1
+.var new_pos               = text_rest_pos_plus_1    +  1
+.var inp_char_nr           = new_pos                 +  1
+.var occur                 = inp_char_nr             +  1
 
 
-    lda s_to_d          + 1
-    clc
-    adc #40
-    sta s_to_d          + 1
-    lda s_to_d          + 2
-    adc #0
-    sta s_to_d          + 2
+//*******************************************************************************
+//*** REU-Register
+//*******************************************************************************
+.const REUSTATUS           = $df00         //Statusregister (nur lesen, wird dann gelöscht!)
+.const REUCOMMAND          = $df01         //Befehlsregister
+.const REUC64RAM           = $df02         //RAM-Adresse im C64 (LSB/MSB)
+.const REURAM              = $df04         //Speicher Adresse in der REU (LSB/MSB)
+.const REUBANK             = $df06         //Bank in der REU
+.const REUBYTES            = $df07         //Anzahl der betroffenen BYTES (LSB/MSB)
+.const REUIRQMASK          = $df09         //Interruptmaske
+.const REUADRCONTROL       = $df0a         //Adress-Kontroll-Register
+
+//*******************************************************************************
+//*** REU-Befehle
+//*******************************************************************************
+ 
+//*** Standardbefehle mit AUTOLOAD, ohne $ff00
+//.const REU_STASH_A__       = $fc           // kopiere C64 -> REU
+.const REU_FETCH_A__         = $fd           // kopiere REU -> C64
+//.const REU_SWAP_A__        = $fe           // Speicherbereich tauschen
+//.const REU_VERIFY_A__      = $ff           // Speicherbereich vergleichen
+ 
+//*** mit AUTOLOAD und mit $ff00
+//.const REU_STASH_A_F       = $ec           // kopiere C64 -> REU
+//.const REU_FETCH_A_F       = $ed           // kopiere REU -> C64
+//.const REU_SWAP_A_F        = $ee           // Speicherbereich tauschen
+//.const REU_VERIFY_A_F      = $ef           // Speicherbereich vergleichen
+ 
+//*** ohne AUTOLOAD, ohne $ff00
+//.const REU_STASH____       = $dc           // kopiere C64 -> REU
+//.const REU_FETCH____       = $dd           // kopiere REU -> C64
+//.const REU_SWAP____        = $de           // Speicherbereich tauschen
+//.const REU_VERIFY____      = $df           // Speicherbereich vergleichen
+ 
+//*** ohne AUTOLOAD, mit $ff00
+//.const REU_STASH___F       = $cc           // kopiere C64 -> REU
+//.const REU_FETCH___F       = $cd           // kopiere REU -> C64
+//.const REU_SWAP___F        = $ce           // Speicherbereich tauschen
+//.const REU_VERIFY___F      = $cf           // Speicherbereich vergleichen
+
+.var o0         = $10
+.var o1         = $11
+
+.var a0         = $18
+.var a1         = $19
 
 
-    lda source_to_dest_color  + 1
-    sec
-    sbc #40
-    sta source_to_dest_color  + 1
-    lda source_to_dest_color  + 2
-    sbc #0
-    sta source_to_dest_color  + 2
+.var b0         = $20
+.var b1         = $21
+
+.var T1         = $22
+.var T2         = $23
+.var PRODUCT    = $24
+.var PRODUCTHI  = $25
 
 
-    lda s_to_d_color          + 1
-    clc
-    adc #40
-    sta s_to_d_color          + 1
-    lda s_to_d_color          + 2
-    adc #0
-    sta s_to_d_color          + 2
-    
-    inx 
-    cpx #LASTLINE
-    bne SOURCE_TO_DESTINATION
-    rts
+.var t0         = $28
+.var t1         = $29
+
+.var tt0        = $2a
+.var tt1        = $2b
+
+.var quotient   = $2c
+.var quotientHi = $2d
+.var signflag   = $2e
 
 
-PaintStart:
-         ldx #$0
-         ldy #$0
-         lda #$20
-SetScreensClear:
-         sta SCREENS      ,x
-         lda #WHITE
-SetColorClear:
-         sta COLORS       ,x
-         lda #$20
+.var tmp        = $30
+.var length     = $31
+.var CHAR       = $32
 
-         inx 
-         bne SetScreensClear
-         inc SetScreensClear + 2
-         inc SetColorClear + 2
-         iny
-         cpy #SCROLLSCREENS 
-         bne SetScreensClear
+.var FAC1       = $33
+.var FAC2       = $34
 
-         ldx #$0
-GetTribotLogo:
-         lda tribot_plus_logo,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*0,x
-         lda tribot_plus_logo + 26,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*1,x
-         lda tribot_plus_logo + 26 *2,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*2,x
-         lda tribot_plus_logo + 26 *3,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*3,x
-         lda tribot_plus_logo + 26 *4,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*4,x
-         lda tribot_plus_logo + 26 *5,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*5,x
-         lda tribot_plus_logo + 26 *6,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*6,x
-         lda tribot_plus_logo + 26 *7,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*7,x
+.var d0         = $35  // DIVIDEND  ALSO DOT PRODUCT
+.var d1         = $36
+.var d2         = $37
+.var d3         = $38
 
-         lda tribot_plus_logo + 26*8,x
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*0,x
-         lda tribot_plus_logo + 26*9,x
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*1,x
-         lda tribot_plus_logo + 26*10,x
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*2,x
-         lda tribot_plus_logo + 26*11,x
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*3,x
-         lda tribot_plus_logo + 26*12,x
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*4,x
-         lda tribot_plus_logo + 26*13,x
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*5,x
-         lda tribot_plus_logo + 26*14,x
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*6,x
-         lda tribot_plus_logo + 26*15,x
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*7,x
-         inx  
-         cpx #26
-         bne GetTribotLogo
-         jsr PlotScreen
-         rts
+.var v0         = $39  // DIVISOR
+.var v1         = $3a
 
-tribot_plus_logo:
-.byte 160,160,160,46,254,160,252,46,160,46,254,160,252,46,254,160,252,46,160,160,160,46,32,32,32,32
-.byte 32,160,112,125,160,46,160,93,64,125,160,32,160,93,160,46,160,93,32,160,112,125,32,32,32,32
-.byte 32,160,93,32,160,93,160,93,160,46,160,32,160,93,160,93,160,93,32,160,93,32,32,160,32,32
-.byte 32,160,93,32,160,160,236,93,160,93,160,160,236,32,160,93,160,93,32,160,93,32,160,160,160,46
-.byte 32,160,93,32,160,46,160,93,160,93,160,32,160,93,160,93,160,93,32,160,93,32,32,160,112,125
-.byte 32,160,93,32,160,93,160,93,160,93,160,32,160,93,160,93,160,93,32,160,93,32,32,64,125,32
-.byte 32,160,93,32,160,93,160,93,160,93,251,160,236,46,251,160,236,46,32,160,93,32,32,32,32,32
-.byte 32,64,125,32,64,125,64,125,64,125,32,64,64,32,32,64,64,32,32,64,125,32,32,32,32,32
-.byte 3,3,3,11,3,3,3,11,3,11,3,3,3,11,3,3,3,11,3,3,3,11,14,14,14,14
-.byte 14,3,11,11,3,11,3,11,11,11,3,14,3,11,3,11,3,11,14,3,11,11,14,14,14,14
-.byte 14,3,11,14,3,11,3,11,3,11,3,14,3,11,3,11,3,11,14,3,11,14,14,3,14,14
-.byte 14,3,11,14,3,3,3,11,3,11,3,3,3,14,3,11,3,11,14,3,11,14,3,3,3,11
-.byte 14,3,11,14,3,11,3,11,3,11,3,14,3,11,3,11,3,11,14,3,11,14,14,3,11,11
-.byte 14,3,11,14,3,11,3,11,3,11,3,14,3,11,3,11,3,11,14,3,11,14,14,11,11,14
-.byte 14,3,11,14,3,11,3,11,3,11,3,3,3,11,3,3,3,11,14,3,11,14,14,14,14,14
-.byte 14,11,11,14,11,11,11,11,11,11,14,11,11,14,14,11,11,14,14,11,11,14,14,14,14,14
+.var q0         = $3b  // QUOTIENT ALSO ERGEBNIS
+.var q1         = $3c
+.var q2         = $3d
+.var q3         = $3e
+
+.var r0         = $3f
+.var r1         = $40
+
+.var count      = $41
+
+.var x_save     = $42
+.var y_save     = $43
+
+.var normALO    = $44
+.var normAHI    = $45
+
+.var normBLO    = $46
+.var normBHI    = $47
+
+.var sign       = $48
+
+.var bufptr     = $49
+.var bufptrHi   = $4a
+
+.var tokptr     = $4b
+.var tokptrHi   = $4c
+  // aktueller Token-Pointer
+.var tokidx      = $4d     // Index in tokens[]
+.var i           = $4e
+.var n           = $4f
+.var L           = $50
+.var hash_lo     = $51
+.var hash_hi     = $52
+.var idx         = $53
+
+.var LineZero_LO = $54
+.var LineZero_HI = $55   
+
+.var norm2       = $56
+.var norm2Hi     = $57
+
+.var lo_SqrtIn   = $59
+.var hi_SqrtIn   = $5a
+.var lsby        = $5b
+.var msby        = $5c
+
+
+.var LineOne_LO  = $5e
+.var LineOne_HI  = $5f
+
+.var val         = $60
+.var High_Byte   = $61
+
+// 16 bit division
+.var remainder   = $62
+.var remainderHi = $63
+.var dividend    = $64
+.var dividendHi  = $65
+.var divisor     = $66
+
+.var dist0                 = $68
+.var dist1                 = dist0                   + 1
+.var dist2                 = dist1                   + 1
+.var position_answer       = dist2                   + 1
+.var bestBank              = position_answer         + 1
+.var bestram               = bestBank                + 1
+.var reuram                = bestram                 + 1  
+.var reubank               = reuram                  + 1
+.var hasAnAnswer           = reubank                 + 1
+.var diff_lo               = hasAnAnswer             + 1
+.var diff_hi               = diff_lo                 + 1
+.var neg_diff_lo           = diff_hi                 + 1
+.var neg_diff_hi           = neg_diff_lo             + 1
+.var token_length          = neg_diff_hi             + 1
+.var n_gram                = token_length            + 1
+.var i_token               = n_gram                  + 1
+.var frame                 = i_token                 + 1
+.var inputdone             = frame                   + 1
+.var cursor                = inputdone               + 1
+.var len1_unextracted      = cursor                  + 1 
+.var musicplay             = len1_unextracted        + 1 
+.var key_return            = musicplay               + 1
+.var active_music          = key_return              + 1
+.var keypos                = active_music            + 1
+.var just_music            = keypos                  + 1
+.var actkey	               = just_music              + 1
+.var keyblock              = actkey                  + 1
+.var keyflag               = keyblock                + 1 
+.var lastkey	             = keyflag                 + 1
+.var extract_addr          = lastkey                 + 1
+.var extract_addr_Hi       = extract_addr            + 1
+.var occour_in_query       = extract_addr_Hi         + 1
+.var len1                  = occour_in_query         + 1
+.var check_summe           = len1                    + 1
+.var COUNT_ENTRIES_LO      = check_summe             + 1
+.var COUNT_ENTRIES_HI      = COUNT_ENTRIES_LO        + 1
+.var eliza_answer          = COUNT_ENTRIES_HI        + 1
+.var ELIZA_ENTRIES         = eliza_answer            + 1
+.var active_bot            = ELIZA_ENTRIES           + 1
+.var ColorLineZero_LO      = active_bot              + 1
+.var ColorLineZero_HI      = ColorLineZero_LO        + 1
+.var ColorLineOne_LO       = ColorLineZero_HI        + 1
+.var ColorLineOne_HI       = ColorLineOne_LO         + 1
+
+.pc = LoadTab "x127 && AxA && clamp && multab"
+  .import binary "data/lookup_tables.bin"
