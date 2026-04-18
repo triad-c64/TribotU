@@ -85,12 +85,12 @@ sta_input:
           sta string1,x
           inx
           bne setQuery
-
+          
 finalize_query:
           lda #$00
           sta string1,x
           stx len1
-
+           
           sei
           jsr ExtractString
           

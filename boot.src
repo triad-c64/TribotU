@@ -131,8 +131,6 @@ leave_loading:
          jsr CLEAR_SCREEN
 
          jsr PaintStart
-
-         jsr DELAY
     
          ldx #1
          rts
@@ -198,7 +196,7 @@ CLEARSCREEN:
          bne CLEARSCREEN
          rts
 
-.pc = LOGO 
+.pc = LOGO "LOGO"
 logo:      
 	.byte $fe, $fe, $6f, $61, $18 
 	.byte $c1, $0c, $66, $66, $18   

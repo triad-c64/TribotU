@@ -14,7 +14,6 @@
 .const SCROLLSCREENS = 8
 .const TOTALLINES    = 25
 .const LASTLINE      = 23
-.const LAST_VISIBLE  = TOTALLINES - LASTLINE
 
 
 //*******************************************************************************
@@ -24,7 +23,7 @@
 .const MATH                = $3500
 .const TOKENIZER           = $0c00
 .const MY_HASH16           = $0d00
-.const PROGRAMM            = $c000
+.const PROGRAMM            = $c200
 .const KEYBOARD            = $2400
 .const LoadTab             = $2700
 .const ELIZA               = $6000
@@ -45,7 +44,7 @@
 .const embeddingA          = $ff00
 .const temporer            = $1100
 .const tokens              = $1200  // buffer für die tokens  "who\0is\0adder\0"
-.const STRING_FUNKTION     = $1300
+.const STRING_FUNKTION     = $c000
 .const EXTRACTKEYWORDS     = $1500
 .const final_answer        = $1600
 
@@ -224,10 +223,8 @@
 .var dividendHi  = $65
 .var divisor     = $66
 
-.var dist0                 = $68
-.var dist1                 = dist0                   + 1
-.var dist2                 = dist1                   + 1
-.var position_answer       = dist2                   + 1
+.var dist0                 = $67
+.var position_answer       = dist0                   + 1
 .var bestBank              = position_answer         + 1
 .var bestram               = bestBank                + 1
 .var reuram                = bestram                 + 1  
