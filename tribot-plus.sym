@@ -1,4 +1,6 @@
+.label setMark=$67b3
 .label fallback_eliza=$6042
+.label return_from_plot_aligned=$67b2
 .label plot_response=$60dc
 .label add_possible_match=$c047
 .label ieacc=$24ed
@@ -6,7 +8,7 @@
 .label delay=$6532
 .label eliz=$25dc
 .label MatchFound=$c352
-.label tribot_plus_logo=$678c
+.label tribot_plus_logo=$681c
 .label PrintHeadLine_Eliza=$25d9
 .label EOR_CHAR=$d24
 .label PROMPT=$c23c
@@ -40,13 +42,14 @@
 .label GetMatch=$c062
 .label eliza_entries=$6020
 .label ieaa8=$24dc
-.label cls_input=$c3ce
+.label cls_input=$c3c1
 .label pattern_matched=$6078
 .label begin_hash=$d15
 .label Check_input=$2405
 .label ExtractString=$c000
 .label identify_word=$c0cc
 .label SHIFT_HASH_AROUND_5=$d2b
+.label GiveOutRow=$67c1
 .label c64_char=$c105
 .label div_loop=$35a2
 .label plus_temporer=$850
@@ -56,10 +59,10 @@
 .label done_tokens=$876
 .label CheckPossibleMatch=$c04a
 .label done_strln=$8e4
-.label CleanUp=$c375
+.label CleanUp=$c368
 .label Identify=$c0ca
 .label sta_input=$c27f
-.label prompt=$c3e9
+.label prompt=$c3dc
 .label search_loop=$605b
 .label SetResultString=$c094
 .label SQRT=$3500
@@ -71,7 +74,8 @@
 .label if6dc=$24c5
 .label output=$c0ec
 .label Bit32Div16Signed=$3574
-.label Init=$c38e
+.label Init=$c381
+.label PlotAlignedLines=$6797
 .label sm1=$36c0
 .label REU_CHECK=$c22a
 .label sm3=$36c8
@@ -80,7 +84,7 @@
 .label GetChar=$2400
 .label sm4=$36cb
 .label checkForREU=$6400
-.label GetLoadLookup=$c377
+.label GetLoadLookup=$c36a
 .label next_pattern=$6093
 .label i_token_check=$85a
 .label a0277=$259a
@@ -98,14 +102,15 @@
 .label div_skip=$35cf
 .label WAIT=$6529
 .label DETECT=$6416
+.label start_row=$67bd
 .label Tribot_bot=$2453
 .label GetToken=$823
 .label divloop=$353b
-.label GET_FINAL_ANWER=$c363
+.label GET_FINAL_ANWER=$679e
 .label ie5b9=$2494
 .label GetLoading=$64bb
 .label frames_wait_REU=$64d6
-.label cls_input_strings=$c3dc
+.label cls_input_strings=$c3cf
 .label MakeEmbeddings=$8ae
 .label SetNMI=$c247
 .label Tribot=$c2ef
@@ -139,7 +144,7 @@
 .label check_bank=$c33c
 .label t_smaller_input=$c083
 .label cosine_similarity=$369b
-.label SetLookup=$c37a
+.label SetLookup=$c36d
 .label increment_to_char=$c109
 .label Make16Positive=$3647
 .label my_ffe4=$248a
@@ -160,8 +165,10 @@
 .label match_pattern=$6062
 .label notchar=$6498
 .label s_to_d=$66ab
+.label on_this_row=$67e6
 .label ClearCursor=$c2d2
 .label clean_rest_answer=$6112
+.label inrtoduce=$67f0
 .label CheckInputCharDiffers=$c0a4
 .label REU_NOT_FOUND=$64e9
 .label Loading=$650e
@@ -169,6 +176,7 @@
 .label GetSlogan=$64a8
 .label div_pos=$3590
 .label skip_ws=$c1b
+.label curr_mark=$67c9
 .label CleanChar=$247b
 .label prep_resp2=$60d1
 .label prep_resp3=$60b0
@@ -179,7 +187,7 @@
 .label ieb26=$2538
 .label out_answer_e=$60ea
 .label eliza=$2610
-.label nmi=$c3ec
+.label nmi=$c3df
 .label out_answer_n=$6101
 .label ieb0d=$251e
 .label tokenize=$c00
@@ -211,6 +219,7 @@
 .label set_len=$c112
 .label ieafb2=$251c
 .label ieafb1=$24a7
+.label mark=$67ef
 .label check_founded=$c34a
 .label return_from_response=$6110
 .label loop_scroll=$6634
@@ -251,7 +260,6 @@
 .label next_ngram=$865
 .label s_to_d_color=$66b1
 .label finalize_query=$c285
-.label GiveOutFinal=$c366
 .label fallback=$611f
 .label continue_to_extract_string=$c0e9
 .label line=$247f
@@ -261,6 +269,7 @@
 .label Make32Negative=$35e3
 .label ready=$c294
 .label wait_logo=$64b3
+.label fill_up=$67cf
 .label copy_rest=$607a
 .label continue_iterative_search=$c32b
 .label embedding_loop=$8b0

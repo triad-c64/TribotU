@@ -90,7 +90,7 @@ finalize_query:
           lda #$00
           sta string1,x
           stx len1
-           
+         
           sei
           jsr ExtractString
           
@@ -252,16 +252,7 @@ MatchFound:
           lda #REU_FETCH_A__           // Befehl fürs Kopieren von der REU zum C64
           sta REUCOMMAND               // mit AUTOLOAD ausführen
 PlotAnswer:
-          ldy #0
-GET_FINAL_ANWER:
-          lda BOT_ANSWER_REU        , y
-GiveOutFinal:
-          sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , y 
-          iny
-          cpy #40//#ANSWER_LENGTH
-          bne GET_FINAL_ANWER
-          
-          jsr scroll_up
+          jsr PlotAlignedLines
           jsr Init
           rts
 

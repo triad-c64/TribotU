@@ -192,44 +192,113 @@ SetColorClear:
 
          ldx #$0
 GetTribotLogo:
-         lda tribot_plus_logo,x
+         lda inrtoduce        ,x
          sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*0,x
-         lda tribot_plus_logo + 26,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*1,x
-         lda tribot_plus_logo + 26 *2,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*2,x
-         lda tribot_plus_logo + 26 *3,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*3,x
-         lda tribot_plus_logo + 26 *4,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*4,x
-         lda tribot_plus_logo + 26 *5,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*5,x
-         lda tribot_plus_logo + 26 *6,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*6,x
-         lda tribot_plus_logo + 26 *7,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*7,x
 
-         lda tribot_plus_logo + 26*8,x
+         lda tribot_plus_logo,x
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*2,x
+         lda tribot_plus_logo + 26,x
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*3,x
+         lda tribot_plus_logo + 26 *2,x
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*4,x
+         lda tribot_plus_logo + 26 *3,x
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*5,x
+         lda tribot_plus_logo + 26 *4,x
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*6,x
+         lda tribot_plus_logo + 26 *5,x
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*7,x
+         lda tribot_plus_logo + 26 *6,x
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*8,x
+         lda tribot_plus_logo + 26 *7,x
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*9,x
+
+         lda #GREY
          sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*0,x
-         lda tribot_plus_logo + 26*9,x
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*1,x
-         lda tribot_plus_logo + 26*10,x
+         lda tribot_plus_logo + 26*8,x
          sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*2,x
-         lda tribot_plus_logo + 26*11,x
+         lda tribot_plus_logo + 26*9,x
          sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*3,x
-         lda tribot_plus_logo + 26*12,x
+         lda tribot_plus_logo + 26*10,x
          sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*4,x
-         lda tribot_plus_logo + 26*13,x
+         lda tribot_plus_logo + 26*11,x
          sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*5,x
-         lda tribot_plus_logo + 26*14,x
+         lda tribot_plus_logo + 26*12,x
          sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*6,x
-         lda tribot_plus_logo + 26*15,x
+         lda tribot_plus_logo + 26*13,x
          sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*7,x
+         lda tribot_plus_logo + 26*14,x
+         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*8,x
+         lda tribot_plus_logo + 26*15,x
+         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*9,x
          inx  
          cpx #26
          bne GetTribotLogo
          jsr PlotScreen
          rts
+
+
+PlotAlignedLines:
+         ldx #0
+         ldy #0
+         sty start_row + 1
+GET_FINAL_ANWER:
+         lda BOT_ANSWER_REU        , y
+         cmp #' '
+         beq setMark
+         cmp #0
+         beq return_from_plot_aligned
+         inx
+         iny
+         cpy #ANSWER_LENGTH
+         bne GET_FINAL_ANWER
+         jsr scroll_up
+return_from_plot_aligned:
+         rts
+
+setMark:
+         cpx #39
+         bcc on_this_row
+          
+         lda mark
+         sta curr_mark +1
+         
+start_row:
+         ldy #0
+         ldx #0
+GiveOutRow:
+         lda BOT_ANSWER_REU        , y
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         inx
+         iny
+curr_mark:
+         cpy #0
+         bne GiveOutRow
+         lda #$20
+fill_up:
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         inx
+         cpx #40
+         bcc fill_up
+         
+         sty start_row + 1
+        
+         jsr scroll_up
+
+         ldy start_row + 1
+         dey
+         ldx #0
+         jmp GET_FINAL_ANWER
+
+on_this_row:
+         iny
+         sty mark
+         inx
+         jmp GET_FINAL_ANWER
+         rts
+mark:
+  .byte 0 
+inrtoduce:
+  .text "Tribot Plus, Triad                          "
 
 tribot_plus_logo:
 .byte 160,160,160,46,254,160,252,46,160,46,254,160,252,46,254,160,252,46,160,160,160,46,32,32,32,32
