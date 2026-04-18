@@ -234,6 +234,17 @@ GetTribotLogo:
          cpx #26
          bne GetTribotLogo
          jsr PlotScreen
+
+         ldx #0 
+       
+limiter:
+         lda #99
+         sta SCREEN - 42   , x
+         lda #DARK_GREY
+         sta $d800 + 23 *40, x
+         inx
+         cpx #40
+         bne limiter
          rts
 
 
