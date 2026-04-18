@@ -177,6 +177,7 @@ worker:
           rts
           */
 Tribot:     
+          jsr PlotQuestions
           jsr tokenize
           jsr Embeddings
           jsr start_check
