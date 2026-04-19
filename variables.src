@@ -266,6 +266,7 @@
 .var ColorLineZero_HI      = ColorLineZero_LO        + 1
 .var ColorLineOne_LO       = ColorLineZero_HI        + 1
 .var ColorLineOne_HI       = ColorLineOne_LO         + 1
-
+.var scroll_LO             = ColorLineOne_HI         + 1
+.var scroll_HI             = scroll_LO               + 1
 .pc = LoadTab "x127 && AxA && clamp && multab"
   .import binary "data/lookup_tables.bin"

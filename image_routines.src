@@ -89,6 +89,8 @@ loop_scroll:
     cpx #198
     bne ScrollArea 
 
+    inc lines_used
+
     jsr PlotScreen
     rts
 
@@ -403,6 +405,9 @@ thinking:
 
 Infotext:
   .text "This scene database includes embedding  based similarity search and an ELIZA -  style conversational system for simple  natural language interaction.                                      type: /help                                                                                                      "
+
+lines_used:
+  .byte 0
 
 tribot_plus_logo:
 .byte 160,160,160,46,254,160,252,46,160,46,254,160,252,46,254,160,252,46,160,160,160,46,32,32,32,32

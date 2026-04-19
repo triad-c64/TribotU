@@ -48,11 +48,13 @@ unequal_phrase:
         inc count_phrases
         lda count_phrases
         cmp #38
-        beq return_from_phrases
+        beq ret_from_phrases
         ldx #0
         jmp phrase
 
 return_from_phrases:
+        sty len1
+ret_from_phrases:
         rts
 
 count_phrases:
