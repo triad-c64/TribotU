@@ -145,8 +145,6 @@ output:
    ldy #0
 WriteResult:
    lda string1                 ,x
-  // cmp #$20
-  //beq increment_to_char
    cmp #63
    beq set_len
 printf:  
@@ -173,8 +171,6 @@ increment_to_char:
 set_len:
    sty len1
 new_len_1:
- //  iny
- //  sty len1_plus_1
    rts
 
 ResetExtract:

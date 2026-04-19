@@ -7,6 +7,7 @@
 #import "extract.src"
 #import "eliza.src"
 #import "boot.src"
+#import "phrases.src"
 
 .pc = $0801 "Basic Upstart"
 BasicUpstart(PROGRAMM) 
@@ -92,6 +93,7 @@ finalize_query:
           stx len1
          
           sei
+          jsr ShortPhrase
           jsr ExtractString
           
           jsr worker 

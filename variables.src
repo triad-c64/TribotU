@@ -10,7 +10,7 @@
 .const MAXLENGHT     = 38
 .const ELIZA_QUEST   = 16
 .const ELIZA_ANSW    = 50
-.const DELAYTIME     = 100
+.const DELAYTIME     = 10
 .const SCROLLSCREENS = 8
 .const TOTALLINES    = 25
 .const LASTLINE      = 23
@@ -53,6 +53,8 @@
 .const correct             = $b200
 .const input               = $b300
 .const input_eliza         = $b400
+.const shorten_phrases     = $b500
+.const Phrases             = $b600
 
 .var   scrollLine          = $0400 + 40 * 16
 
