@@ -2,6 +2,7 @@
  *     got it from sailor/ triad (kernal keyboard input) *
  *********************************************************/
 #import "variables.src"
+#import "boot.src"
 
 .var adc00 = $dc00
 .var adc01 = $dc01
@@ -32,7 +33,9 @@ ok:
        ldx #0
 CheckKey: 
        cmp #$45
-       beq choose_bot
+       beq scrollhoch
+       cmp #$48
+       beq scrollrunter
        cmp validkeys,x
        beq SetThisChar
        inx
@@ -50,16 +53,13 @@ SetThisChar:
        inc keypos
 plus:
        jmp GetChar	
-choose_bot:
-       lda active_bot
-       eor #1
-       sta active_bot
-       beq Tribot_bot
-Eliza_bot:
-       jsr PrintHeadLine_Eliza
+scrollhoch:
+       jsr scroll_F1
+       jmp GetChar
+scrollrunter:
+       jsr scroll_F7
        jmp GetChar
 Tribot_bot:       
-       jsr PrintHeadLine_Tribot
        jmp GetChar
 PaintReturn:
        ldy keypos
@@ -200,7 +200,8 @@ ac5: 	.byte 0
 ac6:	.byte 0
 acb:	.byte 0
 
-feb81:  .byte $14,$0d,$1d,$88,$85,$86,$87,$11	// keyboard 1 -- unshifted	
+feb81: 
+       .byte $14,$0d,$1d,$88,$85,$86,$87,$11	// keyboard 1 -- unshifted	
        .byte $33,$57,$41,$34,$5a,$53,$45,$01
        .byte $35,$52,$44,$36,$43,$46,$54,$58
        .byte $37,$59,$47,$38,$42,$48,$55,$56
@@ -217,33 +218,3 @@ f0278:	.byte 0,0,0,0,0,0,0,0,0
 validkeys:
 .byte   1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,48,49,50,51,52,53,54,55,56,57,32
 
-
-PrintHeadLine_Tribot:
-       rts
-       ldx #0
-tri:
-       lda tribot,x
-       beq ret_from_headline
-       sta $0400,x
-       inx
-       jmp tri
-
-PrintHeadLine_Eliza:
-       rts
-       ldx #0
-eliz:
-       lda eliza,x
-       beq ret_from_headline
-       sta $0400,x
-       inx
-       jmp eliz
-ret_from_headline:
-       rts
-
-tribot: 
-  .text "f1 switch to eliza  (currently tribot)"
-  .byte 0
-
-eliza: 
-  .text "f1 switch to tribot  (currently eliza)"
-  .byte 0

@@ -116,6 +116,8 @@ PlotScreen:
     lda #>(COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000))    
     sta source_to_dest_color   + 2
 
+PLOT_SCREEN_HERE:
+
     ldx #$0
 SOURCE_TO_DESTINATION:
     ldy #$0
@@ -395,6 +397,74 @@ possible_color:
          bne possible_color
          jsr scroll_up        
          rts
+
+scroll_F1:
+         lda lines_scrolled
+         cmp lines_used
+         bcc scrollup
+         rts
+scrollup:
+         inc lines_scrolled
+         lda scroll_pos 
+         sec
+         sbc #40
+         sta scroll_pos 
+         lda scroll_pos +1
+         sbc #0
+         sta scroll_pos +1
+         jsr PlotScrolledScreen
+ret_from_downer:
+         rts
+scroll_F7:
+         lda lines_scrolled
+         bne scrolldown
+         rts
+scrolldown:
+         dec lines_scrolled
+         lda scroll_pos 
+         clc
+         adc #40
+         sta scroll_pos 
+         lda scroll_pos +1
+         adc #0
+         sta scroll_pos +1
+         jsr PlotScrolledScreen
+         rts
+
+PlotScrolledScreen:
+    lda #$0
+    sta s_to_d           + 1
+    sta s_to_d_color     + 1
+    lda #$04
+    sta s_to_d           + 2
+    lda #$d8
+    sta s_to_d_color     + 2
+
+
+    lda #<(SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000))
+    sec
+    sbc scroll_pos       + 0
+    sta source_to_dest   + 1
+    lda #>(SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000)) 
+    sbc scroll_pos       + 1   
+    sta source_to_dest   + 2
+
+    lda #<(COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000))
+    sec
+    sbc scroll_pos             + 0
+    sta source_to_dest_color   + 1
+    lda #>(COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000))  
+    sbc scroll_pos            + 1     
+    sta source_to_dest_color  + 2
+     
+    jsr PLOT_SCREEN_HERE
+
+    rts
+
+scroll_pos:
+    .byte 0,0
+
+
 mark:
   .byte 0 
 inrtoduce:
@@ -407,6 +477,8 @@ Infotext:
   .text "This scene database includes embedding  based similarity search and an ELIZA -  style conversational system for simple  natural language interaction.                                      type: /help                                                                                                      "
 
 lines_used:
+  .byte 0
+lines_scrolled:
   .byte 0
 
 tribot_plus_logo:

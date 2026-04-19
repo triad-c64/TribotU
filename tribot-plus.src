@@ -6,7 +6,6 @@
 #import "embedder.src"
 #import "extract.src"
 #import "eliza.src"
-#import "boot.src"
 #import "phrases.src"
 
 .pc = $0801 "Basic Upstart"
@@ -43,7 +42,6 @@ REU_CHECK:
           
           jsr Init
           jsr CleanUp
-          jsr PrintHeadLine_Tribot
 
           ldx #0
 PROMPT:
@@ -295,6 +293,9 @@ Init:
           sta musicplay
           sta dist0
           sta check_summe
+          sta scroll_pos
+          sta scroll_pos + 1
+          sta lines_scrolled
 
           lda #<DATARAM                      // Beginn des Speichers der  
           sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
