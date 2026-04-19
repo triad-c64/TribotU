@@ -3,7 +3,7 @@
  *********************************************************/
 #importonce 
 
-.const ngram_min     = 2
+.const ngram_min     = 1
 .const ngram_max     = 3
 .const DIM           = 64
 .const ANSWER_LENGTH = 256 - DIM
