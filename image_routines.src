@@ -390,7 +390,7 @@ return_from_thinking:
 possible_color:
          lda #$20
          sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-         lda #GREY
+         lda #WHITE
          sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
          inx
          cpx #40
