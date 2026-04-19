@@ -233,10 +233,52 @@ GetTribotLogo:
          inx  
          cpx #26
          bne GetTribotLogo
+
+         ldy #0
+PrintInfo:
+         ldx #0
+Info: 
+         lda Infotext,x
+info_location:
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*11, x
+         lda #LIGHT_GREY
+info_color:
+         sta COLORS  + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*11, x
+         inx
+         cpx #40
+         bne Info
+
+         lda info_location + 1
+         sec
+         sbc #40
+         sta info_location + 1
+         lda info_location + 2
+         sbc #0
+         sta info_location +2
+
+         lda info_color + 1
+         sec
+         sbc #40
+         sta info_color + 1
+         lda info_color + 2
+         sbc #0
+         sta info_color + 2
+         
+         lda Info + 1
+         clc
+         adc #40
+         sta Info + 1
+         lda Info + 2
+         adc #0
+         sta Info + 2
+
+         iny 
+         cpy #5
+         bne PrintInfo
+
          jsr PlotScreen
 
          ldx #0 
-       
 limiter:
          lda #99
          sta SCREEN - 42   , x
@@ -358,6 +400,9 @@ inrtoduce:
 
 thinking:
   .text "* Thinking...                                                                     "
+
+Infotext:
+  .text "This scene database includes embedding  based similarity search and an ELIZA -  style conversational system for simple  natural language interaction.                                      type: /help                                                                                                      "
 
 tribot_plus_logo:
 .byte 160,160,160,46,254,160,252,46,160,46,254,160,252,46,254,160,252,46,160,160,160,46,32,32,32,32
