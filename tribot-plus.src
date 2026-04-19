@@ -5,7 +5,6 @@
 #import "keyboard_best.src"
 #import "embedder.src"
 #import "extract.src"
-#import "eliza.src"
 #import "phrases.src"
 
 .pc = $0801 "Basic Upstart"
@@ -170,13 +169,8 @@ returnIrq:
 // ************************************
 // ** Worker                         **7
 // ************************************
-worker:
-       /*   lda active_bot
-          beq Tribot
-          jsr ELIZA
-          rts
-          */
-Tribot:     
+worker: 
+          jsr save_eliza_input_string
           jsr PlotQuestions
           jsr tokenize
           jsr Embeddings
@@ -198,6 +192,7 @@ GETNODES:
           cpx #DIM                     // in x - register dot product
           bne check_dist
     
+          stx dist0
           // found direct hit
           lda reubank
           sta bestBank 
@@ -245,6 +240,11 @@ check_founded:
           bne MatchFound
 
 MatchFound: 
+          ldx dist0
+          cpx #ELIZA_THRESHOLD
+          bcc Ask_ELIZA
+          //*/
+
           lda bestBank
           sta REUBANK
           lda bestram
@@ -254,6 +254,12 @@ MatchFound:
           sta REUCOMMAND               // mit AUTOLOAD ausführen
 PlotAnswer:
           jsr PlotAlignedLines
+          jsr Init
+          rts
+
+Ask_ELIZA:
+          jsr ELIZA
+          jsr Plot_ELIZA_ANSWER
           jsr Init
           rts
 
@@ -325,6 +331,16 @@ cls_input_strings:
           bne cls_input_strings
           rts
 
+save_eliza_input_string:
+          ldx #0
+eliza_string_save:
+          lda string1, x
+          sta string2, x
+          inx
+          cpx #40
+          bne eliza_string_save
+          rts
+               
 prompt:
    .text "> "
    .byte 0

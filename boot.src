@@ -3,7 +3,7 @@
 // *******************************************
 
 #import "variables.src"
-#import "image_routines.src"
+#import "eliza.src"
 
 .pc = BOOT "BOOT SEQUENCE"
 checkForREU:

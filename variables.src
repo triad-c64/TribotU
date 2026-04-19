@@ -3,17 +3,18 @@
  *********************************************************/
 #importonce 
 
-.const ngram_min     = 1
-.const ngram_max     = 3
-.const DIM           = 64
-.const ANSWER_LENGTH = 256 - DIM
-.const MAXLENGHT     = 38
-.const ELIZA_QUEST   = 16
-.const ELIZA_ANSW    = 50
-.const DELAYTIME     = 100
-.const SCROLLSCREENS = 8
-.const TOTALLINES    = 25
-.const LASTLINE      = 23
+.const ngram_min       = 1
+.const ngram_max       = 3
+.const DIM             = 64
+.const ANSWER_LENGTH   = 256 - DIM
+.const MAXLENGHT       = 38
+.const ELIZA_QUEST     = 16
+.const ELIZA_ANSW      = 50
+.const DELAYTIME       = 10
+.const SCROLLSCREENS   = 8
+.const TOTALLINES      = 25
+.const LASTLINE        = 23
+.const ELIZA_THRESHOLD = $39
 
 
 //*******************************************************************************

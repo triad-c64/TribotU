@@ -2,6 +2,7 @@
  *     coded by Adder of Triad in 2026 for X2026         *
  *********************************************************/
 #import "variables.src"
+#import "image_routines.src"
 
 .pc = ELIZA "ELIZA"
 
@@ -64,7 +65,7 @@ matches:
         ldx #0          
 
 search_loop:
-        lda string1           ,x
+        lda string2           ,x
         beq quit_w_no_match     
         ldy #0                 
 match_pattern:
@@ -72,7 +73,7 @@ match_pattern:
         beq pattern_matched    
         cmp #$30
         beq pattern_matched
-        lda string1           ,x
+        lda string2           ,x
         cmp DATARAM           ,y
         bne next_char
         iny
@@ -82,7 +83,7 @@ match_pattern:
 pattern_matched:
         ldy #0
 copy_rest:
-        lda string1           ,x
+        lda string2           ,x
         sta EXTRACTED_ELIZA   ,y
         beq return_from_extr
         iny
@@ -182,11 +183,31 @@ clean_rest_answer:
         sta final_answer     
         inc clean_rest_answer + 1
         bne clean_rest_answer
-
         lda #1 
         sta eliza_answer
         rts
 
+Plot_ELIZA_ANSWER:
+        ldx #0
+plot_eliza_answer:
+        lda final_answer,x
+        sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+        inx
+        cpx #40
+        bne plot_eliza_answer
+
+        jsr scroll_up
+
+        ldx #0
+plot_eliza_clean:
+        lda #$20
+        sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+        inx
+        cpx #40
+        bne plot_eliza_clean
+        
+        jsr scroll_up
+        rts
 
 // -------------------------------------------------
 // daten
