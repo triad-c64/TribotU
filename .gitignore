@@ -1,0 +1,9 @@
+# Build output (keep directories, ignore contents)
+build/*
+!build/.gitkeep
+dist/*
+!dist/.gitkeep
+
+# Stray KickAssembler artifacts if they end up outside build/
+*.dbg
+*.vs
