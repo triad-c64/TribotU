@@ -6,4 +6,6 @@ dist/*
 
 # Stray KickAssembler artifacts if they end up outside build/
 *.dbg
+*.prg
+*.sym
 *.vs
