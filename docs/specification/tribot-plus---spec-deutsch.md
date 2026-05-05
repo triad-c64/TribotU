@@ -312,6 +312,32 @@ Titelbezeichnungen sind Platzhalter und werden aktualisiert, sobald die SID-Date
 
 ---
 
+## Zeichensatz
+
+Tribot+ unterstützt zwei eigene Zeichensätze. Zeichensatz 1 ist standardmäßig aktiv und wird bei jedem Programmstart zurückgesetzt.
+
+### Befehle
+
+Der Zeichensatz wird über einen Befehl gesteuert:
+
+    /char 1-2     Zeichensatz auswählen (1 oder 2)
+
+### Verhalten
+
+- `/char X` wechselt sofort zum gewählten Zeichensatz.
+- Einstellungen werden bei jedem Programmstart zurückgesetzt: Zeichensatz 1.
+
+### Zeichensätze
+
+| Nummer | Name           | Autor     |
+| ------ | -------------- | --------- |
+| 1      | Highres_1x1_#8 | Tao/Triad |
+| 2      | Highres_1x1_#6 | Tao/Triad |
+
+Zeichensatzbezeichnungen sind Platzhalter und werden aktualisiert, sobald die Zeichensätze finalisiert sind.
+
+---
+
 ## Befehle
 
 Befehle werden im gleichen Eingabefeld wie Fragen eingegeben. Alle Befehle erfordern ein `/`-Präfix.
@@ -352,12 +378,16 @@ Wählt einen von vier verfügbaren Titeln. X durch eine Zahl zwischen 1 und 4 er
 
     /tune X
 
+### Zeichensatz
+
+Wählt einen von zwei verfügbaren Zeichensätzen. X durch 1 oder 2 ersetzen.
+
+    /char X
+
 ---
 
 ## Offene Punkte
 
-- Finalen Zeichensatz bestätigen - Skyhawk und Taper
-- Schriftskalierungsansatz bestätigen (2×1, 1×2, 2×2) - Skyhawk und Taper
 - Definition einer Datenbankübereinstimmung festlegen - Adder, Taper und Bepp
 - Hardware-Prüfungen und technische Details für Stufe 2 definieren - Taper
 - SID-Dateien auswählen und Titelbezeichnungen bestätigen - Taper

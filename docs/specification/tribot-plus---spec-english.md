@@ -312,6 +312,32 @@ Tune titles are placeholders and will be updated once SID files are selected.
 
 ---
 
+## Charset
+
+Tribot+ supports two custom character sets. Charset 1 is active by default and resets to charset 1 each time the program loads.
+
+### Commands
+
+The character set is controlled via one command:
+
+    /char 1-2     Select charset (1 or 2)
+
+### Behavior
+
+- `/char X` switches to the selected charset immediately.
+- Settings reset to default on each program load: charset 1.
+
+### Charsets
+
+| Number | Name           | Author    |
+| ------ | -------------- | --------- |
+| 1      | Highres_1x1_#8 | Tao/Triad |
+| 2      | Highres_1x1_#6 | Tao/Triad |
+
+Charset names are placeholders and will be updated once charsets are finalized.
+
+---
+
 ## Commands
 
 Commands use the same input field as questions. All commands require a `/` prefix.
@@ -352,12 +378,16 @@ Selects one of four available tunes. Replace X with a number between 1 and 4.
 
     /tune X
 
+### Charset
+
+Selects one of two available character sets. Replace X with 1 or 2.
+
+    /char X
+
 ---
 
 ## Open Points
 
-- Confirm final character set - Skyhawk and Taper
-- Confirm font scaling approach (2×1, 1×2, 2×2) - Skyhawk and Taper
 - Define what qualifies as a database match - Adder, Taper and Bepp
 - Define hardware checks and technical details for Stage 2 - Taper
 - Select SID files and confirm tune titles - Taper
