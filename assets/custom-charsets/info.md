@@ -1,0 +1,1 @@
+Custom charsets by Tao/Triad, contains both lowercase and uppercase
