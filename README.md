@@ -75,14 +75,6 @@ EXOMIZER=/path/to/exomizer   ./build.sh dist
 
 The `build/` and `dist/` directories are tracked in the repository as empty. Their contents are ignored by git.
 
-### Tests
-
-```
-./test.sh
-```
-
-Runs the full build test suite (49 tests). Covers source layout, required assets, build script behaviour, assembly output, memory map segments, and exomizer dist output.
-
 ---
 
 ## Documentation
