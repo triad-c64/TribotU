@@ -27,9 +27,9 @@ Mark items `[x]` when confirmed. Leave `[ ]` open when not yet done or not yet v
 - [ ] Stage 3: TRIAD logo is displayed with byline "Dealer Quality Botnet"
 - [ ] Stage 3: Screen clears again and shows "Loading..." centered
 - [ ] Stage 4: Screen clears when loading is complete
-- [ ] Stage 4: Tribot+ logo is displayed
-- [ ] Stage 4: Introduction text is displayed
-- [ ] Stage 4: Input field is displayed and ready for input
+- [X] Stage 4: Tribot+ logo is displayed
+- [X] Stage 4: Introduction text is displayed
+- [X] Stage 4: Input field is displayed and ready for input
 
 ### Visual Style
 
@@ -40,18 +40,18 @@ Mark items `[x]` when confirmed. Leave `[ ]` open when not yet done or not yet v
 
 ### Layout
 
-- [ ] Screen is split into an output area (above divider) and input field (below divider)
+- [X] Screen is split into an output area (above divider) and input field (below divider)
 - [ ] Output area scrolls vertically
-- [ ] Input field is fixed and always visible
-- [ ] Divider is present and separates the two areas
+- [X] Input field is fixed and always visible
+- [X] Divider is present and separates the two areas
 
 ### Input Field
 
-- [ ] Prompt prefix `> ` is displayed (greater-than + space)
-- [ ] Prefix is static and cannot be edited or deleted
-- [ ] Input area is 38 characters wide
-- [ ] Total prompt width is 2 characters (prefix occupies columns 1–2)
-- [ ] Divider is colored dark grey
+- [X] Prompt prefix `> ` is displayed (greater-than + space)
+- [X] Prefix is static and cannot be edited or deleted
+- [X] Input area is 37 characters wide
+- [X] Total prompt width is 2 characters (prefix occupies columns 1–2)
+- [X] Divider is colored dark grey
 - [ ] Prompt `>` is colored medium grey
 - [ ] Placeholder text is colored dark grey
 - [ ] User input text is colored yellow
@@ -61,8 +61,8 @@ Mark items `[x]` when confirmed. Leave `[ ]` open when not yet done or not yet v
 
 ### Input Behavior
 
-- [ ] Input is capped at 38 characters
-- [ ] No further characters are accepted once the 38-character limit is reached
+- [X] Input is capped at 37 characters
+- [X] No further characters are accepted once the 37-character limit is reached
 
 ### Scrollback
 
@@ -211,7 +211,7 @@ Mark items `[x]` when confirmed. Leave `[ ]` open when not yet done or not yet v
 
 ### Input Behavior
 
-- [ ] Typing stops at character 38 — the 39th character is not accepted
+- [ ] Typing stops at character 37 — the 38th character is not accepted
 - [ ] No visual or auditory glitch occurs when the character limit is reached
 - [ ] Backspace correctly removes the last typed character
 
