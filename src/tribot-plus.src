@@ -47,6 +47,8 @@ PROMPT:
           lda prompt    ,x
           beq SetNMI
           sta SCREEN - 2,x
+          lda #GREY
+          sta COLORRAM-2,x
           inx
           bne PROMPT
 SetNMI:
