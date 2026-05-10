@@ -40,6 +40,7 @@
 .var BOT_ANSWER_REU        = EMBEDDING_REU  + DIM
 
 .const SCREEN              = $0400 + 40 * 24 + 2         // SCREENRAM Adress
+.const COLORRAM            = $d800 + 40 * 24 + 2         // SCREENRAM Adress
 
 
 .const embeddingA          = $ff00

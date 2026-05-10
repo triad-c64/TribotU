@@ -297,13 +297,12 @@ limiter:
 PlotAlignedLines:
          ldx #0
          ldy #0
-         sty start_row + 1
+         sty start_row      + 1
+         sty onRow
 GET_FINAL_ANWER:
          lda BOT_ANSWER_REU        , y
          cmp #' '
          beq setMark
-         cmp #0
-         beq return_from_plot_aligned
          inx
          iny
          cpy #ANSWER_LENGTH
@@ -324,34 +323,68 @@ start_row:
          ldx #0
 GiveOutRow:
          lda BOT_ANSWER_REU        , y
+         beq last_word
          sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
          inx
          iny
 curr_mark:
          cpy #0
          bne GiveOutRow
+
          lda #$20
 fill_up:
          sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
          inx
          cpx #40
          bcc fill_up
-
-         sty start_row + 1
         
-         jsr scroll_up
+         sty start_row      + 1
 
+         jsr scroll_up
+         inc onRow
+         
          ldy start_row + 1
          dey
          ldx #0
          jmp GET_FINAL_ANWER
 
+last_word:
+         lda onRow
+         beq return_from_last_word
+
+         lda #$20
+fill_up_last:
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         inx
+         cpx #40
+         bcc fill_up_last
+
+         jsr scroll_up
+         jsr ClearLine
+         jsr scroll_up
+         rts 
+return_from_last_word:
+         jsr ClearLine
+         jsr scroll_up
+         rts
+ClearLine:
+         ldx #0
+         lda #$20
+clear_line:
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         inx
+         cpx #40
+         bne clear_line
+         rts
 on_this_row:
+
          iny
          sty mark
          inx
          jmp GET_FINAL_ANWER
          rts
+onRow:
+ .byte 0
 
 PlotQuestions:
          ldx #0
@@ -475,6 +508,7 @@ thinking:
 
 Infotext:
   .text "This scene database includes embedding  based similarity search and an ELIZA -  style conversational system for simple  natural language interaction.                                      type: /help                                                                                                      "
+
 
 lines_used:
   .byte 0
