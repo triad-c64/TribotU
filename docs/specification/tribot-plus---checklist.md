@@ -256,9 +256,9 @@ Mark items `[x]` when confirmed. Leave `[ ]` open when not yet done or not yet v
 
 ### Output Area & Formatting
 
-- [ ] [     ] [          ] Lines longer than 40 characters wrap cleanly at the column boundary
-- [ ] [     ] [          ] No stray characters or rendering artifacts appear on word-wrapped lines
-- [ ] [     ] [          ] Output appends to the bottom and the view follows automatically
+- [x] [     ] [          ] Lines longer than 40 characters wrap cleanly at the column boundary
+- [x] [     ] [          ] No stray characters or rendering artifacts appear on word-wrapped lines
+- [x] [     ] [          ] Output appends to the bottom and the view follows automatically
 
 ### Response Color Behavior
 
