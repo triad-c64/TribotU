@@ -350,8 +350,7 @@ fill_up:
 
 last_word:
          lda onRow
-         cmp #1
-         bcc return_from_last_word
+         beq return_from_last_word
 
          lda #$20
 fill_up_last:
