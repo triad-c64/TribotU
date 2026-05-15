@@ -7,9 +7,6 @@
 #import "extract.src"
 #import "phrases.src"
 
-.pc = MUSIC "Music"
- .import binary "../assets/music/ne7-overcooked_omellete(wip).sid",126
- 
 .pc = $0801 "Basic Upstart"
 BasicUpstart(PROGRAMM) 
  
@@ -36,6 +33,24 @@ BasicUpstart(PROGRAMM)
           sta $d020
           sta $d021
           sta searchflag
+
+          jsr Init
+REU_CHECK:
+          jsr checkForREU                    // prüfen ob eine REU vorhanden ist
+          cpx #0
+          beq REU_CHECK
+          
+          jsr Init
+          jsr CleanUp
+
+          jsr CopyCharset
+          lda #LOCATION_CHARSET_A
+          jsr GetCharset
+
+          lda #LOCATION_MUSIC_A
+          jsr GetMusic
+
+          lda #0
           tax
           tay
           jsr $1000
@@ -65,18 +80,6 @@ BasicUpstart(PROGRAMM)
           lda #%00000001                    //Timer-A im CIA-2
           sta $DD0E                         //starten
 
-          jsr Init
-REU_CHECK:
-          jsr checkForREU                    // prüfen ob eine REU vorhanden ist
-          cpx #0
-          beq REU_CHECK
-          
-          jsr Init
-          jsr CleanUp
-
-          jsr CopyCharset
-          lda #LOCATION_CHARSET_A
-          jsr GetCharset
 
           ldx #0
 PROMPT:
@@ -222,6 +225,7 @@ worker:
           jsr Embeddings
           jsr start_check
 return_from_worker:
+          jsr Init
           rts
 
 start_check:
@@ -413,6 +417,26 @@ GetCharset:
         jsr Init     
         rts
 
+GetMusic:
+        sta REUBANK
+        lda #0
+        sta REURAM + 1
+
+        lda #<($1700)                      // Die Anzahl der BYTEs ($0100)
+        sta REUBYTES                       // je Aktion der REU bekannt machen
+        lda #>($1700)
+        sta REUBYTES+1
+
+        lda #<MUSIC                        // Beginn des Speichers der  
+        sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
+        lda #>MUSIC
+        sta REUC64RAM+1
+
+        lda #REU_FETCH_A__            
+        sta REUCOMMAND 
+        jsr Init     
+        rts
+
 check_for_command:
         ldy #$0
 next_command:
@@ -471,13 +495,50 @@ switch_music:
         lda music_play
         eor #1
         sta music_play
+
+        lda #$80
+        cmp $d012
+        bne *-3
+        lda #0
+        sta $d418
         ldx #1
         rts
 
 select_tune_1:
+        lda #0
+        sta music_play
+        lda #$80
+        cmp $d012
+        bne *-3
+        lda #0
+        sta $d418
+        lda #LOCATION_MUSIC_A
+        jsr GetMusic
+        lda #0
+        tay
+        tax
+        jsr $1000
+        lda #1
+        sta music_play
         ldx #1
         rts
 select_tune_2:
+        lda #0
+        sta music_play
+        lda #$80
+        cmp $d012
+        bne *-3
+        lda #0
+        sta $d418
+        lda #LOCATION_MUSIC_B
+        jsr GetMusic
+        lda #0
+        tay
+        tax
+        jsr $1000
+        lda #1
+        sta music_play
+
         ldx #1
         rts
 select_charset_1:
@@ -500,28 +561,20 @@ CopyCharset:
 copy_charset:
         lda $d000,x
         sta CHARSET,x
-
         lda $d100,x
         sta CHARSET+$100,x
-
         lda $d200,x
         sta CHARSET+$200,x
-
         lda $d300,x
         sta CHARSET+$300,x
-
         lda $d400,x
         sta CHARSET+$400,x
-
         lda $d500,x
         sta CHARSET+$500,x
-
         lda $d600,x
         sta CHARSET+$600,x
-
         lda $d700,x
         sta CHARSET+$700,x
-
         inx
         bne copy_charset
         pla
@@ -538,15 +591,26 @@ nmi:
          pha
          tya                               //und Y-Reg
          pha                               //auf dem Stack merken
-         lda  music_play
-         beq  nmi_exit
+          
+         lda $01
+         sta rom
+
+         lda #$35
+         sta $01
+
 
          lda $DD0D                         //IRQs bestätigen
          and #%00000001                    //Timer IRQ?
          beq nmi_exit                      //wenn nicht -> ENDE 
+
+         lda  music_play
+         beq  nmi_exit
+
          jsr $1003                         //sonst Hintergrundfarbe ändern
        
 nmi_exit: 
+         lda rom
+         sta $01
          pla                               //Register vom Stack holen
          tay
          pla
@@ -555,6 +619,8 @@ nmi_exit:
          
          rti                               //und zurück
 music_play: 
+  .byte 1
+rom:
   .byte 0
 
 commando:

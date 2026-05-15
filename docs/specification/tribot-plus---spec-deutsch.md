@@ -352,7 +352,7 @@ Löscht den Bildschirm. Kein Logo oder Text wird wiederhergestellt.
 
 Beendet Tribot+ und kehrt zu BASIC zurück (Warm-Reset).
 
-    /exit | /quit
+    /exit | /quit/char 
 
 ### Hilfe
 
