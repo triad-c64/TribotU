@@ -5,7 +5,6 @@
 #import "image_routines.src"
 
 .pc = ELIZA "ELIZA"
-
         lda #0
         sta eliza_entries     + 1
         lda #<final_answer 
@@ -18,7 +17,7 @@
         sta out_answer_n      + 2
         sta clean_rest_answer + 2
 
-        lda #128                   // OFFSET ELIZA
+        lda #$90               // OFFSET ELIZA
         sta REUBANK
 eliza_entries:
         lda #0

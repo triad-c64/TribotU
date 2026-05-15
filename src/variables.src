@@ -14,7 +14,7 @@
 .const SCROLLSCREENS   = 8
 .const TOTALLINES      = 25
 .const LASTLINE        = 23
-.const ELIZA_THRESHOLD = $39
+.const ELIZA_THRESHOLD = $3b
 
 
 //*******************************************************************************
@@ -25,7 +25,7 @@
 .const TOKENIZER           = $0c00
 .const MY_HASH16           = $0d00
 .const PROGRAMM            = $c200
-.const KEYBOARD            = $2400
+.const KEYBOARD            = $c500
 .const LoadTab             = $2700
 .const ELIZA               = $6000
 .const LOGO                = $6200
@@ -34,6 +34,7 @@
 .const SCROLLING           = $6600
 .const SCREENS             = $7000                  // + $2000
 .const COLORS              = $9000                  // + $2000
+.const MUSIC               = $1000
 
 .var DATARAM               = $0e00                  // Adresse des DATABLOCKS
 .var EMBEDDING_REU         = DATARAM
@@ -44,11 +45,11 @@
 
 
 .const embeddingA          = $ff00
-.const temporer            = $1100
-.const tokens              = $1200  // buffer für die tokens  "who\0is\0adder\0"
 .const STRING_FUNKTION     = $c000
-.const EXTRACTKEYWORDS     = $1500
-.const final_answer        = $1600
+.const temporer            = $e500
+.const tokens              = $e600  // buffer für die tokens  "who\0is\0adder\0"
+.const final_answer        = $e800
+.const EXTRACTKEYWORDS     = $e900
 
 .const string1             = $b000
 .const string2             = $b100
@@ -66,12 +67,13 @@
 .var lookUpAxALo           = lookUpx127Hi + $0100 
 .var lookUpAxAHi           = lookUpAxALo  + $0100 
 .var lookUpClamp           = lookUpAxAHi  + $0100
+/*
 .var square1_lo            = lookUpClamp  + $0100
 .var square1_hi            = square1_lo   + $0200
 .var square2_lo            = square1_hi   + $0200
 .var square2_hi            = square2_lo   + $0200
 .var modulo                = square2_hi   + $0200
-
+// */
 // String Funktionen
 .var extrpos               = $cf00
 .var text_rest_pos         = extrpos                 +  1
@@ -270,7 +272,7 @@
 .var ColorLineOne_HI       = ColorLineOne_LO         + 1
 .var scroll_LO             = ColorLineOne_HI         + 1
 .var scroll_HI             = scroll_LO               + 1
-//.var UP_DOWN               = scroll_HI               + 1
+.var searchflag            = scroll_HI               + 1
 
 .pc = LoadTab "x127 && AxA && clamp && multab"
   .import binary "../data/lookup_tables.bin"

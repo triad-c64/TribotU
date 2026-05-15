@@ -7,6 +7,9 @@
 #import "extract.src"
 #import "phrases.src"
 
+.pc = MUSIC "Music"
+ .import binary "../assets/music/ne7-overcooked_omellete(wip).sid",126
+ 
 .pc = $0801 "Basic Upstart"
 BasicUpstart(PROGRAMM) 
  
@@ -32,7 +35,38 @@ BasicUpstart(PROGRAMM)
           lda #0
           sta $d020
           sta $d021
+          sta searchflag
+          tax
+          tay
+          jsr $1000
            
+
+         lda #0
+         sta $dd0e
+
+         ldx $DD0D                        // aktuelle IRQs des CIA-2 merken 
+         lda #%01111111                   // und dann alle
+         sta $DD0D                        // deaktivieren
+         
+         lda #<nmi                        //Adresse des NMI
+         sta $fffa                        //in den RAM-Vector schreiben
+         lda #>nmi
+         sta $fffb
+         
+         lda #$c7                           //LO-BYTE für             c7
+         sta $DD04                         //Timer-A vom CIA-2 setzen
+         lda #$4c                         //und auch das HI-BYTE      4c
+         sta $DD05                         //setzen
+   
+         txa                               //gemerkte IRQs vom CIA-2 in den Akku
+         ora #%10000001                    //alle IRQs + dem für Timer-A 
+         sta $DD0D                         //wieder aktivieren
+
+         lda #%00000001                    //Timer-A im CIA-2
+         sta $DD0E                         //starten
+
+
+         
           jsr Init
 REU_CHECK:
           jsr checkForREU                    // prüfen ob eine REU vorhanden ist
@@ -91,12 +125,15 @@ finalize_query:
           sta string1,x
           stx len1
          
-          sei
+          lda #1
+          sta searchflag
           jsr ShortPhrase
           jsr ExtractString
           
           jsr worker 
-          cli
+
+          lda #0
+          sta searchflag
 ready:
           jmp botloop                                
                       // zurück
@@ -113,6 +150,8 @@ irq:
          lda #$9f
          cmp $d012
          bne *-3
+         lda searchflag
+         bne returnIrq
      
          lda stop_input
          bne returnIrq
@@ -155,7 +194,6 @@ SetKeyboardBack:
          sta lastkey
         
 returnIrq: 
-       
          lda #$9e
          sta $d012
          asl $d019
@@ -169,7 +207,7 @@ returnIrq:
          rti
 
 // ************************************
-// ** Worker                         **7
+// ** Worker                         **
 // ************************************
 worker: 
           jsr save_eliza_input_string
@@ -277,7 +315,7 @@ SetLookup:
           inc GetLoadLookup  + 2
           inc SetLookup      + 2
           lda GetLoadLookup  + 2
-          cmp #$35
+          cmp #$2c
           bne GetLoadLookup
           rts
 
@@ -346,5 +384,32 @@ eliza_string_save:
 prompt:
    .text "> "
    .byte 0
-nmi: 
-    rti  
+nmi:
+         pha                               //Akku
+         txa                               //X-Register
+         pha
+         tya                               //und Y-Reg
+         pha                               //auf dem Stack merken
+         
+         lda $01
+         sta romNmi
+         lda #$35
+         sta $01
+
+         lda $DD0D                         //IRQs bestätigen
+         and #%00000001                    //Timer IRQ?
+         beq nmi_exit                      //wenn nicht -> ENDE 
+         jsr $1003                         //sonst Hintergrundfarbe ändern
+       
+nmi_exit: 
+         lda romNmi
+         sta $01
+         pla                               //Register vom Stack holen
+         tay
+         pla
+         tax
+         pla
+         
+         rti                               //und zurück
+romNmi: 
+  .byte 0

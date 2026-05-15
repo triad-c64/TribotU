@@ -267,7 +267,7 @@ Make16Positive:
         sta v1
         rts
 
-
+/*
 multiply_8bit_signed:
         lda T1
         sta _sm1+1
@@ -306,11 +306,12 @@ _skip_neg_T1:
         sta PRODUCT+1
 _skip_neg_T2:
         rts
-
+*/
 /* ***********************************************************************
  * this is the perfect for embedding - cosine simililarity 
  * ***********************************************************************
 */
+/*
 cosine_similarity:
         ldy #0
         sty d0
