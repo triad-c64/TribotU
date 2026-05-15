@@ -3,18 +3,21 @@
  *********************************************************/
 #importonce 
 
-.const ngram_min       = 1
-.const ngram_max       = 3
-.const DIM             = 64
-.const ANSWER_LENGTH   = 256 - DIM
-.const MAXLENGHT       = 38
-.const ELIZA_QUEST     = 16
-.const ELIZA_ANSW      = 50
-.const DELAYTIME       = 10
-.const SCROLLSCREENS   = 8
-.const TOTALLINES      = 25
-.const LASTLINE        = 23
-.const ELIZA_THRESHOLD = $3b
+.const ngram_min          = 1
+.const ngram_max          = 3
+.const DIM                = 64
+.const ANSWER_LENGTH      = 256 - DIM
+.const MAXLENGHT          = 38
+.const ELIZA_QUEST        = 16
+.const ELIZA_ANSW         = 50
+.const DELAYTIME          = 10
+.const SCROLLSCREENS      = 8
+.const TOTALLINES         = 25
+.const LASTLINE           = 23
+.const ELIZA_THRESHOLD    = $3d
+.const COMMAND_NUMBERS    = 6
+.const LOCATION_CHARSET_A = $B0
+.const LOCATION_CHARSET_B = $A0
 
 
 //*******************************************************************************
@@ -35,6 +38,8 @@
 .const SCREENS             = $7000                  // + $2000
 .const COLORS              = $9000                  // + $2000
 .const MUSIC               = $1000
+.const CHARSET             = $2800
+.const COMMANDS            = $c700
 
 .var DATARAM               = $0e00                  // Adresse des DATABLOCKS
 .var EMBEDDING_REU         = DATARAM

@@ -41,32 +41,30 @@ BasicUpstart(PROGRAMM)
           jsr $1000
            
 
-         lda #0
-         sta $dd0e
+          lda #0
+          sta $dd0e
 
-         ldx $DD0D                        // aktuelle IRQs des CIA-2 merken 
-         lda #%01111111                   // und dann alle
-         sta $DD0D                        // deaktivieren
+          ldx $DD0D                        // aktuelle IRQs des CIA-2 merken 
+          lda #%01111111                   // und dann alle
+          sta $DD0D                        // deaktivieren
          
-         lda #<nmi                        //Adresse des NMI
-         sta $fffa                        //in den RAM-Vector schreiben
-         lda #>nmi
-         sta $fffb
+          lda #<nmi                        //Adresse des NMI
+          sta $fffa                        //in den RAM-Vector schreiben
+          lda #>nmi
+          sta $fffb
          
-         lda #$c7                           //LO-BYTE für             c7
-         sta $DD04                         //Timer-A vom CIA-2 setzen
-         lda #$4c                         //und auch das HI-BYTE      4c
-         sta $DD05                         //setzen
+          lda #$c7                           //LO-BYTE für             c7
+          sta $DD04                         //Timer-A vom CIA-2 setzen
+          lda #$4c                         //und auch das HI-BYTE      4c
+          sta $DD05                         //setzen
    
-         txa                               //gemerkte IRQs vom CIA-2 in den Akku
-         ora #%10000001                    //alle IRQs + dem für Timer-A 
-         sta $DD0D                         //wieder aktivieren
+          txa                               //gemerkte IRQs vom CIA-2 in den Akku
+          ora #%10000001                    //alle IRQs + dem für Timer-A 
+          sta $DD0D                         //wieder aktivieren
 
-         lda #%00000001                    //Timer-A im CIA-2
-         sta $DD0E                         //starten
+          lda #%00000001                    //Timer-A im CIA-2
+          sta $DD0E                         //starten
 
-
-         
           jsr Init
 REU_CHECK:
           jsr checkForREU                    // prüfen ob eine REU vorhanden ist
@@ -75,6 +73,10 @@ REU_CHECK:
           
           jsr Init
           jsr CleanUp
+
+          jsr CopyCharset
+          lda #LOCATION_CHARSET_A
+          jsr GetCharset
 
           ldx #0
 PROMPT:
@@ -210,11 +212,16 @@ returnIrq:
 // ** Worker                         **
 // ************************************
 worker: 
+          jsr check_for_command
+          cpx #1                       // valid command
+          beq return_from_worker
+
           jsr save_eliza_input_string
           jsr PlotQuestions
           jsr tokenize
           jsr Embeddings
           jsr start_check
+return_from_worker:
           rts
 
 start_check:
@@ -380,21 +387,159 @@ eliza_string_save:
           cpx #40
           bne eliza_string_save
           rts
-               
+
+.pc = COMMANDS "Commando handling"
+
+GetCharset:
+        sta REUBANK
+        lda #0
+        sta REURAM + 1
+
+        lda #<($0300)                      // Die Anzahl der BYTEs ($0100)
+        sta REUBYTES                       // je Aktion der REU bekannt machen
+        lda #>($0300)
+        sta REUBYTES+1
+
+        lda #<CHARSET                      // Beginn des Speichers der  
+        sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
+        lda #>CHARSET
+        sta REUC64RAM+1
+
+        lda #REU_FETCH_A__            
+        sta REUCOMMAND 
+
+        lda #%00011010
+        sta $d018
+        jsr Init     
+        rts
+
+check_for_command:
+        ldy #$0
+next_command:
+        ldx #$ff
+loop_check_command:
+        inx
+        lda string1,         x
+        beq complete_command
+cmds:
+        cmp commando,        x
+        beq loop_check_command
+        
+        lda cmds + 1
+        clc
+        adc #12
+        sta cmds + 1
+        lda cmds + 2
+        adc #0
+        sta cmds + 2
+
+        iny
+        cpy #COMMAND_NUMBERS
+        bne next_command
+       
+        lda #>commando
+        sta cmds + 2
+        lda #<commando
+        sta cmds + 1
+        ldx #$00
+        rts
+
+complete_command:
+        lda #>commando
+        sta cmds + 2
+        lda #<commando
+        sta cmds + 1
+        
+        cpy #0
+        beq print_help
+        cpy #1 
+        beq switch_music
+        cpy #2
+        beq select_tune_1
+        cpy #3
+        beq select_tune_2
+        cpy #4
+        beq select_charset_1
+        cpy #5
+        beq select_charset_2
+        ldx #0
+        rts 
+print_help:
+        ldx #1
+        rts
+switch_music:
+        lda music_play
+        eor #1
+        sta music_play
+        ldx #1
+        rts
+
+select_tune_1:
+        ldx #1
+        rts
+select_tune_2:
+        ldx #1
+        rts
+select_charset_1:
+        lda #LOCATION_CHARSET_A              // OFFSET CHARSET 1
+        jsr GetCharset
+        ldx #1
+        rts
+select_charset_2:
+        lda #LOCATION_CHARSET_B              // OFFSET CHARSET 1
+        jsr GetCharset
+        ldx #1
+        rts
+
+CopyCharset:     
+        lda $01
+        pha
+        and #%11111011
+        sta $01
+        ldx #$00
+copy_charset:
+        lda $d000,x
+        sta CHARSET,x
+
+        lda $d100,x
+        sta CHARSET+$100,x
+
+        lda $d200,x
+        sta CHARSET+$200,x
+
+        lda $d300,x
+        sta CHARSET+$300,x
+
+        lda $d400,x
+        sta CHARSET+$400,x
+
+        lda $d500,x
+        sta CHARSET+$500,x
+
+        lda $d600,x
+        sta CHARSET+$600,x
+
+        lda $d700,x
+        sta CHARSET+$700,x
+
+        inx
+        bne copy_charset
+        pla
+        sta $01
+        rts
+
 prompt:
    .text "> "
    .byte 0
+
 nmi:
          pha                               //Akku
          txa                               //X-Register
          pha
          tya                               //und Y-Reg
          pha                               //auf dem Stack merken
-         
-         lda $01
-         sta romNmi
-         lda #$35
-         sta $01
+         lda  music_play
+         beq  nmi_exit
 
          lda $DD0D                         //IRQs bestätigen
          and #%00000001                    //Timer IRQ?
@@ -402,8 +547,6 @@ nmi:
          jsr $1003                         //sonst Hintergrundfarbe ändern
        
 nmi_exit: 
-         lda romNmi
-         sta $01
          pla                               //Register vom Stack holen
          tay
          pla
@@ -411,5 +554,13 @@ nmi_exit:
          pla
          
          rti                               //und zurück
-romNmi: 
+music_play: 
   .byte 0
+
+commando:
+  .text "/help@      "
+  .text "/music@     "
+  .text "/tune 1@    "
+  .text "/tune 2@    "
+  .text "/char 1@    "
+  .text "/char 2@    "
