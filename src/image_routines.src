@@ -369,9 +369,11 @@ return_from_last_word:
          rts
 ClearLine:
          ldx #0
-         lda #$20
 clear_line:
+         lda #$20
          sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         lda #WHITE
+         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
          inx
          cpx #40
          bne clear_line
@@ -494,6 +496,92 @@ PlotScrolledScreen:
 
     rts
 
+save_Y:
+  .byte 0
+
+PlotHelp:
+    lda #LOCATION_HELP
+    sta REUBANK
+
+    lda #<($0100)                      // Die Anzahl der BYTEs ($0100)
+    sta REUBYTES                       // je Aktion der REU bekannt machen
+    lda #>($0100)
+    sta REUBYTES+1
+
+    lda #<HELPSCREENS                        // Beginn des Speichers der  
+    sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
+    lda #>HELPSCREENS
+    sta REUC64RAM+1
+
+    ldy #0
+
+plot_hlp:
+    ldx #0
+    sty REURAM + 1
+
+    lda #REU_FETCH_A__            
+    sta REUCOMMAND 
+getHelp:
+    lda HELPSCREENS      ,    x
+    sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+getHelpColor:
+    lda HELPSCREENS + 128,    x
+    sta COLORS  + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+    inx
+    cpx #40
+    bne getHelp
+    
+    sty save_Y
+    jsr scroll_up
+    ldy save_Y
+
+    iny
+    cpy #23
+    bne plot_hlp
+    jsr ClearLine
+    rts
+
+PlotInfo:
+    lda #LOCATION_HELP
+    sta REUBANK
+
+    lda #<($0100)                      // Die Anzahl der BYTEs ($0100)
+    sta REUBYTES                       // je Aktion der REU bekannt machen
+    lda #>($0100)
+    sta REUBYTES+1
+
+    lda #<HELPSCREENS                        // Beginn des Speichers der  
+    sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
+    lda #>HELPSCREENS
+    sta REUC64RAM+1
+
+    ldy #25
+plot_nfo:
+    ldx #0
+    sty REURAM + 1
+
+    lda #REU_FETCH_A__            
+    sta REUCOMMAND 
+getInfo:
+    lda HELPSCREENS      ,    x
+    sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+getInfoColor:
+    lda HELPSCREENS + 128,    x
+    sta COLORS  + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+    inx
+    cpx #40
+    bne getInfo
+    
+    sty save_Y
+    jsr scroll_up
+    ldy save_Y
+
+    iny
+    cpy #48
+    bne plot_nfo
+    jsr ClearLine
+    rts
+
 scroll_pos:
     .byte 0,0
 
@@ -532,3 +620,4 @@ tribot_plus_logo:
 .byte 14,3,11,14,3,11,3,11,3,11,3,14,3,11,3,11,3,11,14,3,11,14,14,11,11,14
 .byte 14,3,11,14,3,11,3,11,3,11,3,3,3,11,3,3,3,11,14,3,11,14,14,14,14,14
 .byte 14,11,11,14,11,11,11,11,11,11,14,11,11,14,14,11,11,14,14,11,11,14,14,14,14,14
+

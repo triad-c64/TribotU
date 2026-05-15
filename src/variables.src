@@ -15,11 +15,12 @@
 .const TOTALLINES         = 25
 .const LASTLINE           = 23
 .const ELIZA_THRESHOLD    = $3d
-.const COMMAND_NUMBERS    = 6
+.const COMMAND_NUMBERS    = 8
 .const LOCATION_CHARSET_A = $B0
 .const LOCATION_CHARSET_B = $A0
 .const LOCATION_MUSIC_A   = $C0
 .const LOCATION_MUSIC_B   = $D0
+.const LOCATION_HELP      = $E0
 
 
 
@@ -43,6 +44,7 @@
 .const MUSIC               = $1000
 .const CHARSET             = $2800
 .const COMMANDS            = $c700
+.const HELPSCREENS         = $cf00
 
 .var DATARAM               = $0e00                  // Adresse des DATABLOCKS
 .var EMBEDDING_REU         = DATARAM

@@ -44,6 +44,7 @@ REU_CHECK:
           jsr CleanUp
 
           jsr CopyCharset
+
           lda #LOCATION_CHARSET_A
           jsr GetCharset
 
@@ -84,18 +85,13 @@ REU_CHECK:
           ldx #0
 PROMPT:
           lda prompt    ,x
-          beq SetNMI
+          beq SetIRQ
           sta SCREEN - 2,x
           lda #GREY
           sta COLORRAM-2,x
           inx
           bne PROMPT
-SetNMI:
-          lda #<nmi
-          sta $fffa
-          lda #>nmi
-          sta $fffb
-         
+SetIRQ:
           lda #<irq
           sta $fffe
           lda #>irq
@@ -447,6 +443,7 @@ loop_check_command:
         beq complete_command
 cmds:
         cmp commando,        x
+        sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
         beq loop_check_command
         
         lda cmds + 1
@@ -467,28 +464,37 @@ cmds:
         sta cmds + 1
         ldx #$00
         rts
-
+sy:
+ .byte 0
 complete_command:
+        sty sy
+        jsr scroll_up
+        jsr ClearLine
+        jsr scroll_up
+        ldy sy
         lda #>commando
         sta cmds + 2
         lda #<commando
         sta cmds + 1
         
-        cpy #0
-        beq print_help
-        cpy #1 
-        beq switch_music
         cpy #2
-        beq select_tune_1
+        bcc print_help
+        cpy #2 
+        beq switch_music
         cpy #3
-        beq select_tune_2
+        beq select_tune_1
         cpy #4
-        beq select_charset_1
+        beq select_tune_2
         cpy #5
+        beq select_charset_1
+        cpy #6
         beq select_charset_2
+        cpy #7
+        beq show_information
         ldx #0
         rts 
 print_help:
+        jsr PlotHelp
         ldx #1
         rts
 switch_music:
@@ -551,7 +557,10 @@ select_charset_2:
         jsr GetCharset
         ldx #1
         rts
-
+show_information:
+        jsr PlotInfo
+        ldx #1
+        rts
 CopyCharset:     
         lda $01
         pha
@@ -625,8 +634,10 @@ rom:
 
 commando:
   .text "/help@      "
+  .text "/man@       "
   .text "/music@     "
   .text "/tune 1@    "
   .text "/tune 2@    "
   .text "/char 1@    "
   .text "/char 2@    "
+  .text "/info@      "
