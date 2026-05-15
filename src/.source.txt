@@ -1,216 +1,622 @@
+
 /*********************************************************
  *     coded by Adder of Triad in 2026 for X2026         *
  *********************************************************/
 #import "variables.src"
-#import "image_routines.src"
 
-.pc = ELIZA "ELIZA"
-        lda #0
-        sta eliza_entries     + 1
-        lda #<final_answer 
-        sta out_answer_e      + 1
-        sta out_answer_n      + 1
-        sta clean_rest_answer + 1
+.pc = SCROLLING "SCROLL SCREENS"
 
-        lda #>final_answer 
-        sta out_answer_e      + 2
-        sta out_answer_n      + 2
-        sta clean_rest_answer + 2
+scroll_up:
+    lda #>SCREENS
+    clc
+    adc #$20                  // 8 screens
+    sta LineZero_HI
+    sta LineOne_HI
 
-        lda #$90               // OFFSET ELIZA
-        sta REUBANK
-eliza_entries:
-        lda #0
-        sta REURAM + 1
+    lda #<SCREENS
+    sta LineZero_LO
+    sec
+    sbc #40
+    sta LineOne_LO
 
-        lda #REU_FETCH_A__            
-        sta REUCOMMAND                
-            
-        jsr GetResponse
+    lda LineOne_HI
+    sbc #0
+    sta LineOne_HI
 
-        lda eliza_answer
-        bne here_wait
-        inc eliza_entries + 1
-        lda eliza_entries + 1 
-        cmp ELIZA_ENTRIES
-        bne eliza_entries
-          
-        lda eliza_answer
-        beq fallback_eliza
 
-        jmp here_wait
-fallback_eliza:
+    lda #>COLORS
+    clc
+    adc #$20                  // 8 screens
+    sta ColorLineZero_HI
+    sta ColorLineOne_HI
+
+    lda #<COLORS
+    sta ColorLineZero_LO
+    sec
+    sbc #40
+    sta ColorLineOne_LO
+
+    lda ColorLineOne_HI
+    sbc #0
+    sta ColorLineOne_HI
+
+    ldx #$0
+ScrollArea:
+    ldy #$0
+loop_scroll:
+    lda (LineOne_LO) ,y     
+    sta (LineZero_LO),y
+    lda (ColorLineOne_LO) ,y     
+    sta (ColorLineZero_LO),y
+    iny
+    cpy #40
+    bne loop_scroll  
+
+    lda LineOne_LO
+    sec
+    sbc #40
+    sta LineOne_LO
+    lda LineOne_HI
+    sbc #0
+    sta LineOne_HI
+
+    lda LineZero_LO
+    sec
+    sbc #40
+    sta LineZero_LO
+    lda LineZero_HI
+    sbc #0
+    sta LineZero_HI
+
+
+    lda ColorLineOne_LO
+    sec
+    sbc #40
+    sta ColorLineOne_LO
+    lda ColorLineOne_HI
+    sbc #0
+    sta ColorLineOne_HI
+
+    lda ColorLineZero_LO
+    sec
+    sbc #40
+    sta ColorLineZero_LO
+    lda ColorLineZero_HI
+    sbc #0
+    sta ColorLineZero_HI
+
+    inx 
+    cpx #198
+    bne ScrollArea 
+
+    inc lines_used
+
+    jsr PlotScreen
+    rts
+
+
+
+PlotScreen:
+    lda #$0
+    sta s_to_d           + 1
+    sta s_to_d_color     + 1
+    lda #$04
+    sta s_to_d           + 2
+    lda #$d8
+    sta s_to_d_color     + 2
+
+
+    lda #<(SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000))
+    sta source_to_dest   + 1
+    lda #>(SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000))    
+    sta source_to_dest   + 2
+
+    lda #<(COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000))
+    sta source_to_dest_color   + 1
+    lda #>(COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000))    
+    sta source_to_dest_color   + 2
+
+PLOT_SCREEN_HERE:
+
+    ldx #$0
+SOURCE_TO_DESTINATION:
+    ldy #$0
+source_to_dest:
+    lda SCREENS         ,y
+s_to_d:
+    sta $0400           ,y
+source_to_dest_color:
+    lda COLORS          ,y
+s_to_d_color:
+    sta $d800           ,y
+    
+    iny
+    cpy #40
+    bne source_to_dest
+
+    lda source_to_dest  + 1
+    sec
+    sbc #40
+    sta source_to_dest  + 1
+    lda source_to_dest  + 2
+    sbc #0
+    sta source_to_dest  + 2
+
+
+    lda s_to_d          + 1
+    clc
+    adc #40
+    sta s_to_d          + 1
+    lda s_to_d          + 2
+    adc #0
+    sta s_to_d          + 2
+
+
+    lda source_to_dest_color  + 1
+    sec
+    sbc #40
+    sta source_to_dest_color  + 1
+    lda source_to_dest_color  + 2
+    sbc #0
+    sta source_to_dest_color  + 2
+
+
+    lda s_to_d_color          + 1
+    clc
+    adc #40
+    sta s_to_d_color          + 1
+    lda s_to_d_color          + 2
+    adc #0
+    sta s_to_d_color          + 2
+    
+    inx 
+    cpx #LASTLINE
+    bne SOURCE_TO_DESTINATION
+    rts
+
+
+PaintStart:
+         ldx #$0
+         ldy #$0
+         lda #$20
+SetScreensClear:
+         sta SCREENS      ,x
+         lda #WHITE
+SetColorClear:
+         sta COLORS       ,x
+         lda #$20
+
+         inx 
+         bne SetScreensClear
+         inc SetScreensClear + 2
+         inc SetColorClear + 2
+         iny
+         cpy #SCROLLSCREENS 
+         bne SetScreensClear
+
+         ldx #$0
+GetTribotLogo:
+         lda inrtoduce        ,x
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*0,x
+
+         lda tribot_plus_logo,x
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*2,x
+         lda tribot_plus_logo + 26,x
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*3,x
+         lda tribot_plus_logo + 26 *2,x
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*4,x
+         lda tribot_plus_logo + 26 *3,x
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*5,x
+         lda tribot_plus_logo + 26 *4,x
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*6,x
+         lda tribot_plus_logo + 26 *5,x
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*7,x
+         lda tribot_plus_logo + 26 *6,x
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*8,x
+         lda tribot_plus_logo + 26 *7,x
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*9,x
+
+         lda #GREY
+         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*0,x
+         lda tribot_plus_logo + 26*8,x
+         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*2,x
+         lda tribot_plus_logo + 26*9,x
+         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*3,x
+         lda tribot_plus_logo + 26*10,x
+         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*4,x
+         lda tribot_plus_logo + 26*11,x
+         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*5,x
+         lda tribot_plus_logo + 26*12,x
+         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*6,x
+         lda tribot_plus_logo + 26*13,x
+         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*7,x
+         lda tribot_plus_logo + 26*14,x
+         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*8,x
+         lda tribot_plus_logo + 26*15,x
+         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*9,x
+         inx  
+         cpx #26
+         bne GetTribotLogo
+
+         ldy #0
+PrintInfo:
+         ldx #0
+Info: 
+         lda Infotext,x
+info_location:
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*11, x
+         lda #LIGHT_GREY
+info_color:
+         sta COLORS  + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*11, x
+         inx
+         cpx #40
+         bne Info
+
+         lda info_location + 1
+         sec
+         sbc #40
+         sta info_location + 1
+         lda info_location + 2
+         sbc #0
+         sta info_location +2
+
+         lda info_color + 1
+         sec
+         sbc #40
+         sta info_color + 1
+         lda info_color + 2
+         sbc #0
+         sta info_color + 2
          
-        ldy #$00
-copy_fallback:
-        lda fallback,y
-        beq cnup
-        sta final_answer,y
-        iny
-        jmp copy_fallback
+         lda Info + 1
+         clc
+         adc #40
+         sta Info + 1
+         lda Info + 2
+         adc #0
+         sta Info + 2
 
-cnup:
-        lda #$20
-clean_rest_bck_answer:
-        sta final_answer           ,y
-        iny
-        bne clean_rest_bck_answer
+         iny 
+         cpy #5
+         bne PrintInfo
 
-here_wait:
-        rts
+         jsr PlotScreen
 
-
-matches:
-        ldx #0          
-
-search_loop:
-        lda string2           ,x
-        beq quit_w_no_match     
-        ldy #0                 
-match_pattern:
-        lda DATARAM           ,y
-        beq pattern_matched    
-        cmp #$30
-        beq pattern_matched
-        lda string2           ,x
-        cmp DATARAM           ,y
-        bne next_char
-        iny
-        inx
-        jmp match_pattern
-
-pattern_matched:
-        ldy #0
-copy_rest:
-        lda string2           ,x
-        sta EXTRACTED_ELIZA   ,y
-        beq return_from_extr
-        iny
-        inx
-        jmp copy_rest
-
-return_from_extr:
-        ldx #1
-        rts
-
-next_char:
-        inx
-        jmp search_loop
-
-quit_w_no_match:
-        ldx #0
-        rts
+         ldx #0 
+limiter:
+         lda #99
+         sta SCREEN - 42   , x
+         lda #DARK_GREY
+         sta $d800 + 23 *40, x
+         inx
+         cpx #40
+         bne limiter
+         rts
 
 
-// --------------------------------------------------------------------------------------------------------------
+PlotAlignedLines:
+         ldx #0
+         ldy #0
+         sty start_row      + 1
+         sty onRow
+GET_FINAL_ANWER:
+         lda BOT_ANSWER_REU        , y
+         cmp #' '
+         beq setMark
+         inx
+         iny
+         cpy #ANSWER_LENGTH
+         bne GET_FINAL_ANWER
+         jsr scroll_up
+return_from_plot_aligned:
+         rts
 
-GetResponse:
-        ldx #$00            // pattern index x = 0
-next_pattern:
+setMark:
+         cpx #39
+         bcc on_this_row
+          
+         lda mark
+         sta curr_mark +1
+         
+start_row:
+         ldy #0
+         ldx #0
+GiveOutRow:
+         lda BOT_ANSWER_REU        , y
+         beq last_word
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         inx
+         iny
+curr_mark:
+         cpy #0
+         bne GiveOutRow
+
+         lda #$20
+fill_up:
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         inx
+         cpx #40
+         bcc fill_up
         
-        jsr matches         // prüfe, ob pattern matcht
-        cpx #0
-        bne match
-no_match:
-        lda #0
-        sta eliza_answer
-        rts
-match:
-        ldy #$00
+         sty start_row      + 1
 
-        lda $d012
-        and #$03
-        beq prep_resp0
-        cmp #1
-        beq prep_resp1
-        cmp #2
-        beq prep_resp2
-prep_resp3:
-        lda #ELIZA_QUEST + ELIZA_ANSW *3
-        sta plot_response + 1
-        sta plot_answer   + 1
-        jmp plot_response
-prep_resp0:
-        lda #ELIZA_QUEST
-        sta plot_response + 1
-        sta plot_answer   + 1
-        jmp plot_response
-prep_resp1:
-        lda #ELIZA_QUEST + ELIZA_ANSW 
-        sta plot_response + 1
-        sta plot_answer   + 1
-        jmp plot_response
-prep_resp2:
-        lda #ELIZA_QUEST + ELIZA_ANSW * 2
-        sta plot_response + 1
-        sta plot_answer   + 1
-        jmp plot_response
+         jsr scroll_up
+         
+         ldy start_row + 1
+         dey
+         ldx #0
+         jmp GET_FINAL_ANWER
 
-plot_response:
-        lda DATARAM           ,y
-        cmp #$30                        // '0' ersetzen mit EXTRACTED            
-        bne plot_answer
- 
-// --- MATCH FOUND ---
-        ldx #0
-replace_loop:
-        lda EXTRACTED_ELIZA,x
-        beq continue_with_answer
-out_answer_e:
-        sta final_answer           
-        inc out_answer_e      + 1
-        inc out_answer_n      + 1
-        inc clean_rest_answer + 1
-        inx
-        cpx #DIM           
-        bne replace_loop
-continue_with_answer:
-        iny 
-plot_answer:  
-        lda DATARAM           ,y
-        beq return_from_response
-out_answer_n:
-        sta final_answer 
-        inc out_answer_e      + 1
-        inc out_answer_n      + 1 
-        inc clean_rest_answer + 1       
-        iny
-        bne plot_response
-return_from_response:
-        lda #$20
-clean_rest_answer:
-        sta final_answer     
-        inc clean_rest_answer + 1
-        bne clean_rest_answer
-        lda #1 
-        sta eliza_answer
-        rts
+last_word:
+         lda onRow
+         beq return_from_last_word
 
-Plot_ELIZA_ANSWER:
-        ldx #0
-plot_eliza_answer:
-        lda final_answer,x
-        sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-        inx
-        cpx #40
-        bne plot_eliza_answer
+         lda #$20
+fill_up_last:
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         inx
+         cpx #40
+         bcc fill_up_last
 
-        jsr scroll_up
+         jsr scroll_up
+         jsr ClearLine
+         jsr scroll_up
+         rts 
+return_from_last_word:
+         jsr ClearLine
+         jsr scroll_up
+         rts
+ClearLine:
+         ldx #0
+clear_line:
+         lda #$20
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         lda #WHITE
+         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         inx
+         cpx #40
+         bne clear_line
+         rts
+on_this_row:
+         inc onRow
+         iny
+         sty mark
+         inx
+         jmp GET_FINAL_ANWER
+         rts
+onRow:
+ .byte 0
 
-        ldx #0
-plot_eliza_clean:
-        lda #$20
-        sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-        inx
-        cpx #40
-        bne plot_eliza_clean
-        
-        jsr scroll_up
-        rts
+PlotQuestions:
+         ldx #0
+GetQ:
+         lda SCREEN - 2,x
+         beq return_from_question
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         lda #YELLOW
+         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         inx
+         jmp GetQ
+return_from_question:
+         jsr scroll_up
+         ldx #0
+         lda #$20
+clear_row:
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         sta SCREEN,x
+         inx
+         cpx #40
+         bne clear_row
+         jsr scroll_up
+         ldx #0
+think:
+         lda thinking,x
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         lda #CYAN
+         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         inx
+         cpx #40
+         bne think
+return_from_thinking:
+         jsr scroll_up     
 
-// -------------------------------------------------
-// daten
-// -------------------------------------------------
-fallback:
-        .text "please tell me more"
-        .byte 0
+         ldx #0
+possible_color:
+         lda #$20
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         lda #WHITE
+         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         inx
+         cpx #40
+         bne possible_color
+         jsr scroll_up        
+         rts
+
+scroll_F1:
+         lda lines_scrolled
+         cmp lines_used
+         bcc scrollup
+         rts
+scrollup:
+         inc lines_scrolled
+         lda scroll_pos 
+         sec
+         sbc #40
+         sta scroll_pos 
+         lda scroll_pos +1
+         sbc #0
+         sta scroll_pos +1
+         jsr PlotScrolledScreen
+ret_from_downer:
+         rts
+scroll_F7:
+         lda lines_scrolled
+         bne scrolldown
+         rts
+scrolldown:
+         dec lines_scrolled
+         lda scroll_pos 
+         clc
+         adc #40
+         sta scroll_pos 
+         lda scroll_pos +1
+         adc #0
+         sta scroll_pos +1
+         jsr PlotScrolledScreen
+         rts
+
+PlotScrolledScreen:
+    lda #$0
+    sta s_to_d           + 1
+    sta s_to_d_color     + 1
+    lda #$04
+    sta s_to_d           + 2
+    lda #$d8
+    sta s_to_d_color     + 2
+
+
+    lda #<(SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000))
+    sec
+    sbc scroll_pos       + 0
+    sta source_to_dest   + 1
+    lda #>(SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000)) 
+    sbc scroll_pos       + 1   
+    sta source_to_dest   + 2
+
+    lda #<(COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000))
+    sec
+    sbc scroll_pos             + 0
+    sta source_to_dest_color   + 1
+    lda #>(COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000))  
+    sbc scroll_pos            + 1     
+    sta source_to_dest_color  + 2
+     
+    jsr PLOT_SCREEN_HERE
+
+    rts
+
+save_Y:
+  .byte 0
+
+PlotHelp:
+    lda #LOCATION_HELP
+    sta REUBANK
+
+    lda #<($0100)                      // Die Anzahl der BYTEs ($0100)
+    sta REUBYTES                       // je Aktion der REU bekannt machen
+    lda #>($0100)
+    sta REUBYTES+1
+
+    lda #<HELPSCREENS                        // Beginn des Speichers der  
+    sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
+    lda #>HELPSCREENS
+    sta REUC64RAM+1
+
+    ldy #0
+
+plot_hlp:
+    ldx #0
+    sty REURAM + 1
+
+    lda #REU_FETCH_A__            
+    sta REUCOMMAND 
+getHelp:
+    lda HELPSCREENS      ,    x
+    sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+getHelpColor:
+    lda HELPSCREENS + 128,    x
+    sta COLORS  + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+    inx
+    cpx #40
+    bne getHelp
+    
+    sty save_Y
+    jsr scroll_up
+    ldy save_Y
+
+    iny
+    cpy #23
+    bne plot_hlp
+    jsr ClearLine
+    rts
+
+PlotInfo:
+    lda #LOCATION_HELP
+    sta REUBANK
+
+    lda #<($0100)                      // Die Anzahl der BYTEs ($0100)
+    sta REUBYTES                       // je Aktion der REU bekannt machen
+    lda #>($0100)
+    sta REUBYTES+1
+
+    lda #<HELPSCREENS                        // Beginn des Speichers der  
+    sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
+    lda #>HELPSCREENS
+    sta REUC64RAM+1
+
+    ldy #25
+plot_nfo:
+    ldx #0
+    sty REURAM + 1
+
+    lda #REU_FETCH_A__            
+    sta REUCOMMAND 
+getInfo:
+    lda HELPSCREENS      ,    x
+    sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+getInfoColor:
+    lda HELPSCREENS + 128,    x
+    sta COLORS  + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+    inx
+    cpx #40
+    bne getInfo
+    
+    sty save_Y
+    jsr scroll_up
+    ldy save_Y
+
+    iny
+    cpy #48
+    bne plot_nfo
+    jsr ClearLine
+    rts
+
+scroll_pos:
+    .byte 0,0
+
+
+mark:
+  .byte 0 
+inrtoduce:
+  .text "Tribot Plus, Triad                          "
+
+thinking:
+  .text "* Thinking...                                                                     "
+
+Infotext:
+  .text "This scene database includes embedding  based similarity search and an ELIZA -  style conversational system for simple  natural language interaction.                                      type: /help                                                                                                      "
+
+
+lines_used:
+  .byte 0
+lines_scrolled:
+  .byte 0
+
+tribot_plus_logo:
+.byte 160,160,160,46,254,160,252,46,160,46,254,160,252,46,254,160,252,46,160,160,160,46,32,32,32,32
+.byte 32,160,112,125,160,46,160,93,64,125,160,32,160,93,160,46,160,93,32,160,112,125,32,32,32,32
+.byte 32,160,93,32,160,93,160,93,160,46,160,32,160,93,160,93,160,93,32,160,93,32,32,160,32,32
+.byte 32,160,93,32,160,160,236,93,160,93,160,160,236,32,160,93,160,93,32,160,93,32,160,160,160,46
+.byte 32,160,93,32,160,46,160,93,160,93,160,32,160,93,160,93,160,93,32,160,93,32,32,160,112,125
+.byte 32,160,93,32,160,93,160,93,160,93,160,32,160,93,160,93,160,93,32,160,93,32,32,64,125,32
+.byte 32,160,93,32,160,93,160,93,160,93,251,160,236,46,251,160,236,46,32,160,93,32,32,32,32,32
+.byte 32,64,125,32,64,125,64,125,64,125,32,64,64,32,32,64,64,32,32,64,125,32,32,32,32,32
+.byte 3,3,3,11,3,3,3,11,3,11,3,3,3,11,3,3,3,11,3,3,3,11,14,14,14,14
+.byte 14,3,11,11,3,11,3,11,11,11,3,14,3,11,3,11,3,11,14,3,11,11,14,14,14,14
+.byte 14,3,11,14,3,11,3,11,3,11,3,14,3,11,3,11,3,11,14,3,11,14,14,3,14,14
+.byte 14,3,11,14,3,3,3,11,3,11,3,3,3,14,3,11,3,11,14,3,11,14,3,3,3,11
+.byte 14,3,11,14,3,11,3,11,3,11,3,14,3,11,3,11,3,11,14,3,11,14,14,3,11,11
+.byte 14,3,11,14,3,11,3,11,3,11,3,14,3,11,3,11,3,11,14,3,11,14,14,11,11,14
+.byte 14,3,11,14,3,11,3,11,3,11,3,3,3,11,3,3,3,11,14,3,11,14,14,14,14,14
+.byte 14,11,11,14,11,11,11,11,11,11,14,11,11,14,14,11,11,14,14,11,11,14,14,14,14,14
+

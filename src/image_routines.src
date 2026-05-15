@@ -341,7 +341,6 @@ fill_up:
          sty start_row      + 1
 
          jsr scroll_up
-         inc onRow
          
          ldy start_row + 1
          dey
@@ -379,7 +378,7 @@ clear_line:
          bne clear_line
          rts
 on_this_row:
-
+         inc onRow
          iny
          sty mark
          inx
