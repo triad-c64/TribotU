@@ -33,7 +33,7 @@ BasicUpstart(PROGRAMM)
           sta $d020
           sta $d021
           sta searchflag
-
+          jsr CleanView
           jsr Init
 REU_CHECK:
           jsr checkForREU                    // prüfen ob eine REU vorhanden ist
@@ -335,6 +335,19 @@ Ask_ELIZA:
           sta think_anim
           jsr Plot_ELIZA_ANSWER
           jsr Init
+          rts
+
+CleanView:
+          ldx #0
+          lda #$20
+clear_view:
+          sta SCREENS,x
+          inx 
+          bne clear_view
+          inc clear_view + 2
+          ldy clear_view + 2
+          cpy #$b0
+          bne clear_view
           rts
 
 CleanUp:
