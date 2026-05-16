@@ -172,11 +172,12 @@ increment_to_char:
    beq new_len_1
 set_len:
    sty len1
-   lda #$00
+ /*  lda #$00
 clr_input_rest:
    sta input,y
    iny
    bne clr_input_rest
+   */
 new_len_1:
    rts
 

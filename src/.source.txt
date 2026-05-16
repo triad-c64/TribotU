@@ -1,700 +1,228 @@
 /*********************************************************
- *     coded by Adder of Triad in 2026 for X2026         *
+ *     coded by Adder of Triad in 2025 / 2026 for X2026  *
  *********************************************************/
-#import "tokenize.src"
-#import "keyboard.src"
-#import "embedder.src"
-#import "extract.src"
-#import "phrases.src"
 
-.pc = $0801 "Basic Upstart"
-BasicUpstart(PROGRAMM) 
- 
-.pc = PROGRAMM "TRIBOT ULTIMATE"
-          
-          sei
-          lda #$7f
-          sta $dc0d
+#import "variables.src"
 
-          lda #$35
-          sta $01
-          
-          lda #$ff
-          cmp $d012
-          bne *-3
-          lda #$01
-          cmp $d012
-          bne *-3
-          lda #0
-          cmp $d012
-          bne *-3
+.pc = STRING_FUNKTION "STRING_FUNCTION"
 
-          lda #0
-          sta $d020
-          sta $d021
-          sta searchflag
-          jsr CleanView
-          jsr Init
-REU_CHECK:
-          jsr checkForREU                    // prüfen ob eine REU vorhanden ist
-          cpx #0
-          beq REU_CHECK
-          
-          jsr Init
-          jsr CleanUp
+ExtractString: 
+   lda #<extract
+   sta extract_addr
+   lda #>extract
+   sta extract_addr + 1
 
-          jsr CopyCharset
+Extract:
+   ldy #0
+Checklength:
+   lda (extract_addr)          ,y
+   cmp #','
+   beq WriteLength
+   cmp #0
+   bne length__
+   jmp output
+length__:
+   iny
+   bne Checklength
 
-          lda #LOCATION_CHARSET_A
-          jsr GetCharset
-
-          lda #LOCATION_MUSIC_A
-          jsr GetMusic
-
-          lda #0
-          tax
-          tay
-          jsr $1000
-           
-
-          lda #0
-          sta $dd0e
-
-          ldx $DD0D                        // aktuelle IRQs des CIA-2 merken 
-          lda #%01111111                   // und dann alle
-          sta $DD0D                        // deaktivieren
-         
-          lda #<nmi                        //Adresse des NMI
-          sta $fffa                        //in den RAM-Vector schreiben
-          lda #>nmi
-          sta $fffb
-         
-          lda #$c7                           //LO-BYTE für             c7
-          sta $DD04                         //Timer-A vom CIA-2 setzen
-          lda #$4c                         //und auch das HI-BYTE      4c
-          sta $DD05                         //setzen
+WriteLength:
+   sty extractLenght
+   jsr CopyString                          // len1 needed
+   jsr ResetAlgorithm
    
-          txa                               //gemerkte IRQs vom CIA-2 in den Akku
-          ora #%10000001                    //alle IRQs + dem für Timer-A 
-          sta $DD0D                         //wieder aktivieren
+CheckString:
+   ldx inp_char_nr
+   ldy extrpos
+   cpy extractLenght
+   bne Extrahiere
 
-          lda #%00000001                    //Timer-A im CIA-2
-          sta $DD0E                         //starten
+   jsr ResetExtract          
+Extrahiere:
+   inc occour_in_query
+   lda string1                 ,x
+   cmp (extract_addr)          ,y
+   bne CheckPossibleMatch
 
-
-          ldx #0
-PROMPT:
-          lda prompt    ,x
-          beq SetIRQ
-          sta SCREEN - 2,x
-          lda #GREY
-          sta COLORRAM-2,x
-          inx
-          bne PROMPT
-SetIRQ:
-          lda #<irq
-          sta $fffe
-          lda #>irq
-          sta $ffff
-
-          lda #$a1
-          sta $d012
-          lda #$1b
-          sta $d011
-          lda #1
-          sta $d019
-          sta $d01a
-          cli
-botloop:   
-          jsr Input
-          
-          lda #1
-          sta stop_input
-  
-          ldx #0
-setQuery:
-          lda SCREEN,x
-          cmp #63 // fragezeichen
-          beq finalize_query
-sta_input:
-          sta string1,x
-          inx
-          bne setQuery
-          
-finalize_query:
-          lda #$00
-          sta string1,x
-          stx len1
-         
-          lda #1
-          sta searchflag
-          jsr ShortPhrase
-          jsr ExtractString
-          
-          jsr worker 
-
-          lda #0
-          sta searchflag
-ready:
-          jmp botloop                                
-                      // zurück
-stop_input:
- .byte 0
-// ****************************************************************************************
-irq: 
-         pha
-         txa
-         pha
-         tya
-         pha
-  
-         lda #$9f
-         cmp $d012
-         bne *-3
-         lda searchflag
-         bne returnIrq
-     
-         lda stop_input
-         bne returnIrq
+   lda firstoccur
+   bne add_possible_match
+   stx inputpos
+   lda #1
+   sta firstoccur
+add_possible_match:
+   inc possible_match
+CheckPossibleMatch:
+   lda possible_match
+   cmp extractLenght
+   bne CheckInputCharDiffers
+   cmp occour_in_query
+   bne CheckInputCharDiffers
    
-         jsr if6bc
+   lda string1  +  1           ,x
+   cmp #$20
+   beq GetMatch
 
-         lda keyblock 
-         beq NormalizedInput
-
-         lda #0
-         sta keyblock
-
-NormalizedInput:
-         lda inputdone
-         bne returnIrq
-
-         inc frame
-         lda frame
-         cmp #10
-         bne returnIrq
-        
-         lda cursor
-         eor #$1
-         sta cursor
-         
-         beq ClearCursor
-            
-         ldy keypos
-         lda #100
-         sta SCREEN   ,y
-         jmp SetKeyboardBack
-ClearCursor:
-         ldy keypos
-         lda #$20
-         sta SCREEN   ,y
-SetKeyboardBack:
-         lda #0
-         sta frame
-         sta keyflag
-         sta lastkey
-        
-returnIrq: 
-         lda think_anim
-         beq leave_irq
-         inc think_delay
-         lda think_delay
-         cmp #$10
-         bne leave_irq
-         lda #0
-         sta think_delay
-         inc think_frames
-         ldx think_frames
-         cpx #4
-         bne animate_thinking
-         ldx #0
-         sta think_frames
-animate_thinking:         
-         lda think_signs,x
-         sta THINKANIM
-leave_irq:
-         lda #$9e
-         sta $d012
-         asl $d019
-         
-         pla
-         tay
-         pla
-         tax
-         pla
-
-         rti
-think_signs:
- .text "*+-+"
-think_frames:
- .byte 0
-think_delay:
- .byte 0
-// ************************************
-// ** Worker                         **
-// ************************************
-worker: 
-          jsr check_for_command
-          cpx #1                       // valid command
-          beq return_from_worker
-
-          jsr save_eliza_input_string
-          jsr PlotQuestions
-          jsr tokenize
-          jsr Embeddings
-          jsr start_check
-return_from_worker:
-          jsr Init
-          rts
-
-start_check:
-  
-GETNODES:
-          lda reubank
-          sta REUBANK
-          lda reuram
-          sta REURAM + 1
-
-          lda #REU_FETCH_A__           // Befehl fürs Kopieren von der REU zum C64
-          sta REUCOMMAND               // mit AUTOLOAD ausführen
-           
-          jsr cosine_approximation
-          cpx #DIM                     // in x - register dot product
-          bne check_dist
-    
-          stx dist0
-          // found direct hit
-          lda reubank
-          sta bestBank 
-          lda reuram
-          sta bestram
-          jmp MatchFound
+   inx
+   cpx len1
+   bne CheckInputCharDiffers
    
-diff_bne:  // help jmp
-          jmp GETNODES
+GetMatch:                          // possible_match
+   ldx #0
+   clc
+   lda text_rest_pos
+   adc #1
+   sta text_rest_pos_plus_1
+FillNewString:
+   cpx text_rest_pos_plus_1
+   bcc t_smaller_input
+   beq t_smaller_input
+   ldy new_pos
+   lda string1                 ,x
+   sta correct                 ,y
+   inc new_pos
+   jmp SetResultString
+t_smaller_input:
+   cpx inputpos
+   bcs SetResultString
+   
+   // TODO
+   ldy new_pos
+   
+   lda string1                 ,x
+   sta correct                 ,y
+   inc new_pos
+SetResultString:
+   inx
+   cpx len1
+   bne FillNewString
+   lda new_pos
+   sta len1
+   jsr ResetExtract
+   jmp Identify
 
-check_dist:
-          cpx dist0
-          bcc continue_iterative_search      // carry=1 → a >= b → hier: größer
-update_founded:
-          stx dist0
+CheckInputCharDiffers:
+   ldx inp_char_nr
+   ldy extrpos
+   lda string1                 ,x
+   cmp (extract_addr)          ,y
+   beq loop_input
 
-set_latest_entry:
-          lda reubank
-          sta bestBank 
-          lda reuram
-          sta bestram
-  
-continue_iterative_search:
-          lda reuram
-          cmp COUNT_ENTRIES_LO
-          beq check_bank
-          inc reuram
-          bne diff_bne
-          inc reubank
-          bne diff_bne
-          jmp check_founded
-check_bank:
-          lda reubank
-          cmp COUNT_ENTRIES_HI
-          beq check_founded
-          inc reuram
-          bne diff_bne
-          inc reubank
-          bne diff_bne
-          
-check_founded:
-          lda bestram
-          bne MatchFound
-          lda bestBank
-          bne MatchFound
+   jsr ResetExtract 
+   jmp loop_search_and_replace 
+loop_input:
+   inc extrpos
+   inc text_rest_pos
+loop_search_and_replace:
+   inc inp_char_nr
+   ldx inp_char_nr
+   cpx len1
+   beq Identify
+   jmp CheckString
 
-MatchFound: 
-          ldx dist0
-          cpx #ELIZA_THRESHOLD
-          bcc Ask_ELIZA
-          //*/
+Identify:
+   ldy #0
+identify_word:
+   lda correct                 ,y
+   sta string1                 ,y 
+   iny
+   cpy len1
+   bne identify_word
+   
+   ldy extractLenght
+   iny
+   lda (extract_addr)          ,y
+   beq output
+   tya
+   clc
+   adc extract_addr
+   sta extract_addr
+   bcc continue_to_extract_string
+   inc extract_addr            +1 
+continue_to_extract_string:
+   jmp Extract
 
-          lda bestBank
-          sta REUBANK
-          lda bestram
-          sta REURAM + 1
+output:
+   ldx #0
+   ldy #0
+WriteResult:
+   lda string1                 ,x
+   cmp #63
+   beq set_len
+printf:  
+   sta string1                 ,y
+ //  Debug 
+ //  sta $0400    + 40 *23          ,y 
 
-          lda #REU_FETCH_A__           // Befehl fürs Kopieren von der REU zum C64
-          sta REUCOMMAND               // mit AUTOLOAD ausführen
-          lda #0 
-          sta think_anim
-PlotAnswer:
-          jsr PlotAlignedLines
-          jsr Init
-          rts
+   cmp #'a'        // kleiner als 'A'?
+   bcc c64_char    // ja → nichts ändern
+   cmp #'z'+1      // größer als 'Z'?
+   bcs c64_char    // ja → nichts ändern
 
-Ask_ELIZA:
-          jsr ELIZA
-          lda #0 
-          sta think_anim
-          jsr Plot_ELIZA_ANSWER
-          jsr Init
-          rts
+   clc
+   adc #64         // nur A–Z werden umgewandelt
+c64_char:
+   sta input                   ,y
+   // debug
+   //sta $0400    + 40 *23          ,y 
+   iny
+increment_to_char:
+   inx
+   cpx len1
+   bne WriteResult
+   cpy len1_unextracted
+   beq new_len_1
+set_len:
+   sty len1
+ /*  lda #$00
+clr_input_rest:
+   sta input,y
+   iny
+   bne clr_input_rest
+   */
+new_len_1:
+   rts
 
-CleanView:
-          ldx #0
-          lda #$20
-clear_view:
-          sta SCREENS,x
-          inx 
-          bne clear_view
-          inc clear_view + 2
-          ldy clear_view + 2
-          cpy #$b0
-          bne clear_view
-          rts
+ResetExtract:
+   lda inp_char_nr
+   cmp len1 
+   bcc set_Restore
+   lda len1
+set_Restore:
+   sta inputpos
+   sta text_rest_pos
+   lda #0
+   sta extrpos
+   sta possible_match
+   rts
 
-CleanUp:
-          ldx #0
-       
-GetLoadLookup:
-          lda LoadTab        ,x
-SetLookup:
-          sta lookUpx127Lo   ,x
-          inx  
-          bne GetLoadLookup
-          inc GetLoadLookup  + 2
-          inc SetLookup      + 2
-          lda GetLoadLookup  + 2
-          cmp #$2c
-          bne GetLoadLookup
-          rts
+ResetAlgorithm:
+   lda #0
+   sta extrpos
+   sta text_rest_pos
+   sta possible_match
+   sta inputpos
+   sta firstoccur
+   sta occour_in_query
+   sta text_rest_pos_plus_1
+   sta new_pos
+   sta inp_char_nr
+   rts
 
-Init:
-          lda #0
-          sta keypos
-          sta keyflag
-          sta keyblock
-          sta reuram
-          sta reubank
-          sta bestBank
-          sta bestram
-          sta REUBANK                     // 1. Bank (lfd.-Nr. 0)
-          sta REURAM                      // und beginnen auch direkt ab Adresse $0000
-          sta REURAM+1                    // in der Bank
-          sta frame                      
-          sta inputdone            
-          sta cursor 
-          sta stop_input
-          sta key_return
-          sta musicplay
-          sta dist0
-          sta check_summe
-          sta scroll_pos
-          sta scroll_pos + 1
-          sta lines_scrolled
-          sta think_anim
+CopyString:
+   ldy #0 
+copystring:
+   lda string1                 ,y
+   sta correct                 ,y
+   iny
+   cpy len1
+   bne copystring
+   rts
 
-          lda #<DATARAM                      // Beginn des Speichers der  
-          sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
-          lda #>DATARAM
-          sta REUC64RAM+1
-
-          lda #<($0100)                      // Die Anzahl der BYTEs ($0100)
-          sta REUBYTES                       // je Aktion der REU bekannt machen
-          lda #>($0100)
-          sta REUBYTES+1
-
-          ldx #0     
-cls_input:
-          lda #$20
-          sta SCREEN  ,x
-          inx 
-          cpx #MAXLENGHT
-          bne cls_input
-
-          ldx #0
-          lda #0
-cls_input_strings:
-          sta input   ,x
-          sta string1 ,x
-          sta correct ,x
-          inx
-          bne cls_input_strings
-          rts
-
-save_eliza_input_string:
-          ldx #0
-eliza_string_save:
-          lda string1, x
-          sta string2, x
-          inx
-          cpx #40
-          bne eliza_string_save
-          rts
-
-.pc = COMMANDS "Commando handling"
-
-GetCharset:
-        sta REUBANK
-        lda #0
-        sta REURAM + 1
-
-        lda #<($0300)                      // Die Anzahl der BYTEs ($0100)
-        sta REUBYTES                       // je Aktion der REU bekannt machen
-        lda #>($0300)
-        sta REUBYTES+1
-
-        lda #<CHARSET                      // Beginn des Speichers der  
-        sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
-        lda #>CHARSET
-        sta REUC64RAM+1
-
-        lda #REU_FETCH_A__            
-        sta REUCOMMAND 
-
-        lda $01
-        pha
-        and #%11111011
-        sta $01
-        ldx #$00
-copy_singles:
-        lda $d000  + $170,x
-        sta CHARSET +$170,x
-        lda $d000  + $2E8,x
-        sta CHARSET +$2E8,x
-        inx
-        cpx #8
-        bne copy_singles
-        pla
-        sta $01
-
-        lda #%00011010
-        sta $d018
-        jsr Init     
-        rts
-
-GetMusic:
-        sta REUBANK
-        lda #0
-        sta REURAM + 1
-
-        lda #<($1700)                      // Die Anzahl der BYTEs ($0100)
-        sta REUBYTES                       // je Aktion der REU bekannt machen
-        lda #>($1700)
-        sta REUBYTES+1
-
-        lda #<MUSIC                        // Beginn des Speichers der  
-        sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
-        lda #>MUSIC
-        sta REUC64RAM+1
-
-        lda #REU_FETCH_A__            
-        sta REUCOMMAND 
-        jsr Init     
-        rts
-
-check_for_command:
-        ldy #$0
-next_command:
-        ldx #$ff
-loop_check_command:
-        inx
-        lda string1,         x
-        beq complete_command
-cmds:
-        cmp commando,        x
-        sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-        beq loop_check_command
-        
-        lda cmds + 1
-        clc
-        adc #12
-        sta cmds + 1
-        lda cmds + 2
-        adc #0
-        sta cmds + 2
-
-        iny
-        cpy #COMMAND_NUMBERS
-        bne next_command
-       
-        lda #>commando
-        sta cmds + 2
-        lda #<commando
-        sta cmds + 1
-        ldx #$00
-        rts
-sy:
- .byte 0
-complete_command:
-        sty sy
-        jsr scroll_up
-        jsr ClearLine
-        jsr scroll_up
-        ldy sy
-        lda #>commando
-        sta cmds + 2
-        lda #<commando
-        sta cmds + 1
-        
-        cpy #2
-        bcc print_help
-        cpy #2 
-        beq switch_music
-        cpy #3
-        beq select_tune_1
-        cpy #4
-        beq select_tune_2
-        cpy #5
-        beq select_charset_1
-        cpy #6
-        beq select_charset_2
-        cpy #7
-        beq show_information
-        ldx #0
-        rts 
-print_help:
-        jsr PlotHelp
-        ldx #1
-        rts
-switch_music:
-        lda music_play
-        eor #1
-        sta music_play
-
-        lda #$80
-        cmp $d012
-        bne *-3
-        lda #0
-        sta $d418
-        ldx #1
-        rts
-
-select_tune_1:
-        lda #0
-        sta music_play
-        lda #$80
-        cmp $d012
-        bne *-3
-        lda #0
-        sta $d418
-        lda #LOCATION_MUSIC_A
-        jsr GetMusic
-        lda #0
-        tay
-        tax
-        jsr $1000
-        lda #1
-        sta music_play
-        ldx #1
-        rts
-select_tune_2:
-        lda #0
-        sta music_play
-        lda #$80
-        cmp $d012
-        bne *-3
-        lda #0
-        sta $d418
-        lda #LOCATION_MUSIC_B
-        jsr GetMusic
-        lda #0
-        tay
-        tax
-        jsr $1000
-        lda #1
-        sta music_play
-
-        ldx #1
-        rts
-select_charset_1:
-        lda #LOCATION_CHARSET_A              // OFFSET CHARSET 1
-        jsr GetCharset
-        ldx #1
-        rts
-select_charset_2:
-        lda #LOCATION_CHARSET_B              // OFFSET CHARSET 1
-        jsr GetCharset
-        ldx #1
-        rts
-show_information:
-        jsr PlotInfo
-        ldx #1
-        rts
-CopyCharset:     
-        lda $01
-        pha
-        and #%11111011
-        sta $01
-        ldx #$00
-copy_charset:
-        lda $d000,x
-        sta CHARSET,x
-        lda $d100,x
-        sta CHARSET+$100,x
-        lda $d200,x
-        sta CHARSET+$200,x
-        lda $d300,x
-        sta CHARSET+$300,x
-        lda $d400,x
-        sta CHARSET+$400,x
-        lda $d500,x
-        sta CHARSET+$500,x
-        lda $d600,x
-        sta CHARSET+$600,x
-        lda $d700,x
-        sta CHARSET+$700,x
-        inx
-        bne copy_charset
-        pla
-        sta $01
-        rts
-
-prompt:
-   .text "> "
-   .byte 0
-
-nmi:
-         pha                               //Akku
-         txa                               //X-Register
-         pha
-         tya                               //und Y-Reg
-         pha                               //auf dem Stack merken
-          
-         lda $01
-         sta rom
-
-         lda #$35
-         sta $01
-
-
-         lda $DD0D                         //IRQs bestätigen
-         and #%00000001                    //Timer IRQ?
-         beq nmi_exit                      //wenn nicht -> ENDE 
-
-         lda  music_play
-         beq  nmi_exit
-
-         jsr $1003                         //sonst Hintergrundfarbe ändern
-       
-nmi_exit: 
-         lda rom
-         sta $01
-         pla                               //Register vom Stack holen
-         tay
-         pla
-         tax
-         pla
-         
-         rti                               //und zurück
-music_play: 
-  .byte 1
-rom:
-  .byte 0
-
-commando:
-  .text "/help@      "
-  .text "/man@       "
-  .text "/music@     "
-  .text "/tune 1@    "
-  .text "/tune 2@    "
-  .text "/char 1@    "
-  .text "/char 2@    "
-  .text "/info@      "
+.pc = EXTRACTKEYWORDS "EXTRACT KEYWORDS"
+extract: 
+   .text "what,where,when,who,whom,which,why,how,do,does,"
+   .text "did,have,has,had,can,could,will,would,shall,"
+   .text "should,may,might,must,is,are,was,where,am,"
+   .text "any,ever,much,many,kind,type,time,place,reason,"
+   .text "why,there,tell,me,about,the,end"
+   .byte 0, 0, 0
+   

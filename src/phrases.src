@@ -53,13 +53,14 @@ unequal_phrase:
 
 return_from_phrases:
         sty len1
-        tya
+  /*      tya
         tax
         lda #$20
 clr_str1:
         sta string1,x
         inx
         bne clr_str1
+        */
 ret_from_phrases:
         rts
 
