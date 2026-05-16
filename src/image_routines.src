@@ -408,16 +408,51 @@ clear_row:
          cpx #40
          bne clear_row
          jsr scroll_up
+         
+         lda #>thinking
+         sta think + 2
+         lda #<thinking
+         sta think + 1
+
+         lda $d012
+         and #31
+         cmp #THINKSTATI
+         bcc mul_to_think
+         lda #0
+mul_to_think:
+         tax
+mul_loop:
+         dex
+         bmi write_thinking
+         lda think + 1
+         clc
+         adc #19
+         sta think + 1
+         lda think + 2 
+         adc #0
+         sta think + 2
+         jmp mul_loop
+
+write_thinking: 
          ldx #0
 think:
          lda thinking,x
+         beq return_from_thinking
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         lda #CYAN
+         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         inx
+         cpx #31
+         bne think
+return_from_thinking:
+         lda #$20
          sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
          lda #CYAN
          sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
          inx
          cpx #40
-         bne think
-return_from_thinking:
+         bne return_from_thinking
+
          jsr scroll_up     
 
          ldx #0
@@ -429,7 +464,9 @@ possible_color:
          inx
          cpx #40
          bne possible_color
-         jsr scroll_up        
+         jsr scroll_up    
+         lda #1
+         sta think_anim  
          rts
 
 scroll_F1:
@@ -590,8 +627,6 @@ mark:
 inrtoduce:
   .text "Tribot Plus, Triad                          "
 
-thinking:
-  .text "* Thinking...                                                                     "
 
 Infotext:
   .text "This scene database includes embedding  based similarity search and an ELIZA -  style conversational system for simple  natural language interaction.                                      type: /help                                                                                                      "
@@ -620,3 +655,30 @@ tribot_plus_logo:
 .byte 14,3,11,14,3,11,3,11,3,11,3,3,3,11,3,3,3,11,14,3,11,14,14,14,14,14
 .byte 14,11,11,14,11,11,11,11,11,11,14,11,11,14,14,11,11,14,14,11,11,14,14,14,14,14
 
+thinking:
+    .text "* Thinking...@     "
+    .text "* Cogitating...@   "
+    .text "* Contemplating...@"
+    .text "* Deliberating...@ "
+    .text "* Ruminating...@   "
+    .text "* Pondering...@    "
+    .text "* Mulling...@      "
+    .text "* Musing...@       "
+    .text "* Percolating...@  "
+    .text "* Noodling...@     "
+    .text "* Simmering...@    "
+    .text "* Marinating...@   "
+    .text "* Incubating...@   "
+    .text "* Concocting...@   "
+    .text "* Scheming...@     "
+    .text "* Hatching...@     "
+    .text "* Brewing...@      "
+    .text "* Calculating...@  "
+    .text "* Computing...@    "
+    .text "* Churning...@     "
+    .text "* Crunching...@    "
+    .text "* Coalescing...@   "
+    .text "* Deciphering...@  "
+    .text "* Germinating...@  "
+    .text "* Manifesting...@  "
+    .text "* Reticulating...@ "

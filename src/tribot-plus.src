@@ -195,6 +195,24 @@ SetKeyboardBack:
          sta lastkey
         
 returnIrq: 
+         lda think_anim
+         beq leave_irq
+         inc think_delay
+         lda think_delay
+         cmp #$10
+         bne leave_irq
+         lda #0
+         sta think_delay
+         inc think_frames
+         ldx think_frames
+         cpx #4
+         bne animate_thinking
+         ldx #0
+         sta think_frames
+animate_thinking:         
+         lda think_signs,x
+         sta THINKANIM
+leave_irq:
          lda #$9e
          sta $d012
          asl $d019
@@ -206,7 +224,12 @@ returnIrq:
          pla
 
          rti
-
+think_signs:
+ .text "*+-+"
+think_frames:
+ .byte 0
+think_delay:
+ .byte 0
 // ************************************
 // ** Worker                         **
 // ************************************
@@ -299,6 +322,8 @@ MatchFound:
 
           lda #REU_FETCH_A__           // Befehl fürs Kopieren von der REU zum C64
           sta REUCOMMAND               // mit AUTOLOAD ausführen
+          lda #0 
+          sta think_anim
 PlotAnswer:
           jsr PlotAlignedLines
           jsr Init
@@ -306,6 +331,8 @@ PlotAnswer:
 
 Ask_ELIZA:
           jsr ELIZA
+          lda #0 
+          sta think_anim
           jsr Plot_ELIZA_ANSWER
           jsr Init
           rts
@@ -349,6 +376,7 @@ Init:
           sta scroll_pos
           sta scroll_pos + 1
           sta lines_scrolled
+          sta think_anim
 
           lda #<DATARAM                      // Beginn des Speichers der  
           sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
@@ -407,6 +435,22 @@ GetCharset:
 
         lda #REU_FETCH_A__            
         sta REUCOMMAND 
+
+        lda $01
+        pha
+        and #%11111011
+        sta $01
+        ldx #$00
+copy_singles:
+        lda $d000  + $170,x
+        sta CHARSET +$170,x
+        lda $d000  + $2E8,x
+        sta CHARSET +$2E8,x
+        inx
+        cpx #8
+        bne copy_singles
+        pla
+        sta $01
 
         lda #%00011010
         sta $d018

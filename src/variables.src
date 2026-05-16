@@ -14,13 +14,16 @@
 .const SCROLLSCREENS      = 8
 .const TOTALLINES         = 25
 .const LASTLINE           = 23
-.const ELIZA_THRESHOLD    = $3d
+.const ELIZA_THRESHOLD    = $38
 .const COMMAND_NUMBERS    = 8
 .const LOCATION_CHARSET_A = $B0
 .const LOCATION_CHARSET_B = $A0
 .const LOCATION_MUSIC_A   = $C0
 .const LOCATION_MUSIC_B   = $D0
 .const LOCATION_HELP      = $E0
+.const THINKSTATI         = 26
+.const NUMBEROFPHRASES    = 48
+
 
 
 
@@ -44,6 +47,7 @@
 .const MUSIC               = $1000
 .const CHARSET             = $2800
 .const COMMANDS            = $c700
+.const EXTRACTKEYWORDS     = $ca00
 .const HELPSCREENS         = $cf00
 
 .var DATARAM               = $0e00                  // Adresse des DATABLOCKS
@@ -52,24 +56,22 @@
 
 .const SCREEN              = $0400 + 40 * 24 + 2         // SCREENRAM Adress
 .const COLORRAM            = $d800 + 40 * 24 + 2         // SCREENRAM Adress
+.const THINKANIM           = $0400 + 21 * 40
 
 
 .const embeddingA          = $ff00
 .const STRING_FUNKTION     = $c000
 .const temporer            = $e500
 .const tokens              = $e600  // buffer für die tokens  "who\0is\0adder\0"
-.const final_answer        = $e800
-.const EXTRACTKEYWORDS     = $e900
+.const final_answer        = $e900
+
 
 .const string1             = $b000
 .const string2             = $b100
 .const correct             = $b200
 .const input               = $b300
 .const input_eliza         = $b400
-.const shorten_phrases     = $b500
-.const Phrases             = $b600
-
-.var   scrollLine          = $0400 + 40 * 16
+.const Phrases             = $b500
 
 
 .var lookUpx127Lo          = $e000 
@@ -85,7 +87,7 @@
 .var modulo                = square2_hi   + $0200
 // */
 // String Funktionen
-.var extrpos               = $cf00
+.var extrpos               = $ce00
 .var text_rest_pos         = extrpos                 +  1
 .var possible_match        = text_rest_pos           +  1
 .var inputpos              = possible_match          +  1
@@ -283,6 +285,7 @@
 .var scroll_LO             = ColorLineOne_HI         + 1
 .var scroll_HI             = scroll_LO               + 1
 .var searchflag            = scroll_HI               + 1
+.var think_anim            = searchflag              + 1
 
 .pc = LoadTab "x127 && AxA && clamp && multab"
   .import binary "../data/lookup_tables.bin"

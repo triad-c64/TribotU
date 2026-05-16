@@ -26,7 +26,6 @@ compare_string:
         jmp unequal_phrase
 
 equal_phrases:
-        inx
         ldy #0
 set_new_question:
         lda string1,         x
@@ -47,13 +46,20 @@ unequal_phrase:
 
         inc count_phrases
         lda count_phrases
-        cmp #38
+        cmp #NUMBEROFPHRASES
         beq ret_from_phrases
         ldx #0
         jmp phrase
 
 return_from_phrases:
         sty len1
+        tya
+        tax
+        lda #$20
+clr_str1:
+        sta string1,x
+        inx
+        bne clr_str1
 ret_from_phrases:
         rts
 
@@ -61,41 +67,51 @@ count_phrases:
  .byte 0
 
 phrases:
-.text "whats@                      "
-.text "what is meant by@           "
-.text "what is the definition of@  "
-.text "what constitutes@           "
-.text "how would you describe@     "
-.text "what can be described as@   "
-.text "what is going on with@      "
-.text "whats going on with@        "
-.text "what is the deal with@      "
-.text "whats the deal with@        "
-.text "can you explain@            "
-.text "can you tell me about@      "
-.text "what is an@                 "
-.text "define@                     "
-.text "define a@                   "
-.text "define the@                 "
-.text "explain@                    "
-.text "explain what is@            "
-.text "what do you know about@     "
-.text "what can you tell me about@ "
-.text "give me info on@            "
-.text "give me information on@     "
-.text "give me info about@         "
-.text "give me information about@  "
-.text "what would you call@        "
-.text "tell me what is@            "
-.text "what do you know about@     "
-.text "what was@                   "
-.text "tell me who is@             "
-.text "explain who is@             "
-.text "describe who is@            "
-.text "who was@                    "
-.text "do you know@                "
-.text "have you heard of@          "
-.text "is there a@                 "
-.text "who created@                "
-.text "who developed@              "
-.text "who wrote@                  "
+.text "tell me a joke about @      "
+.text "what is an @                "
+.text "what is a @                 "
+.text "what is the deal with @     "
+.text "whats the deal with @       "
+.text "what is meant by @          "
+.text "what is the definition of @ "
+.text "what constitutes an @       "
+.text "what constitutes a @        "
+.text "what constitutes @          "
+.text "how would you describe an @ "
+.text "how would you describe a @  "
+.text "how would you describe @    "
+.text "what can be described as @  "
+.text "what is going on with an @  "
+.text "what is going on with a @   "
+.text "what is going on with @     "
+.text "whats going on with @       "
+.text "can you explain @           "
+.text "can you tell me about @     "
+.text "define the @                "
+.text "define a @                  "
+.text "explain what is @           "
+.text "explain who is @            "
+.text "explain @                   "
+.text "what do you know about @    "
+.text "whats can you tell me about @"
+.text "give me info on @           "
+.text "give me information on @    "
+.text "give me info about @        "
+.text "give me information about @ "
+.text "what would you call @       "
+.text "tell me what is @           "
+.text "what was @                  "
+.text "tell me who is @            "
+.text "describe who is @           "
+.text "who was @                   "
+.text "do you know @               "
+.text "have you heard of @         "
+.text "is there a @                "
+.text "who created @               "
+.text "who developed @             "
+.text "who wrote @                 "
+.text "what do you mean by an @    "
+.text "what do you mean by a @     "
+.text "what do you mean by @       "
+.text "whats @                     "
+.text "define @                    "

@@ -150,7 +150,7 @@ WriteResult:
 printf:  
    sta string1                 ,y
  //  Debug 
- // sta $0400    + 40           ,y 
+ //  sta $0400    + 40 *23          ,y 
 
    cmp #'a'        // kleiner als 'A'?
    bcc c64_char    // ja → nichts ändern
@@ -161,6 +161,8 @@ printf:
    adc #64         // nur A–Z werden umgewandelt
 c64_char:
    sta input                   ,y
+   // debug
+   //sta $0400    + 40 *23          ,y 
    iny
 increment_to_char:
    inx
@@ -170,6 +172,11 @@ increment_to_char:
    beq new_len_1
 set_len:
    sty len1
+   lda #$00
+clr_input_rest:
+   sta input,y
+   iny
+   bne clr_input_rest
 new_len_1:
    rts
 
