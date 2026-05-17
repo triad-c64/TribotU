@@ -114,7 +114,7 @@ botloop:
           ldx #0
 setQuery:
           lda SCREEN,x
-         // cmp #63 // fragezeichen
+          //cmp #63 // fragezeichen
           beq finalize_query
 sta_input:
           sta string1,x
