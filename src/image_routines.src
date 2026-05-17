@@ -390,10 +390,10 @@ onRow:
 PlotQuestions:
          ldx #0
 GetQ:
-         lda #$20
+         lda #$20 // this should clear garbage shown above the question
          sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - ((LASTLINE - 1) * 40) , x
          lda #BLACK
-         sta COLORS + $2000  - ((SCROLLSCREENS - 1) * 1000) - ((LASTLINE - 1) * 40) , x
+         sta COLORS  + $2000 - ((SCROLLSCREENS - 1) * 1000) - ((LASTLINE - 1) * 40) , x
          inx
          cpx #40
          bne GetQ
@@ -403,7 +403,7 @@ Get_Quest:
          beq return_from_question
          sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
          lda #YELLOW
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         sta COLORS  + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40)  , x
          inx
          cpx #40
          bne Get_Quest
@@ -477,6 +477,10 @@ possible_color:
          jsr scroll_up    
          lda #1
          sta think_anim  
+         lda lines_used
+         clc
+         adc #2
+         sta lines_used
          rts
 
 scroll_F1:

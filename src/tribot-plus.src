@@ -339,14 +339,24 @@ Ask_ELIZA:
 
 CleanView:
           ldx #0
-          lda #$20
+          stx lines_used
+          lda #>SCREENS
+          sta _scr_  + 2
+          lda #>COLORS
+          sta _col_  + 2
 clear_view:
+          lda #$20
+_scr_:
           sta SCREENS,x
+          lda #BLACK
+_col_:
+          sta COLORS,x
           inx 
           bne clear_view
-          inc clear_view + 2
-          ldy clear_view + 2
-          cpy #$b0
+          inc _scr_ + 2
+          inc _col_ + 2
+          lda _scr_ + 2
+          cmp #$90
           bne clear_view
           rts
 
@@ -459,6 +469,10 @@ copy_singles:
         sta CHARSET +$170,x
         lda $d000  + $2E8,x
         sta CHARSET +$2E8,x
+        lda $d000  + $3E8,x
+        sta CHARSET +$3E8,x
+        lda $d000  + $200,x
+        sta CHARSET +$200,x
         inx
         cpx #8
         bne copy_singles
@@ -543,13 +557,36 @@ complete_command:
         cpy #4
         beq select_tune_2
         cpy #5
-        beq select_charset_1
+        beq select_charset_A
         cpy #6
-        beq select_charset_2
+        beq select_charset_B
         cpy #7
-        beq show_information
+        beq show_informations
+        cpy #8
+        beq clean_viewer
+        cpy #9
+        beq exit_tribot
         ldx #0
         rts 
+exit_tribot:
+        lda #1
+        sta music_play
+        jsr switch_music
+        sei 
+        lda #$37
+        sta $01
+        jmp $FCE2
+select_charset_A:
+        jmp select_charset_1
+select_charset_B:
+        jmp select_charset_2
+show_informations:  
+        jmp show_information
+clean_viewer:
+        jsr CleanView
+        jsr scroll_up
+        ldx #1
+        rts
 print_help:
         jsr PlotHelp
         ldx #1
@@ -698,3 +735,5 @@ commando:
   .text "/char 1@    "
   .text "/char 2@    "
   .text "/info@      "
+  .text "/clear@     "
+  .text "/exit@      "
