@@ -390,13 +390,23 @@ onRow:
 PlotQuestions:
          ldx #0
 GetQ:
+         lda #$20
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - ((LASTLINE - 1) * 40) , x
+         lda #BLACK
+         sta COLORS + $2000  - ((SCROLLSCREENS - 1) * 1000) - ((LASTLINE - 1) * 40) , x
+         inx
+         cpx #40
+         bne GetQ
+         ldx #0
+Get_Quest:
          lda SCREEN - 2,x
          beq return_from_question
          sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
          lda #YELLOW
          sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
          inx
-         jmp GetQ
+         cpx #40
+         bne Get_Quest
 return_from_question:
          jsr scroll_up
          ldx #0
