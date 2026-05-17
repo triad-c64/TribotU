@@ -17,6 +17,13 @@
         sta out_answer_n      + 2
         sta clean_rest_answer + 2
 
+        ldx #0 
+        lda #$20
+clean_up_final_eliza_answer:
+        sta final_answer      ,x
+        inx
+        bne clean_up_final_eliza_answer
+        
         lda #$90               // OFFSET ELIZA
         sta REUBANK
 eliza_entries:
@@ -29,7 +36,7 @@ eliza_entries:
         jsr GetResponse
 
         lda eliza_answer
-        bne here_wait
+        bne cnup
         inc eliza_entries + 1
         lda eliza_entries + 1 
         cmp ELIZA_ENTRIES
@@ -38,25 +45,17 @@ eliza_entries:
         lda eliza_answer
         beq fallback_eliza
 
-        jmp here_wait
+        jmp cnup
 fallback_eliza:
          
         ldy #$00
 copy_fallback:
         lda fallback,y
-        beq cnup
         sta final_answer,y
+        beq cnup
         iny
         jmp copy_fallback
-
 cnup:
-        lda #$20
-clean_rest_bck_answer:
-        sta final_answer           ,y
-        iny
-        bne clean_rest_bck_answer
-
-here_wait:
         rts
 
 
@@ -117,7 +116,6 @@ no_match:
         rts
 match:
         ldy #$00
-
         lda $d012
         and #$03
         beq prep_resp0
@@ -176,41 +174,112 @@ out_answer_n:
         inc clean_rest_answer + 1       
         iny
         bne plot_response
-return_from_response:
-        lda #$20
-clean_rest_answer:
-        sta final_answer     
         inc clean_rest_answer + 1
-        bne clean_rest_answer
+return_from_response:
+        lda #0
+clean_rest_answer:
+        sta final_answer
         lda #1 
         sta eliza_answer
         rts
 
 Plot_ELIZA_ANSWER:
-        ldx #0
-plot_eliza_answer:
-        lda final_answer,x
-        sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-        inx
-        cpx #40
-        bne plot_eliza_answer
+         ldx #0
+         ldy #0
+         sty start_row_eliza      + 1
+         sty onRow_eliza
+GET_FINAL_ANWER_ELIZA:
+         lda final_answer        , y
+         cmp #' '
+         beq setMark_Eliza
+         inx
+         iny
+         cpy #ANSWER_LENGTH
+         bne GET_FINAL_ANWER_ELIZA
+         jsr scroll_up
+         rts
 
-        jsr scroll_up
-
-        ldx #0
-plot_eliza_clean:
-        lda #$20
-        sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-        inx
-        cpx #40
-        bne plot_eliza_clean
+setMark_Eliza:
+         cpx #39
+         bcc on_this_row_eliza
+          
+         lda mark_eliza
+         sta curr_mark_eliza +1
+         
+start_row_eliza:
+         ldy #0
+         ldx #0
+GiveOutRow_Eliza:
+         lda final_answer        , y
+         beq last_word_eliza
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         inx
+         iny
+curr_mark_eliza:
+         cpy #0
+         bne GiveOutRow_Eliza
         
-        jsr scroll_up
-        rts
+         lda #$20
+fill_up_eliza:
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         inx
+         cpx #40
+         bcc fill_up_eliza
+        
+         sty start_row_eliza      + 1
 
+         jsr scroll_up
+         
+         ldy start_row_eliza + 1
+         dey
+         ldx #0
+         jmp GET_FINAL_ANWER_ELIZA
+
+last_word_eliza:
+         lda onRow_eliza
+         beq return_from_last_word_eliza
+
+         lda #$20
+fill_up_last_eliza:
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         inx
+         cpx #40
+         bcc fill_up_last_eliza
+
+         jsr scroll_up
+         jsr ClearLineEliza
+         jsr scroll_up
+         rts 
+return_from_last_word_eliza:
+         jsr ClearLineEliza
+         jsr scroll_up
+         jsr scroll_up
+         rts
+ClearLineEliza:
+         ldx #0
+clear_line_eliza:
+         lda #$20
+         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         lda #WHITE
+         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+         inx
+         cpx #40
+         bne clear_line_eliza
+         rts
+on_this_row_eliza:
+         inc onRow_eliza
+         iny
+         sty mark_eliza
+         inx
+         jmp GET_FINAL_ANWER_ELIZA
+         rts
+onRow_eliza:
+ .byte 0
+mark_eliza:
+ .byte 0
 // -------------------------------------------------
 // daten
 // -------------------------------------------------
 fallback:
-        .text "please tell me more"
+        .text "please tell me more "
         .byte 0

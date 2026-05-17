@@ -63,7 +63,7 @@ Tribot_bot:
        jmp GetChar
 PaintReturn:
        ldy keypos
-       lda #63
+       lda #0 // 63
        sta SCREEN       ,y
        lda #0
        sta inputdone

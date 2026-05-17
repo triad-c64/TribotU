@@ -114,7 +114,7 @@ botloop:
           ldx #0
 setQuery:
           lda SCREEN,x
-          cmp #63 // fragezeichen
+         // cmp #63 // fragezeichen
           beq finalize_query
 sta_input:
           sta string1,x
@@ -516,7 +516,7 @@ cmds:
         cmp commando,        x
         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
         beq loop_check_command
-        
+
         lda cmds + 1
         clc
         adc #12
@@ -575,7 +575,7 @@ exit_tribot:
         sei 
         lda #$37
         sta $01
-        jmp $FCE2
+        jmp $fce2
 select_charset_A:
         jmp select_charset_1
 select_charset_B:
