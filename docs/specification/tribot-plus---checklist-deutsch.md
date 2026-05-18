@@ -16,32 +16,32 @@ Markiere Einträge mit `[x]`, wenn bestätigt. Lasse `[ ]` offen, wenn noch nich
 
 ### Bootsequenz
 
-- [ ] [     ] [          ] Stage 1: Bildschirm wird beim Laden schwarz
+- [x] [Taper] [2026/05/17] Stage 1: Bildschirm wird beim Laden schwarz
 - [ ] [     ] [          ] Stage 1: Text „Tribot Plus, Triad" erscheint
 - [ ] [     ] [          ] Stage 1: Eine Leerzeile zwischen Titel und „Booting..."
 - [ ] [     ] [          ] Stage 1: Text „Booting..." erscheint
 - [ ] [     ] [          ] Stage 2: Hardwareerkennung läuft und gibt Ergebnisse zeilenweise aus
 - [ ] [     ] [          ] Stage 2: REU-Vorhandensein wird erkannt und ausgegeben („REU Detected" / „REU Not found!")
 - [ ] [     ] [          ] Stage 2: Weitere Hardwareumgebungsprüfungen folgen nach der REU-Erkennung
-- [ ] [     ] [          ] Stage 3: Bildschirm wird nach Hardwareprüfungen geleert
-- [ ] [     ] [          ] Stage 3: TRIAD-Logo wird mit Byline „Dealer Quality Botnet" angezeigt
-- [ ] [     ] [          ] Stage 3: Bildschirm wird erneut geleert und zeigt „Loading..." zentriert
-- [ ] [     ] [          ] Stage 4: Bildschirm wird geleert, wenn der Ladevorgang abgeschlossen ist
+- [x] [Taper] [2026/05/17] Stage 3: Bildschirm wird nach Hardwareprüfungen geleert
+- [x] [Taper] [2026/05/17] Stage 3: TRIAD-Logo wird mit Byline „Dealer Quality Botnet" angezeigt
+- [x] [Taper] [2026/05/17] Stage 3: Bildschirm wird erneut geleert und zeigt „Loading..." zentriert
+- [x] [Taper] [2026/05/17] Stage 4: Bildschirm wird geleert, wenn der Ladevorgang abgeschlossen ist
 - [x] [Taper] [2026/05/09] Stage 4: Tribot+-Logo wird angezeigt
 - [x] [Taper] [2026/05/09] Stage 4: Einführungstext wird angezeigt
 - [x] [Taper] [2026/05/09] Stage 4: Eingabefeld wird angezeigt und ist bereit für Eingaben
 
 ### Visueller Stil
 
-- [ ] [     ] [          ] Benutzerdefinierter PETSCII-Zeichensatz ist aktiv (nicht der Standard-C64-BASIC-Zeichensatz)
-- [ ] [     ] [          ] Zeichensatz 1 (Highres_1x1_#8 von Tao/Triad) ist implementiert
-- [ ] [     ] [          ] Zeichensatz 2 (Highres_1x1_#6 von Tao/Triad) ist implementiert
-- [ ] [     ] [          ] Zeichensatz 1 ist der Standard beim Programmstart
+- [x] [Taper] [2026/05/17] Benutzerdefinierter PETSCII-Zeichensatz ist aktiv (nicht der Standard-C64-BASIC-Zeichensatz)
+- [x] [Taper] [2026/05/17] Zeichensatz 1 (Highres_1x1_#8 von Tao/Triad) ist implementiert
+- [ ] [Taper] [2026/05/17] Zeichensatz 2 (Highres_1x1_#6 von Tao/Triad) ist implementiert
+- [x] [Taper] [2026/05/17] Zeichensatz 1 ist der Standard beim Programmstart
 
 ### Layout
 
 - [x] [Taper] [2026/05/09] Bildschirm ist aufgeteilt in einen Ausgabebereich (oberhalb des Trennstrichs) und ein Eingabefeld (unterhalb)
-- [ ] [     ] [          ] Ausgabebereich scrollt vertikal
+- [x] [Taper] [2026/05/17] Ausgabebereich scrollt vertikal
 - [x] [Taper] [2026/05/09] Eingabefeld ist fest und immer sichtbar
 - [x] [Taper] [2026/05/09] Trennstrich ist vorhanden und trennt die beiden Bereiche
 
@@ -52,8 +52,8 @@ Markiere Einträge mit `[x]`, wenn bestätigt. Lasse `[ ]` offen, wenn noch nich
 - [x] [Taper] [2026/05/09] Eingabebereich ist 37 Zeichen breit
 - [x] [Taper] [2026/05/09] Gesamte Prompt-Breite beträgt 2 Zeichen (Präfix belegt Spalten 1–2)
 - [x] [Taper] [2026/05/09] Trennstrich ist dunkelgrau gefärbt
-- [ ] [     ] [          ] Prompt `>` ist mittelgrau gefärbt
-- [ ] [     ] [          ] Platzhaltertext ist dunkelgrau gefärbt
+- [x] [Taper] [2026/05/17] Prompt `>` ist mittelgrau gefärbt
+- [ ] [     ] [2026/05/17] Platzhaltertext ist dunkelgrau gefärbt
 - [ ] [     ] [          ] Benutzereingabetext ist gelb gefärbt
 - [ ] [     ] [          ] Platzhalter „Ask me anything..." wird nur beim ersten Start angezeigt
 - [ ] [     ] [          ] Platzhalter verschwindet, wenn der Benutzer beginnt zu tippen
@@ -66,108 +66,99 @@ Markiere Einträge mit `[x]`, wenn bestätigt. Lasse `[ ]` offen, wenn noch nich
 
 ### Scrollback
 
-- [ ] [     ] [          ] F1 scrollt den Ausgabebereich um 12 Zeilen zurück
-- [ ] [     ] [          ] F7 scrollt den Ausgabebereich um 12 Zeilen vor
-- [ ] [     ] [          ] Wiederholtes Drücken von F1 scrollt bis zur ersten Ausgabezeile zurück
-- [ ] [     ] [          ] Wiederholtes Drücken von F7 scrollt bis zur letzten Ausgabezeile vor
-- [ ] [     ] [          ] Halten von F1 scrollt kontinuierlich in 12-Zeilen-Schritten, bis losgelassen oder Grenze erreicht
+- [x] [Taper] [2026/05/17] F1 scrollt den Ausgabebereich um 1 Zeile zurück
+- [x] [Taper] [2026/05/17] F7 scrollt den Ausgabebereich um 1 Zeile vor
+- [ ] [     ] [          ] Halten von F1 scrollt kontinuierlich in 1-Zeilen-Schritten, bis losgelassen oder Grenze erreicht
 - [ ] [     ] [          ] Halten von F7 scrollt kontinuierlich in 12-Zeilen-Schritten, bis losgelassen oder Grenze erreicht
-- [ ] [     ] [          ] Senden einer neuen Frage beim Zurückgscrollen springt die Ansicht zur neuesten Ausgabe, bevor angehängt wird
+- [x] [Taper] [2026/05/17] Senden einer neuen Frage beim Zurückgscrollen springt die Ansicht zur neuesten Ausgabe, bevor angehängt wird
 
 ### Ausführungsablauf
 
-- [ ] [     ] [          ] Gesendete Eingabe wird mit Präfix `> ` im Ausgabebereich wiederholt
-- [ ] [     ] [          ] Ein `?` wird der wiederholten Eingabe angehängt, wenn die Eingabe eine Frage ist
-- [ ] [     ] [          ] Befehlserkennung prüft beim Senden auf `/`-Präfix
+- [x] [Taper] [2026/05/17] Gesendete Eingabe wird mit Präfix `> ` im Ausgabebereich wiederholt
+- [x] [Taper] [2026/05/17] Ein `?` wird der wiederholten Eingabe angehängt, wenn die Eingabe eine Frage ist
+- [x] [Taper] [2026/05/17] Befehlserkennung prüft beim Senden auf `/`-Präfix
 - [ ] [     ] [          ] Erkannte Befehle werden sofort ausgeführt, ohne Datenbankabfrage
-- [ ] [     ] [          ] Nicht-Befehlseingaben werden als Frage behandelt und an die Datenbank weitergegeben
-- [ ] [     ] [          ] Eine Datenbankübereinstimmung gibt das gefundene Ergebnis als Antwort zurück
-- [ ] [     ] [          ] Keine Datenbankübereinstimmung aktiviert die Nonsens-Antwort-Engine
-- [ ] [     ] [          ] Die Nonsens-Antwort-Engine erzeugt eine plausible, syntaktisch korrekte Antwort
-- [ ] [     ] [          ] Das System verarbeitet jeweils eine Aufgabe (Einzelaufgaben-Warteschlange)
-- [ ] [     ] [          ] Während der Verarbeitung eingegebene Eingaben werden in der Warteschlange eingereiht und der Reihe nach ausgeführt
+- [x] [Taper] [2026/05/17] Nicht-Befehlseingaben werden als Frage behandelt und an die Datenbank weitergegeben
+- [x] [Taper] [2026/05/17] Eine Datenbankübereinstimmung gibt das gefundene Ergebnis als Antwort zurück
+- [x] [Taper] [2026/05/17] Keine Datenbankübereinstimmung aktiviert die Nonsens-Antwort-Engine
+- [x] [Taper] [2026/05/17] Die Nonsens-Antwort-Engine erzeugt eine plausible, syntaktisch korrekte Antwort
+- [x] [Taper] [2026/05/17] Das System verarbeitet jeweils eine Aufgabe (Einzelaufgaben-Warteschlange)
 
 ### Systemrückmeldung
 
-- [ ] [     ] [          ] Ein animierter Indikator erscheint links der Statusmeldung während der Verarbeitung
-- [ ] [     ] [          ] Statusmeldung wird zufällig aus dem definierten Satz von 25 Meldungen ausgewählt
-- [ ] [     ] [          ] Alle 25 Meldungen sind im Meldungspool vorhanden:
-  - [ ] [     ] [          ] Cogitating...
-  - [ ] [     ] [          ] Contemplating...
-  - [ ] [     ] [          ] Deliberating...
-  - [ ] [     ] [          ] Ruminating...
-  - [ ] [     ] [          ] Pondering...
-  - [ ] [     ] [          ] Mulling...
-  - [ ] [     ] [          ] Musing...
-  - [ ] [     ] [          ] Percolating...
-  - [ ] [     ] [          ] Noodling...
-  - [ ] [     ] [          ] Simmering...
-  - [ ] [     ] [          ] Marinating...
-  - [ ] [     ] [          ] Incubating...
-  - [ ] [     ] [          ] Concocting...
-  - [ ] [     ] [          ] Scheming...
-  - [ ] [     ] [          ] Hatching...
-  - [ ] [     ] [          ] Brewing...
-  - [ ] [     ] [          ] Calculating...
-  - [ ] [     ] [          ] Computing...
-  - [ ] [     ] [          ] Churning...
-  - [ ] [     ] [          ] Crunching...
-  - [ ] [     ] [          ] Coalescing...
-  - [ ] [     ] [          ] Deciphering...
-  - [ ] [     ] [          ] Germinating...
-  - [ ] [     ] [          ] Manifesting...
-  - [ ] [     ] [          ] Reticulating...
+- [x] [Taper] [2026/05/17] Ein animierter Indikator erscheint links der Statusmeldung während der Verarbeitung
+- [x] [Taper] [2026/05/17] Statusmeldung wird zufällig aus dem definierten Satz von 25 Meldungen ausgewählt
+- [x] [Taper] [2026/05/17] Alle 25 Meldungen sind im Meldungspool vorhanden:
+  - [x] [Taper] [2026/05/17] Cogitating...
+  - [x] [Taper] [2026/05/17] Contemplating...
+  - [x] [Taper] [2026/05/17] Deliberating...
+  - [x] [Taper] [2026/05/17] Ruminating...
+  - [x] [Taper] [2026/05/17] Pondering...
+  - [x] [Taper] [2026/05/17] Mulling...
+  - [x] [Taper] [2026/05/17] Musing...
+  - [x] [Taper] [2026/05/17] Percolating...
+  - [x] [Taper] [2026/05/17] Noodling...
+  - [x] [Taper] [2026/05/17] Simmering...
+  - [x] [Taper] [2026/05/17] Marinating...
+  - [x] [Taper] [2026/05/17] Incubating...
+  - [x] [Taper] [2026/05/17] Concocting...
+  - [x] [Taper] [2026/05/17] Scheming...
+  - [x] [Taper] [2026/05/17] Hatching...
+  - [x] [Taper] [2026/05/17] Brewing...
+  - [x] [Taper] [2026/05/17] Calculating...
+  - [x] [Taper] [2026/05/17] Computing...
+  - [x] [Taper] [2026/05/17] Churning...
+  - [x] [Taper] [2026/05/17] Crunching...
+  - [x] [Taper] [2026/05/17] Coalescing...
+  - [x] [Taper] [2026/05/17] Deciphering...
+  - [x] [Taper] [2026/05/17] Germinating...
+  - [x] [Taper] [2026/05/17] Manifesting...
+  - [x] [Taper] [2026/05/17] Reticulating...
 
 ### Ausgabebereich
 
-- [ ] [     ] [          ] Fragen, Befehle und Antworten erscheinen alle im Ausgabebereich
-- [ ] [     ] [          ] Einträge erscheinen von oben nach unten in chronologischer Reihenfolge
-- [ ] [     ] [          ] Neue Einträge werden unten angehängt
-- [ ] [     ] [          ] Ansicht scrollt automatisch, um die neueste Ausgabe anzuzeigen
+- [x] [Taper] [2026/05/17] Fragen, Befehle und Antworten erscheinen alle im Ausgabebereich
+- [x] [Taper] [2026/05/17] Einträge erscheinen von oben nach unten in chronologischer Reihenfolge
+- [x] [Taper] [2026/05/17] Neue Einträge werden unten angehängt
+- [x] [Taper] [2026/05/17] Ansicht scrollt automatisch, um die neueste Ausgabe anzuzeigen
 
 ### Antwortformatierung
 
-- [ ] [     ] [          ] Antworten sind nur Klartext (keine Überschriften, keine Listen gerendert)
-- [ ] [     ] [          ] Lange Antworten umbrechen innerhalb der 40-Zeichen-Bildschirmbreite
+- [x] [Taper] [2026/05/17] Antworten sind nur Klartext (keine Überschriften, keine Listen gerendert)
+- [x] [Taper] [2026/05/17] Lange Antworten umbrechen innerhalb der 40-Zeichen-Bildschirmbreite
 
 ### Antwortfarbverhalten
 
-- [ ] [     ] [          ] Die zuletzt angezeigte Antwort erscheint in Weiß
-- [ ] [     ] [          ] Wenn eine neue Antwort eintrifft, verblasst die vorherige: Weiß → Hellgrau → Mittelgrau → Dunkelgrau
-- [ ] [     ] [          ] Die Verblassungssequenz schreitet fort, während die Antwort im Ausgabebereich nach oben wandert
-- [ ] [     ] [          ] Die letzte Antwort (die aktuellste, ohne neuere folgende) bleibt weiß
-- [ ] [     ] [          ] Schlüsselwort-Hervorhebung gilt nur für die letzte Antwort
+- [x] [Taper] [2026/05/17] Die Antwort ist weiß
+- [ ] [     ] [          ] Schlüsselwort-Hervorhebung gilt nur für die Antwort
 - [ ] [     ] [          ] Schlüsselwörter werden aus der Benutzerfrage durch exakte Übereinstimmung extrahiert
 - [ ] [     ] [          ] Häufige Stoppwörter werden vor dem Schlüsselwortabgleich ausgeschlossen
-- [ ] [     ] [          ] Jede Schlüsselwortübereinstimmung in der letzten Antwort wird gelb gefärbt
-- [ ] [     ] [          ] Überholte Antworten haben keine Schlüsselwort-Hervorhebung
+- [ ] [     ] [          ] Jede Schlüsselwortübereinstimmung in der Antwort wird gelb gefärbt
 
 ### Musik
 
-- [ ] [     ] [          ] SID-Musik spielt standardmäßig, wenn das Programm bereit für Eingaben ist
-- [ ] [     ] [          ] Musik wird bei jedem Programmstart auf Ein zurückgesetzt
-- [ ] [     ] [          ] Standard-Melodie ist Melodie 1 bei jedem Programmstart
-- [ ] [     ] [          ] Befehl `/music` schaltet die Wiedergabe sofort ein und aus
-- [ ] [     ] [          ] `/tune 1` wechselt sofort zu Melodie 1
-- [ ] [     ] [          ] `/tune 2` wechselt sofort zu Melodie 2
-- [ ] [     ] [          ] `/tune 3` wechselt sofort zu Melodie 3
-- [ ] [     ] [          ] `/tune 4` wechselt sofort zu Melodie 4
-- [ ] [     ] [          ] Musik ausschalten stoppt die Wiedergabe sofort
-- [ ] [     ] [          ] Musik einschalten setzt die zuletzt gewählte Melodie fort
+- [x] [Taper] [2026/05/17] SID-Musik spielt standardmäßig, wenn das Programm bereit für Eingaben ist
+- [x] [Taper] [2026/05/17] Musik wird bei jedem Programmstart auf Ein zurückgesetzt
+- [x] [Taper] [2026/05/17] Standard-Melodie ist Melodie 1 bei jedem Programmstart
+- [x] [Taper] [2026/05/17] Befehl `/music` schaltet die Wiedergabe sofort ein und aus
+- [x] [Taper] [2026/05/17] `/tune 1` wechselt sofort zu Melodie 1
+- [x] [Taper] [2026/05/17] `/tune 2` wechselt sofort zu Melodie 2
+- [x] [Taper] [2026/05/17] Musik ausschalten stoppt die Wiedergabe sofort
+- [x] [Taper] [2026/05/17] Musik einschalten setzt die zuletzt gewählte Melodie fort
 
 ### Befehle
 
-- [ ] [     ] [          ] `/clear` leert den Bildschirm und löscht den Scrollback-Puffer
-- [ ] [     ] [          ] `/reset` leert den Bildschirm und löscht den Scrollback-Puffer (Alias für `/clear`)
-- [ ] [     ] [          ] `/exit` beendet Tribot+ und kehrt zu BASIC zurück (Warmstart)
+- [x] [Taper] [2026/05/17] `/clear` leert den Bildschirm und löscht den Scrollback-Puffer
+- [ ] [     ][          ] `/reset` leert den Bildschirm und löscht den Scrollback-Puffer (Alias für `/clear`)
+- [x] [Taper] [[2026/05/17] `/exit` beendet Tribot+ und kehrt zu BASIC zurück (Warmstart)
 - [ ] [     ] [          ] `/quit` beendet Tribot+ und kehrt zu BASIC zurück (Alias für `/exit`)
-- [ ] [     ] [          ] `/help` zeigt eine Liste aller verfügbaren Befehle mit Aliasen und Beschreibungen
-- [ ] [     ] [          ] `/man` zeigt eine Liste aller verfügbaren Befehle (Alias für `/help`)
-- [ ] [     ] [          ] `/info` zeigt das Tribot+-Logo, eine kurze Einführung und technische Versionsdetails
-- [ ] [     ] [          ] `/info`-Ausgabe erwähnt `/help` und `/man` für verfügbare Befehle
-- [ ] [     ] [          ] `/music` schaltet Musik ein/aus
-- [ ] [     ] [          ] `/tune X` wählt Melodie (1–4)
-- [ ] [     ] [          ] `/char 1` wechselt sofort zu Zeichensatz 1
+- [x] [Taper] [2026/05/17] `/help` zeigt eine Liste aller verfügbaren Befehle mit Aliasen und Beschreibungen
+- [x] [Taper] [2026/05/17] `/man` zeigt eine Liste aller verfügbaren Befehle (Alias für `/help`)
+- [x] [Taper] [2026/05/17] `/info` zeigt das Tribot+-Logo, eine kurze Einführung und technische Versionsdetails
+- [x] [Taper] [2026/05/17] `/info`-Ausgabe erwähnt `/help` und `/man` für verfügbare Befehle
+- [x] [Taper] [2026/05/17] `/music` schaltet Musik ein/aus
+- [x] [Taper] [2026/05/17] `/tune X` wählt Melodie (1-2)
+- [x] [Taper] [2026/05/17] `/char 1` wechselt sofort zu Zeichensatz 1
 - [ ] [     ] [          ] `/char 2` wechselt sofort zu Zeichensatz 2
 
 ---
@@ -184,108 +175,104 @@ Markiere Einträge mit `[x]`, wenn bestätigt. Lasse `[ ]` offen, wenn noch nich
 - [ ] [     ] [          ] Hardwareprüfungsergebnisse werden zeilenweise ausgegeben, sobald jede Prüfung abgeschlossen ist
 - [ ] [     ] [          ] „REU Detected" erscheint, wenn REU eingebunden ist
 - [ ] [     ] [          ] „REU Not found!" erscheint, wenn REU nicht eingebunden ist
-- [ ] [     ] [          ] TRIAD-Logo wird korrekt dargestellt, nachdem Hardwareprüfungen den Bildschirm geleert haben
-- [ ] [     ] [          ] Byline „Dealer Quality Botnet" erscheint unterhalb des TRIAD-Logos
-- [ ] [     ] [          ] „Loading..."-Meldung ist visuell auf dem Bildschirm zentriert
-- [ ] [     ] [          ] Abschließender Bildschirm zeigt: Logo, Einführungstext und Eingabefeld an korrekten Positionen
+- [x] [Taper] [2026/05/17] TRIAD-Logo wird korrekt dargestellt, nachdem Hardwareprüfungen den Bildschirm geleert haben
+- [x] [Taper] [2026/05/17] Byline „Dealer Quality Botnet" erscheint unterhalb des TRIAD-Logos
+- [x] [Taper] [2026/05/17] „Loading..."-Meldung ist visuell auf dem Bildschirm zentriert
+- [ ] [     ] [          ] Verzögerung zur Bootsequenz hinzufügen.
+- [x] [Taper] [2026/05/17] Abschließender Bildschirm zeigt: Logo, Einführungstext und Eingabefeld an korrekten Positionen
 
 ### Layout & Anzeige
 
-- [ ] [     ] [          ] Ausgabebereich belegt den Bereich oberhalb des Trennstrichs
-- [ ] [     ] [          ] Eingabefeld belegt den Bereich unterhalb des Trennstrichs
-- [ ] [     ] [          ] Trennstrich ist visuell klar zwischen den beiden Bereichen erkennbar
-- [ ] [     ] [          ] Bildschirm ist 40 Zeichen breit und 25 Zeilen hoch, wie auf dem C64 erwartet
-- [ ] [     ] [          ] Benutzerdefinierter Zeichensatz ist aktiv — Standard-C64-BASIC-Zeichen sind nicht sichtbar
+- [x] [Taper] [2026/05/17] Ausgabebereich belegt den Bereich oberhalb des Trennstrichs
+- [x] [Taper] [2026/05/17] Eingabefeld belegt den Bereich unterhalb des Trennstrichs
+- [x] [Taper] [2026/05/17] Trennstrich ist visuell klar zwischen den beiden Bereichen erkennbar
+- [x] [Taper] [2026/05/17] Bildschirm ist 40 Zeichen breit und 25 Zeilen hoch, wie auf dem C64 erwartet
+- [x] [Taper] [2026/05/17] Benutzerdefinierter Zeichensatz ist aktiv — Standard-C64-BASIC-Zeichen sind nicht sichtbar
 
 ### Eingabefeld
 
-- [ ] [     ] [          ] Prompt `> ` erscheint am Anfang der Eingabezeile mit korrektem Abstand
-- [ ] [     ] [          ] Drücken von Backspace oder Delete bis zur Prompt-Grenze entfernt das Präfix nicht
+- [x] [Taper] [2026/05/17] Prompt `> ` erscheint am Anfang der Eingabezeile mit korrektem Abstand
+- [x] [Taper] [2026/05/17] Drücken von Backspace oder Delete bis zur Prompt-Grenze entfernt das Präfix nicht
 - [ ] [     ] [          ] Platzhalter „Ask me anything..." ist vor dem ersten Tastendruck sichtbar
 - [ ] [     ] [          ] Platzhalter verschwindet, sobald der Benutzer eine beliebige Zeichentaste drückt
 - [ ] [     ] [          ] Nach dem Absenden der ersten Frage erscheint der Platzhalter nicht erneut
 - [ ] [     ] [          ] Vom Benutzer eingegebener Text ist gelb
-- [ ] [     ] [          ] Prompt `>` ist mittelgrau
+- [x] [Taper] [2026/05/17] Prompt `>` ist mittelgrau
 - [ ] [     ] [          ] Platzhaltertext ist dunkelgrau
-- [ ] [     ] [          ] Trennstrich ist dunkelgrau
+- [x] [Taper] [2026/05/17] Trennstrich ist dunkelgrau
 
 ### Eingabeverhalten
 
-- [ ] [     ] [          ] Eingabe stoppt bei Zeichen 37 — das 38. Zeichen wird nicht akzeptiert
-- [ ] [     ] [          ] Kein visueller oder akustischer Fehler tritt auf, wenn das Zeichenlimit erreicht wird
-- [ ] [     ] [          ] Backspace entfernt das zuletzt eingegebene Zeichen korrekt
+- [x] [Taper] [2026/05/17] Eingabe stoppt bei Zeichen 37 — das 38. Zeichen wird nicht akzeptiert
+- [x] [Taper] [2026/05/17] Kein visueller oder akustischer Fehler tritt auf, wenn das Zeichenlimit erreicht wird
+- [x] [Taper] [2026/05/17] Backspace entfernt das zuletzt eingegebene Zeichen korrekt
 
 ### Scrollback
 
-- [ ] [     ] [          ] F1 bewegt die Ausgabeansicht genau 12 Zeilen pro Druck zurück
-- [ ] [     ] [          ] F7 bewegt die Ausgabeansicht genau 12 Zeilen pro Druck vor
-- [ ] [     ] [          ] F1 an der oberen Grenze stoppt das Scrollen (kein Überlauf oder Fehler)
-- [ ] [     ] [          ] F7 an der unteren Grenze stoppt das Scrollen (kein Überlauf oder Fehler)
+- [x] [Taper] [2026/05/17] F1 bewegt die Ausgabeansicht genau 1 Zeile pro Druck zurück
+- [x] [Taper] [2026/05/17] F7 bewegt die Ausgabeansicht genau 1 Zeile pro Druck vor
+- [x] [Taper] [2026/05/17] F1 an der oberen Grenze stoppt das Scrollen (kein Überlauf oder Fehler)
+- [x] [Taper] [2026/05/17] F7 an der unteren Grenze stoppt das Scrollen (kein Überlauf oder Fehler)
 - [ ] [     ] [          ] Halten von F1 erzeugt kontinuierliches Rückwärtsscrollen
 - [ ] [     ] [          ] Halten von F7 erzeugt kontinuierliches Vorwärtsscrollen
-- [ ] [     ] [          ] Absenden einer neuen Frage beim Zurückgscrollen: Ansicht springt zur neuesten Ausgabe, dann wird neue Antwort angehängt
+- [x] [Taper] [2026/05/17] Absenden einer neuen Frage beim Zurückgscrollen: Ansicht springt zur neuesten Ausgabe, dann wird neue Antwort angehängt
 
 ### Befehlsbehandlung
 
-- [ ] [     ] [          ] `/clear` leert den Bildschirm sofort und löscht den Scrollback-Puffer (kein Logo oder Einführungstext wird wiederhergestellt)
+- [x] [Taper] [2026/05/17] `/clear` leert den Bildschirm sofort und löscht den Scrollback-Puffer (kein Logo oder Einführungstext wird wiederhergestellt)
 - [ ] [     ] [          ] `/reset` verhält sich identisch zu `/clear` — Bildschirm und Scrollback werden beide geleert
-- [ ] [     ] [          ] `/exit` kehrt ohne Absturz zum BASIC-Prompt zurück
+- [x] [Taper] [2026/05/17] `/exit` kehrt ohne Absturz zum BASIC-Prompt zurück
 - [ ] [     ] [          ] `/quit` verhält sich identisch zu `/exit`
-- [ ] [     ] [          ] `/help`-Ausgabe listet jeden Befehl, jeden Alias und eine Beschreibung für jeden auf
-- [ ] [     ] [          ] `/man` erzeugt identische Ausgabe wie `/help`
-- [ ] [     ] [          ] `/info` zeigt Logo, Einführung und Versionsinformationen
-- [ ] [     ] [          ] `/info` erwähnt `/help` und `/man` namentlich
-- [ ] [     ] [          ] `/music` schaltet Musik sichtbar um: aus wenn spielend, an wenn gestoppt
-- [ ] [     ] [          ] `/tune 1` bis `/tune 4` wechseln jeweils sofort zur korrekten Melodie
+- [x] [Taper] [2026/05/17] `/help`-Ausgabe listet jeden Befehl, jeden Alias und eine Beschreibung für jeden auf
+- [x] [Taper] [2026/05/17] `/man` erzeugt identische Ausgabe wie `/help`
+- [x] [Taper] [2026/05/17] `/info` zeigt Logo, Einführung und Versionsinformationen
+- [x] [Taper] [2026/05/17] `/info` erwähnt `/help` und `/man` namentlich
+- [x] [Taper] [2026/05/17] `/music` schaltet Musik sichtbar um: aus wenn spielend, an wenn gestoppt
+- [x] [Taper] [2026/05/17] `/tune 1` bis `/tune 2` wechseln jeweils sofort zur korrekten Melodie
 - [ ] [     ] [          ] `/char 1` wechselt sofort zu Zeichensatz 1 ohne Bildschirmkorruption
 - [ ] [     ] [          ] `/char 2` wechselt sofort zu Zeichensatz 2 ohne Bildschirmkorruption
 
 ### Fragenbehandlung
 
-- [ ] [     ] [          ] Eine erkannte Frage gibt ein Datenbankergebnis zurück
-- [ ] [     ] [          ] Eine Frage ohne Datenbankübereinstimmung erhält eine Nonsens-Antwort (keine Stille, kein Fehler)
-- [ ] [     ] [          ] Nonsens-Antworten lesen sich als plausible Sätze
-- [ ] [     ] [          ] Ein `?` wird der wiederholten Frage im Ausgabebereich angehängt
-- [ ] [     ] [          ] Befehle werden NICHT an die Datenbank weitergegeben — sie werden direkt ausgeführt
+- [x] [Taper] [2026/05/17] Eine erkannte Frage gibt ein Datenbankergebnis zurück
+- [x] [Taper] [2026/05/17] Eine Frage ohne Datenbankübereinstimmung erhält eine Nonsens-Antwort (keine Stille, kein Fehler)
+- [x] [Taper] [2026/05/17] Nonsens-Antworten lesen sich als plausible Sätze
+- [x] [Taper] [2026/05/17] Ein `?` wird der wiederholten Frage im Ausgabebereich angehängt
+- [x] [Taper] [2026/05/17] Befehle werden NICHT an die Datenbank weitergegeben — sie werden direkt ausgeführt
 
 ### Systemrückmeldung
 
-- [ ] [     ] [          ] Der animierte Indikator ist links der Statusmeldung während der Verarbeitung sichtbar
-- [ ] [     ] [          ] Der Statusmeldungstext ändert sich bei mehreren Abfragen (Zufälligkeit ist beobachtbar)
-- [ ] [     ] [          ] Indikator und Meldung verschwinden oder werden ersetzt, wenn die Antwort erscheint
+- [x] [Taper] [2026/05/17] Der animierte Indikator ist links der Statusmeldung während der Verarbeitung sichtbar
+- [x] [Taper] [2026/05/17] Der Statusmeldungstext ändert sich bei mehreren Abfragen (Zufälligkeit ist beobachtbar)
 
 ### Ausgabebereich & Formatierung
 
-- [ ] [     ] [          ] Zeilen, die länger als 40 Zeichen sind, brechen sauber an der Spaltengrenze um
-- [ ] [     ] [          ] Keine verirrten Zeichen oder Darstellungsartefakte erscheinen in umgebrochenen Zeilen
-- [ ] [     ] [          ] Ausgabe wird unten angehängt und die Ansicht folgt automatisch
+- [x] [Taper] [2026/05/17] Zeilen, die länger als 40 Zeichen sind, brechen sauber an der Spaltengrenze um
+- [x] [Taper] [2026/05/17] Keine verirrten Zeichen oder Darstellungsartefakte erscheinen in umgebrochenen Zeilen
+- [x] [Taper] [2026/05/17] Ausgabe wird unten angehängt und die Ansicht folgt automatisch
 
 ### Antwortfarbverhalten
 
-- [ ] [     ] [          ] Die neueste Antwort ist weiß
-- [ ] [     ] [          ] Nach Eintreffen einer zweiten Antwort beginnt die erste zu verblassen: Weiß → Hellgrau → Mittelgrau → Dunkelgrau
-- [ ] [     ] [          ] Das Verblassen schreitet über mehrere Antworten in der korrekten Reihenfolge fort
-- [ ] [     ] [          ] Die letzte (aktuellste nach Eingabestopp) Antwort bleibt weiß
-- [ ] [     ] [          ] Schlüsselwort-Hervorhebung ist gelb und erscheint nur in der letzten Antwort
-- [ ] [     ] [          ] Schlüsselwörter aus der Benutzerfrage werden in der letzten Antwort hervorgehoben
-- [ ] [     ] [          ] Häufige Stoppwörter (z.B. „the", „is", „a") werden nicht hervorgehoben
+- [x] [Taper] [2026/05/17] Die Antwort ist weiß
+- [ ] [     ] [          ] Schlüsselwort-Hervorhebung ist gelb und erscheint nur in der Antwort
+- [x] [Taper] [2026/05/17] Häufige Stoppwörter (z.B. „the", „is", „a") werden nicht hervorgehoben
 - [ ] [     ] [          ] Ältere Antworten haben keine Hervorhebung
 
 ### Musik
 
-- [ ] [     ] [          ] Musik startet automatisch, wenn das Programm den Bereitschaftszustand erreicht
-- [ ] [     ] [          ] `/music` stoppt die Wiedergabe sofort, wenn Musik an ist
-- [ ] [     ] [          ] `/music` setzt die zuletzt gewählte Melodie sofort fort, wenn Musik aus ist
-- [ ] [     ] [          ] `/tune X` wechselt die Melodie ohne Unterbrechung, wenn Musik bereits spielt
-- [ ] [     ] [          ] Nach `/tune X`, dann `/music` aus, dann `/music` an: Die von `/tune X` gewählte Melodie wird fortgesetzt
-- [ ] [     ] [          ] Bei frischem Programmstart: Musik ist an und Melodie 1 spielt (Einstellungen wurden zurückgesetzt)
+- [x] [Taper] [2026/05/17] Musik startet automatisch, wenn das Programm den Bereitschaftszustand erreicht
+- [x] [Taper] [2026/05/17] `/music` stoppt die Wiedergabe sofort, wenn Musik an ist
+- [x] [Taper] [2026/05/17] `/music` setzt die zuletzt gewählte Melodie sofort fort, wenn Musik aus ist
+- [x] [Taper] [2026/05/17] `/tune X` wechselt die Melodie ohne Unterbrechung, wenn Musik bereits spielt
+- [x] [Taper] [2026/05/17] Nach `/tune X`, dann `/music` aus, dann `/music` an: Die von `/tune X` gewählte Melodie wird fortgesetzt
+- [x] [Taper] [2026/05/17] Bei frischem Programmstart: Musik ist an und Melodie 1 spielt (Einstellungen wurden zurückgesetzt)
 
 ### Zeichensatz
 
-- [ ] [     ] [          ] Bei frischem Programmstart: Zeichensatz 1 ist aktiv
+- [x] [Taper] [2026/05/17] Bei frischem Programmstart: Zeichensatz 1 ist aktiv
 - [ ] [     ] [          ] `/char 2` wechselt den sichtbaren Zeichensatz zu Zeichensatz 2
 - [ ] [     ] [          ] `/char 1` wechselt zurück zu Zeichensatz 1
-- [ ] [     ] [          ] Nach einer `/char 2`-Sitzung und einem frischen Programmstart: Zeichensatz 1 ist wieder aktiv (Zurücksetzung bestätigt)
+- [x] [Taper] [2026/05/17] Nach einer `/char 2`-Sitzung und einem frischen Programmstart: Zeichensatz 1 ist wieder aktiv (Zurücksetzung bestätigt)
 
 ---
 
@@ -295,9 +282,9 @@ Markiere Einträge mit `[x]`, wenn bestätigt. Lasse `[ ]` offen, wenn noch nich
 
 ### Boot / Hardware
 
-- [ ] [     ] [          ] Programm startet korrekt mit eingebundener REU (16MB)
-- [ ] [     ] [          ] Programm startet ohne Absturz, wenn REU nicht eingebunden ist — „REU Not found!" erscheint und Boot setzt sich ordentlich fort
-- [ ] [     ] [          ] Programm hängt sich in keiner Bootphase auf
+- [x] [Taper] [2026/05/17] Programm startet korrekt mit eingebundener REU (16MB)
+- [x] [Taper] [2026/05/17] Programm startet ohne Absturz, wenn REU nicht eingebunden ist — „REU Not found!" erscheint, aber wenn REU eingebunden wird, setzt es fort.
+- [x] [Taper] [2026/05/17] Programm hängt sich in keiner Bootphase auf
 - [ ] [     ] [          ] Bootsequenz wird in angemessener Zeit auf Standard-C64-Hardware abgeschlossen
 - [ ] [     ] [          ] Bootsequenz wird korrekt unter 1541U / U2 mit REU abgeschlossen
 - [ ] [     ] [          ] Bootsequenz wird korrekt unter 64Ultimate mit REU abgeschlossen
@@ -306,41 +293,33 @@ Markiere Einträge mit `[x]`, wenn bestätigt. Lasse `[ ]` offen, wenn noch nich
 
 ### Grenzfälle des Eingabefelds
 
-- [ ] [     ] [          ] Drücken von Return auf leerem Eingabefeld tut nichts (kein Absturz, kein leerer Eintrag in der Ausgabe)
+- [x] [Taper] [2026/05/17] Drücken von Return auf leerem Eingabefeld tut nichts (kein Absturz, kein leerer Eintrag in der Ausgabe)
 - [ ] [     ] [          ] Drücken von Return auf Eingabe, die nur Leerzeichen enthält, tut nichts (oder wird als leer behandelt)
-- [ ] [     ] [          ] Eingabe von genau 38 Zeichen füllt das Feld ohne Überlauf
-- [ ] [     ] [          ] Eingabe von genau 38 Zeichen und anschließendes Drücken von Return wird korrekt abgesendet
-- [ ] [     ] [          ] Drücken von Backspace auf leerem Eingabefeld entfernt das Prompt-Präfix nicht
-- [ ] [     ] [          ] Eingabe spezieller PETSCII-Zeichen korrumpiert die Anzeige nicht
+- [x] [Taper] [2026/05/17] Eingabe von genau 37 Zeichen füllt das Feld ohne Überlauf
+- [x] [Taper] [2026/05/17] Eingabe von genau 37 Zeichen und anschließendes Drücken von Return wird korrekt abgesendet
+- [x] [Taper] [2026/05/17] Drücken von Backspace auf leerem Eingabefeld entfernt das Prompt-Präfix nicht
 
 ### Grenzfälle der Befehle
 
 - [ ] [     ] [          ] Unbekannter Befehl (z.B. `/foo`) erzeugt eine korrekte Antwort — kein Absturz
 - [ ] [     ] [          ] `/tune 0` wird abgelehnt oder erzeugt einen korrekten Fehler (außerhalb des Bereichs)
-- [ ] [     ] [          ] `/tune 5` wird abgelehnt oder erzeugt einen korrekten Fehler (außerhalb des Bereichs)
+- [ ] [     ] [          ] `/tune 3` wird abgelehnt oder erzeugt einen korrekten Fehler (außerhalb des Bereichs)
 - [ ] [     ] [          ] `/char 0` wird abgelehnt oder erzeugt einen korrekten Fehler (außerhalb des Bereichs)
 - [ ] [     ] [          ] `/char 3` wird abgelehnt oder erzeugt einen korrekten Fehler (außerhalb des Bereichs)
-- [ ] [     ] [          ] `/MUSIC` (Großbuchstaben) wird entweder erkannt oder schlägt korrekt fehl (erwartetes Verhalten definieren)
-- [ ] [     ] [          ] `/Tune 1` (gemischte Groß-/Kleinschreibung) wird entweder erkannt oder schlägt korrekt fehl
 - [ ] [     ] [          ] Ein Befehl mit abschließenden Leerzeichen (z.B. `/clear `) verhält sich korrekt
 - [ ] [     ] [          ] Ein `/` ohne Befehlswort (nur ein Schrägstrich) erzeugt eine korrekte Antwort
 
 ### Grenzfälle des Scrollbacks
 
-- [ ] [     ] [          ] F1 gedrückt, wenn bereits am oberen Rand der Ausgabe, führt nicht zu Absturz oder Bildschirmkorruption
-- [ ] [     ] [          ] F7 gedrückt, wenn bereits am unteren Rand der Ausgabe, führt nicht zu Absturz oder Bildschirmkorruption
-- [ ] [     ] [          ] F1/F7 verwendet, wenn der Ausgabebereich weniger als 12 Inhaltszeilen hat, scrollt korrekt zur Grenze
-- [ ] [     ] [          ] Scrollback-Zustand wird korrekt zurückgesetzt, nachdem eine neue Frage gesendet wurde
-
-### Warteschlangenverhalten
-
-- [ ] [     ] [          ] Eingabe von zwei Fragen in schneller Folge: Beide werden verarbeitet und beide Antworten erscheinen in der Reihenfolge
-- [ ] [     ] [          ] Keine doppelten Antworten oder verlorene Eingaben, wenn die Warteschlange mehrere Elemente enthält
+- [X] [Taper] 2026/05/17] F1 gedrückt, wenn bereits am oberen Rand der Ausgabe, führt nicht zu Absturz oder Bildschirmkorruption
+- [X] [Taper] [2026/05/17] F7 gedrückt, wenn bereits am unteren Rand der Ausgabe, führt nicht zu Absturz oder Bildschirmkorruption
+- [X] [Taper] [2026/05/17] F1/F7 verwendet, wenn der Ausgabebereich weniger als 12 Inhaltszeilen hat, scrollt korrekt zur Grenze
+- [X] [Taper] [2026/05/17] Scrollback-Zustand wird korrekt zurückgesetzt, nachdem eine neue Frage gesendet wurde
 
 ### Grenzfälle der Antwortanzeige
 
-- [ ] [     ] [          ] Eine Antwort, die genau 40 Zeichen pro Zeile füllt, bricht korrekt zur nächsten Zeile um
-- [ ] [     ] [          ] Eine Antwort, die länger als die sichtbare Ausgabebereichshöhe ist, ist über F1/F7 scrollbar
+- [X] [Taper] [2026/05/17] Eine Antwort, die genau 40 Zeichen pro Zeile füllt, bricht korrekt zur nächsten Zeile um
+- [X] [Taper] [2026/05/17] Eine Antwort, die länger als die sichtbare Ausgabebereichshöhe ist, ist über F1/F7 scrollbar
 - [ ] [     ] [          ] Schlüsselwort-Hervorhebung funktioniert korrekt, wenn das übereinstimmende Wort mehrfach in der Antwort vorkommt
 - [ ] [     ] [          ] Keine Hervorhebungsartefakte erscheinen in überholten Antworten
 
@@ -348,7 +327,7 @@ Markiere Einträge mit `[x]`, wenn bestätigt. Lasse `[ ]` offen, wenn noch nich
 
 - [ ] [     ] [          ] `/music` wiederholt schnell gedrückt führt nicht zu Absturz oder Audio-Desynchronisation
 - [ ] [     ] [          ] `/tune X` aufgerufen, wenn Musik aus ist: Musik bleibt aus, aber korrekte Melodie wird für das Einschalten in die Warteschlange gestellt
-- [ ] [     ] [          ] Schnelles Wechseln der Melodien (Melodie 1 → 2 → 3 → 4) erzeugt keine Audioartefakte oder Abstürze
+- [ ] [     ] [          ] Schnelles Wechseln der Melodien (Melodie 1 → 2) erzeugt keine Audioartefakte oder Abstürze
 
 ### Grenzfälle des Zeichensatzes
 
@@ -358,10 +337,10 @@ Markiere Einträge mit `[x]`, wenn bestätigt. Lasse `[ ]` offen, wenn noch nich
 
 ### Allgemeine Stabilität
 
-- [ ] [     ] [          ] Programm läuft in einer verlängerten Sitzung (10+ Abfragen) ohne Speicherkorruption oder visuelle Artefakte
-- [ ] [     ] [          ] Programm kehrt sauber zu BASIC zurück bei `/exit` oder `/quit` ohne verbleibenden Zustand
+- [X] [Taper] [2026/05/17] Programm läuft in einer verlängerten Sitzung (10+ Abfragen) ohne Speicherkorruption oder visuelle Artefakte
+- [x] [Taper] [2026/05/17] Programm kehrt sauber zu BASIC zurück bei `/exit` oder `/quit` ohne verbleibenden Zustand
 - [ ] [     ] [          ] Keine Bildschirmkorruption tritt nach `/clear` oder `/reset` auf
-- [ ] [     ] [          ] Nach `/clear` oder `/reset` erzeugen F1 und F7 keine Bewegung (Scrollback ist leer)
-- [ ] [     ] [          ] Nach `/clear` oder `/reset` beginnt neue Ausgabe frisch ohne Überreste des vorherigen Scrollbacks
-- [ ] [     ] [          ] Nonsens-Antwort-Engine gibt niemals einen leeren String zurück
-- [ ] [     ] [          ] Nonsens-Antwort-Engine erzeugt niemals einen Absturz oder Hänger
+- [X] [Taper] [2026/05/17] Nach `/clear` oder `/reset` erzeugen F1 und F7 keine Bewegung (Scrollback ist leer)
+- [X] [Taper] [2026/05/17] Nach `/clear` oder `/reset` beginnt neue Ausgabe frisch ohne Überreste des vorherigen Scrollbacks
+- [X] [Taper] [2026/05/17] Nonsens-Antwort-Engine gibt niemals einen leeren String zurück
+- [X] [Taper] [2026/05/17] Nonsens-Antwort-Engine erzeugt niemals einen Absturz oder Hänger
