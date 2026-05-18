@@ -44,6 +44,9 @@ Type a question and press Return. Tribot+ searches the database and returns a re
 | `/info`           | Show version and introduction  |
 | `/clear` `/reset` | Clear the screen               |
 | `/exit` `/quit`   | Exit and return to BASIC       |
+| `/music`          | Toggle music on / off          |
+| `/tune 1-2`       | Select tune (1 or 2)           |
+| `/char 1-2`       | Select character set (1 or 2)  |
 
 ---
 
