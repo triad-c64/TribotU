@@ -288,7 +288,7 @@ Tribot+ plays SID music during normal use. Music is on by default and resets to 
 Music is controlled via two commands:
 
     /music        Toggle music on / off
-    /tune 1-4     Select tune (1, 2, 3 or 4)
+    /tune 1-2     Select tune (1 or 2)
 
 ### Behavior
 
@@ -301,12 +301,10 @@ Music is controlled via two commands:
 
 ### Tunes
 
-| Number | Title      | Author       |
-| ------ | ---------- | ------------ |
-| 1      | Tune one   | Author one   |
-| 2      | Tune two   | Author two   |
-| 3      | Tune three | Author three |
-| 4      | Tune four  | Author four  |
+| Number | Title    | Author    |
+| ------ | -------- | --------- |
+| 1      | Tune one | ne7/Triad |
+| 2      | Tune two | ne7/Triad |
 
 Tune titles are placeholders and will be updated once SID files are selected.
 
