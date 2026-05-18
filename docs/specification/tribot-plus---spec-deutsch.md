@@ -114,7 +114,7 @@ Das Eingabefeld ist fest am unteren Bildschirmrand platziert.
 
 - Präfix: `> ` (Größer-als-Zeichen + Leerzeichen)
 - Breite: 2 Zeichen
-- Verbleibende Breite: 38 Zeichen für die Benutzereingabe
+- Verbleibende Breite: 37 Zeichen für die Benutzereingabe
 - Das Präfix ist statisch und kann nicht bearbeitet werden
 
 ### Farben
@@ -140,13 +140,13 @@ Verschwindet, wenn der Benutzer zu tippen beginnt. Nach der ersten Frage wird de
 
 - Bildschirmbreite: 40 Zeichen
 - Eingabeaufforderung: 2 Zeichen
-- Eingabebereich: 38 Zeichen
+- Eingabebereich: 37 Zeichen
 
 ---
 
 ## Eingabeverhalten
 
-Wenn die Eingabe 38 Zeichen erreicht, stoppt die Eingabe. Weitere Zeichen werden nicht akzeptiert.
+Wenn die Eingabe 37 Zeichen erreicht, stoppt die Eingabe. Weitere Zeichen werden nicht akzeptiert.
 
 ---
 
@@ -154,14 +154,12 @@ Wenn die Eingabe 38 Zeichen erreicht, stoppt die Eingabe. Weitere Zeichen werden
 
 Der Ausgabebereich unterstützt die Scrollback-Navigation über die Funktionstasten.
 
-| Taste | Aktion                    |
-| ----- | ------------------------- |
-| F1    | 12 Zeilen zurückscrollen  |
-| F7    | 12 Zeilen vorscrollen     |
+| Taste | Aktion                  |
+| ----- | ----------------------- |
+| F1    | 1 Zeile zurückscrollen  |
+| F7    | 1 Zeile vorscrollen     |
 
-Jeder Tastendruck scrollt den Ausgabebereich um 12 Zeilen, die Hälfte der 25-zeiligen Bildschirmhöhe. Dies gibt ein gestuftes Gefühl, das dem Scrollback-Verhalten einer CLI entspricht. Wiederholtes Drücken von F1 scrollt zurück bis zur ersten Ausgabe. Wiederholtes Drücken von F7 scrollt vorwärts bis zur letzten Ausgabe.
-
-Das Gedrückthalten von F1 oder F7 scrollt kontinuierlich in 12-Zeilen-Schritten, bis die Taste losgelassen wird oder der Anfang bzw. das Ende der Ausgabe erreicht ist.
+Jeder Tastendruck scrollt den Ausgabebereich um 1 Zeile. Das Gedrückthalten von F1 oder F7 scrollt kontinuierlich, bis die Taste losgelassen wird oder der Anfang bzw. das Ende der Ausgabe erreicht ist.
 
 Wenn der Benutzer eine neue Frage stellt, während er zurückgescrollt ist, springt der Ausgabebereich zur letzten Ausgabe, bevor die neue Antwort angefügt wird. Die Scrollback-Position hat keinen Einfluss auf die Eingabe oder Ausführung.
 

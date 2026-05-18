@@ -114,7 +114,7 @@ The input field is fixed at the bottom of the screen.
 
 - Prefix: `> ` (greater-than sign + space)
 - Width: 2 characters
-- Remaining width: 38 characters for user input
+- Remaining width: 37 characters for user input
 - The prefix is static and cannot be edited
 
 ### Colors
@@ -140,13 +140,13 @@ Disappears when the user begins typing. Not shown again after the first question
 
 - Screen width: 40 characters
 - Prompt: 2 characters
-- Input area: 38 characters
+- Input area: 37 characters
 
 ---
 
 ## Input Behavior
 
-When input reaches 38 characters, input stops. No further characters are accepted.
+When input reaches 37 characters, input stops. No further characters are accepted.
 
 ---
 
@@ -154,14 +154,12 @@ When input reaches 38 characters, input stops. No further characters are accepte
 
 The output area supports scrollback navigation using the function keys.
 
-| Key | Action                  |
-| --- | ----------------------- |
-| F1  | Scroll back 12 lines    |
-| F7  | Scroll forward 12 lines |
+| Key | Action               |
+| --- | -------------------- |
+| F1  | Scroll back 1 line   |
+| F7  | Scroll forward 1 line |
 
-Each key press scrolls the output area by 12 lines, half of the 25-line screen height. This gives a stepped feel consistent with CLI scrollback behavior. Repeated presses of F1 scroll back to the first output. Repeated presses of F7 scroll forward to the last output.
-
-Holding F1 or F7 scrolls continuously in 12-line increments until the key is released or the boundary of the output is reached.
+Each key press scrolls the output area by 1 line. Holding F1 or F7 scrolls continuously until the key is released or the boundary of the output is reached.
 
 When the user submits a new question while scrolled back, the output area jumps to the last output before appending the new response. Scrollback position does not affect input or execution.
 
