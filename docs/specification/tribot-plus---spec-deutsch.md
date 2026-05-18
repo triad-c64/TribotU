@@ -283,16 +283,18 @@ Tribot+ spielt SID-Musik während der normalen Nutzung. Musik ist standardmäßi
 
 ### Befehle
 
-Die Musik wird über zwei Befehle gesteuert:
+Die Musik wird über drei Befehle gesteuert:
 
     /music        Musik ein- / ausschalten
-    /tune 1-4     Titel auswählen (1 order 2)
+    /tunes        Titel und Komponist auflisten
+    /tune 1-2     Titel auswählen
 
 ### Verhalten
 
 - Musik startet, wenn das Programm bereit für Eingaben ist.
 - `/music` schaltet die Wiedergabe sofort ein oder aus.
 - `/tune X` wechselt sofort zum gewählten Titel.
+- `/tunes` zeigt einen kurzen Einführungstext zum Komponisten und anschließend eine nummerierte Titelliste.
 - Musik ausschalten stoppt die Wiedergabe sofort.
 - Musik einschalten setzt den zuletzt gewählten Titel fort.
 - Einstellungen werden bei jedem Programmstart zurückgesetzt: Musik ein, Titel 1.
@@ -316,7 +318,7 @@ Tribot+ unterstützt zwei eigene Zeichensätze. Zeichensatz 1 ist standardmäßi
 
 Der Zeichensatz wird über einen Befehl gesteuert:
 
-    /char 1-2     Zeichensatz auswählen (1 oder 2)
+    /char 1-2     Zeichensatz auswählen
 
 ### Verhalten
 
@@ -348,7 +350,7 @@ Löscht den Bildschirm. Kein Logo oder Text wird wiederhergestellt.
 
 Beendet Tribot+ und kehrt zu BASIC zurück (Warm-Reset).
 
-    /exit | /quit/char 
+    /exit | /quit
 
 ### Hilfe
 
@@ -368,9 +370,15 @@ Schaltet die Musik ein und aus.
 
     /music
 
+### Titelliste
+
+Zeigt einen kurzen Einführungstext zum Komponisten und anschließend eine nummerierte Liste der verfügbaren Titel.
+
+    /tunes
+
 ### Titel
 
-Wählt einen von vier verfügbaren Titeln. X durch eine Zahl zwischen 1 und 4 ersetzen.
+Wählt einen von zwei verfügbaren Titeln. X durch 1 oder 2 ersetzen.
 
     /tune X
 

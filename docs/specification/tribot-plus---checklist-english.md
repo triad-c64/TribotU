@@ -33,7 +33,7 @@ Mark items `[x]` when confirmed. Leave `[ ]` open when not yet done or not yet v
 
 ### Visual Style
 
-- [x] [Taper] [2026/05/17] Custom PETSCII character set is active (not default C64 BASIC charset)
+- [x] [Taper] [2026/05/17] Custom PETSCII charset is active (not default C64 BASIC charset)
 - [x] [Taper] [2026/05/17] Charset 1 (Highres_1x1_#8 by Tao/Triad) is implemented
 - [ ] [Taper] [2026/05/17] Charset 2 (Highres_1x1_#6 by Tao/Triad) is implemented
 - [x] [Taper] [2026/05/17] Charset 1 is the default on program load
@@ -157,7 +157,8 @@ Mark items `[x]` when confirmed. Leave `[ ]` open when not yet done or not yet v
 - [x] [Taper] [2026/05/17] `/info` displays the Tribot+ logo, short introduction, and technical version details
 - [x] [Taper] [2026/05/17] `/info` output mentions `/help` and `/man` for available commands
 - [x] [Taper] [2026/05/17] `/music` toggles music on/off
-- [x] [Taper] [2026/05/17] `/tune X` selects tune (1-2)
+- [ ] [     ] [          ] `/tunes` List tunes and composer
+- [x] [Taper] [2026/05/17] `/tune X` selects tune
 - [x] [Taper] [2026/05/17] `/char 1` switches to charset 1 immediately
 - [ ] [     ] [          ] `/char 2` switches to charset 2 immediately
 
@@ -228,6 +229,7 @@ Mark items `[x]` when confirmed. Leave `[ ]` open when not yet done or not yet v
 - [x] [Taper] [2026/05/17] `/info` shows logo, introduction, and version information
 - [x] [Taper] [2026/05/17] `/info` mentions `/help` and `/man` by name
 - [x] [Taper] [2026/05/17] `/music` visibly toggles music: off when playing, on when stopped
+- [ ] [     ] [          ] `/tunes` List tunes and composer
 - [x] [Taper] [2026/05/17] `/tune 1` through `/tune 2` each switch to the correct tune immediately
 - [ ] [     ] [          ] `/char 1` switches to charset 1 immediately with no screen corruption
 - [ ] [     ] [          ] `/char 2` switches to charset 2 immediately with no screen corruption

@@ -157,7 +157,8 @@ Markiere Einträge mit `[x]`, wenn bestätigt. Lasse `[ ]` offen, wenn noch nich
 - [x] [Taper] [2026/05/17] `/info` zeigt das Tribot+-Logo, eine kurze Einführung und technische Versionsdetails
 - [x] [Taper] [2026/05/17] `/info`-Ausgabe erwähnt `/help` und `/man` für verfügbare Befehle
 - [x] [Taper] [2026/05/17] `/music` schaltet Musik ein/aus
-- [x] [Taper] [2026/05/17] `/tune X` wählt Melodie (1-2)
+- [ ] [     ] [          ] `/tunes` listet Titel und Komponist auf
+- [x] [Taper] [2026/05/17] `/tune X` wählt Melodie
 - [x] [Taper] [2026/05/17] `/char 1` wechselt sofort zu Zeichensatz 1
 - [ ] [     ] [          ] `/char 2` wechselt sofort zu Zeichensatz 2
 
@@ -228,6 +229,7 @@ Markiere Einträge mit `[x]`, wenn bestätigt. Lasse `[ ]` offen, wenn noch nich
 - [x] [Taper] [2026/05/17] `/info` zeigt Logo, Einführung und Versionsinformationen
 - [x] [Taper] [2026/05/17] `/info` erwähnt `/help` und `/man` namentlich
 - [x] [Taper] [2026/05/17] `/music` schaltet Musik sichtbar um: aus wenn spielend, an wenn gestoppt
+- [ ] [     ] [          ] `/tunes` listet Titel und Komponist auf
 - [x] [Taper] [2026/05/17] `/tune 1` bis `/tune 2` wechseln jeweils sofort zur korrekten Melodie
 - [ ] [     ] [          ] `/char 1` wechselt sofort zu Zeichensatz 1 ohne Bildschirmkorruption
 - [ ] [     ] [          ] `/char 2` wechselt sofort zu Zeichensatz 2 ohne Bildschirmkorruption

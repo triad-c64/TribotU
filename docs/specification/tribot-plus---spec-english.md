@@ -12,7 +12,7 @@ High-level specification covering visual style, layout, input behavior, and comm
 
 ## Overview
 
-Tribot+ runs in text mode using PETSCII with a custom character set. This distinguishes it from the default C64 BASIC look, reduces memory usage, and improves rendering performance.
+Tribot+ runs in text mode using PETSCII with a custom charset. This distinguishes it from the default C64 BASIC look, reduces memory usage, and improves rendering performance.
 
 The interface draws from modern CLI tools such as Claude Code.
 
@@ -283,16 +283,18 @@ Tribot+ plays SID music during normal use. Music is on by default and resets to 
 
 ### Commands
 
-Music is controlled via two commands:
+Music is controlled via three commands:
 
-    /music        Toggle music on / off
-    /tune 1-2     Select tune (1 or 2)
+    /music        Toggle music on/off
+    /tunes        List tunes and composer
+    /tune 1-2     Select tune
 
 ### Behavior
 
 - Music starts when the program is ready for input.
 - `/music` toggles playback on and off immediately.
 - `/tune X` switches to the selected tune immediately.
+- `/tunes` displays a short composer introduction followed by a numbered list of available tunes.
 - Toggling music off stops playback immediately.
 - Toggling music on resumes the last selected tune.
 - Settings reset to default on each program load: music on, tune 1.
@@ -310,13 +312,13 @@ Tune titles are placeholders and will be updated once SID files are selected.
 
 ## Charset
 
-Tribot+ supports two custom character sets. Charset 1 is active by default and resets to charset 1 each time the program loads.
+Tribot+ supports two custom charsets. Charset 1 is active by default and resets to charset 1 each time the program loads.
 
 ### Commands
 
-The character set is controlled via one command:
+The charset is controlled via one command:
 
-    /char 1-2     Select charset (1 or 2)
+    /char 1-2     Select charset
 
 ### Behavior
 
@@ -368,15 +370,21 @@ Toggles music on and off.
 
     /music
 
+### Tunes
+
+Displays a short introduction about the composer followed by a numbered list of available tunes.
+
+    /tunes
+
 ### Tune
 
-Selects one of four available tunes. Replace X with a number between 1 and 4.
+Selects one of two available tunes. Replace X with 1 or 2.
 
     /tune X
 
 ### Charset
 
-Selects one of two available character sets. Replace X with 1 or 2.
+Selects one of two available charsets. Replace X with 1 or 2.
 
     /char X
 
