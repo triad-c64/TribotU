@@ -301,10 +301,10 @@ Die Musik wird über drei Befehle gesteuert:
 
 ### Titel
 
-| Number | Title    | Autor                      |
-| ------ | -------- | -------------------------- |
-| 1      | Tune one | ne7/Triad/Rebels/Retroguru |
-| 2      | Tune two | ne7/Triad/Rebels/Retroguru |
+| Number | Title                          | Autor     |
+| ------ | ------------------------------ | --------- |
+| 1      | V. Clarke - Analogue Monologue | ne7/Triad |
+| 2      | Overcooked Omellete (WIP)      | ne7/Triad |
 
 Titelbezeichnungen sind Platzhalter und werden aktualisiert, sobald die SID-Dateien ausgewählt sind.
 

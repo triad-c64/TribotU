@@ -301,10 +301,10 @@ Music is controlled via three commands:
 
 ### Tunes
 
-| Number | Title    | Author    |
-| ------ | -------- | --------- |
-| 1      | Tune one | ne7/Triad |
-| 2      | Tune two | ne7/Triad |
+| Number | Title                          | Author    |
+| ------ | ------------------------------ | --------- |
+| 1      | V. Clarke - Analogue Monologue | ne7/Triad |
+| 2      | Overcooked Omellete (WIP)      | ne7/Triad |
 
 Tune titles are placeholders and will be updated once SID files are selected.
 
