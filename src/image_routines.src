@@ -563,7 +563,7 @@ PlotHelp:
     lda #>HELPSCREENS
     sta REUC64RAM+1
 
-    ldy #0
+    ldy #4
 
 plot_hlp:
     ldx #0
@@ -588,6 +588,47 @@ getHelpColor:
     iny
     cpy #23
     bne plot_hlp
+    jsr ClearLine
+    rts
+
+PlotTunes:
+    lda #LOCATION_HELP
+    sta REUBANK
+
+    lda #<($0100)                      // Die Anzahl der BYTEs ($0100)
+    sta REUBYTES                       // je Aktion der REU bekannt machen
+    lda #>($0100)
+    sta REUBYTES+1
+
+    lda #<HELPSCREENS                        // Beginn des Speichers der  
+    sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
+    lda #>HELPSCREENS
+    sta REUC64RAM+1
+
+    ldy #50 +16
+plot_tunes:
+    ldx #0
+    sty REURAM + 1
+
+    lda #REU_FETCH_A__            
+    sta REUCOMMAND 
+getTunesInfo:
+    lda HELPSCREENS      ,    x
+    sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+getTunesColor:
+    lda HELPSCREENS + 128,    x
+    sta COLORS  + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+    inx
+    cpx #40
+    bne getTunesInfo
+    
+    sty save_Y
+    jsr scroll_up
+    ldy save_Y
+
+    iny
+    cpy #73
+    bne plot_tunes
     jsr ClearLine
     rts
 

@@ -7,7 +7,7 @@
 .const ngram_max          = 3
 .const DIM                = 64
 .const ANSWER_LENGTH      = 256 - DIM
-.const MAXLENGHT          = 37
+.const MAXLENGHT          = 38
 .const ELIZA_QUEST        = 16
 .const ELIZA_ANSW         = 50
 .const DELAYTIME          = 10
@@ -15,7 +15,7 @@
 .const TOTALLINES         = 25
 .const LASTLINE           = 23
 .const ELIZA_THRESHOLD    = $3b
-.const COMMAND_NUMBERS    = 10
+.const COMMAND_NUMBERS    = 13
 .const LOCATION_CHARSET_A = $B0
 .const LOCATION_CHARSET_B = $A0
 .const LOCATION_MUSIC_A   = $C0
@@ -47,7 +47,7 @@
 .const MUSIC               = $1000
 .const CHARSET             = $2800
 .const COMMANDS            = $c700
-.const EXTRACTKEYWORDS     = $ca00
+.const EXTRACTKEYWORDS     = $ca10
 .const HELPSCREENS         = $cf00
 
 .var DATARAM               = $0e00                  // Adresse des DATABLOCKS

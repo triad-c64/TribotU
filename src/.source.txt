@@ -50,6 +50,8 @@ REU_CHECK:
 
           lda #LOCATION_MUSIC_A
           jsr GetMusic
+        
+          jsr InitPlaceHolder
 
           lda #0
           tax
@@ -415,6 +417,8 @@ Init:
 cls_input:
           lda #$20
           sta SCREEN  ,x
+          lda #YELLOW
+          sta COLORRAM,x
           inx 
           cpx #MAXLENGHT
           bne cls_input
@@ -503,8 +507,15 @@ GetMusic:
         sta REUCOMMAND 
         jsr Init     
         rts
-
+was_command:
+ .byte 0
 check_for_command:
+        lda string1
+        cmp #'/'
+        beq isStartingCommand
+        ldx #$00
+        rts
+isStartingCommand:
         ldy #$0
 next_command:
         ldx #$ff
@@ -533,11 +544,28 @@ cmds:
         sta cmds + 2
         lda #<commando
         sta cmds + 1
-        ldx #$00
+
+        ldy #$00
+        sty was_command
+GetUnknownCommand:
+        lda UnknownCommand,                                                    y
+        beq return_from_unknown_command
+        sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , y
+        lda #YELLOW
+        sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) ,  y
+        iny
+        jmp GetUnknownCommand
+return_from_unknown_command:      
+        jsr scroll_up
+        jsr ClearLine  
+        jsr scroll_up
+        ldx #$01
         rts
 sy:
  .byte 0
 complete_command:
+        lda #1
+        sta was_command
         sty sy
         jsr scroll_up
         jsr ClearLine
@@ -553,19 +581,21 @@ complete_command:
         cpy #2 
         beq switch_music
         cpy #3
-        beq select_tune_1
+        beq tunes_info
         cpy #4
-        beq select_tune_2
+        beq select_tune_A
         cpy #5
-        beq select_charset_A
+        beq select_tune_B
         cpy #6
-        beq select_charset_B
+        beq select_charset_A
         cpy #7
-        beq show_informations
+        beq select_charset_B
         cpy #8
-        beq clean_viewer
-        cpy #9
-        beq exit_tribot
+        beq show_informations
+        cpy #11
+        bcc clean_viewer
+        cpy #13
+        bcc exit_tribot
         ldx #0
         rts 
 exit_tribot:
@@ -576,6 +606,10 @@ exit_tribot:
         lda #$37
         sta $01
         jmp $fce2
+select_tune_A:
+        jmp select_tune_1
+select_tune_B:
+        jmp select_tune_2
 select_charset_A:
         jmp select_charset_1
 select_charset_B:
@@ -585,6 +619,10 @@ show_informations:
 clean_viewer:
         jsr CleanView
         jsr scroll_up
+        ldx #1
+        rts
+tunes_info:
+        jsr PlotTunes
         ldx #1
         rts
 print_help:
@@ -730,10 +768,29 @@ commando:
   .text "/help@      "
   .text "/man@       "
   .text "/music@     "
+  .text "/tunes@     "
   .text "/tune 1@    "
   .text "/tune 2@    "
   .text "/char 1@    "
   .text "/char 2@    "
   .text "/info@      "
   .text "/clear@     "
+  .text "/reset@     "
   .text "/exit@      "
+  .text "/quit@      "
+
+ask_me_place_holder:
+  .text "          Ask me anything@"
+UnknownCommand:
+  .text "Unknown command@"
+
+InitPlaceHolder:
+  ldx #0
+plot_place_holder:
+  lda ask_me_place_holder,x
+  beq return_from_placeHolder
+  sta SCREEN,x
+  inx
+  bne plot_place_holder
+return_from_placeHolder:
+  rts
