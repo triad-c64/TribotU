@@ -477,7 +477,7 @@ possible_color:
          jsr scroll_up    
          lda #1
          sta think_anim  
-         inc lines_used
+        // inc lines_used
          rts
 
 scroll_F1:
