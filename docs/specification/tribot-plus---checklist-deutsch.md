@@ -20,7 +20,7 @@ Markiere Einträge mit `[x]`, wenn bestätigt. Lasse `[ ]` offen, wenn noch nich
 - [x] [Adder] [2026/05/23] Stage 1: Text „Tribot Plus, Triad" erscheint
 - [x] [Adder] [2026/05/23] Stage 1: Eine Leerzeile zwischen Titel und „Booting..."
 - [x] [Adder] [2026/05/23] Stage 1: Text „Booting..." erscheint
-- [ ] [     ] [          ] Stage 2: Hardwareerkennung läuft und gibt Ergebnisse zeilenweise aus
+- [x] [Adder] [2026/05/24] Stage 2: Hardwareerkennung läuft und gibt Ergebnisse zeilenweise aus
 - [x] [Adder] [2026/05/23] Stage 2: REU-Vorhandensein wird erkannt und ausgegeben („REU Detected" / „REU Not found!")
 - [ ] [     ] [          ] Stage 2: Weitere Hardwareumgebungsprüfungen folgen nach der REU-Erkennung
 - [x] [Taper] [2026/05/17] Stage 3: Bildschirm wird nach Hardwareprüfungen geleert
