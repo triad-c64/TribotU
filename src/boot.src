@@ -20,22 +20,48 @@ initing:
          inx
          jmp initing
 print_booting:
+         
+         ldx #0
+         ldy #60
+wait_1:
+         lda #$f0
+         cmp $d012
+         bne *-3
+         dex
+         bne *-1
+         dey
+         bne wait_1
+
          ldx #0
 Booting:
          lda booting,x
          beq DETECT
          sta $0400 +120 ,   x
+         lda #CYAN
+         sta $d800 +120 ,   x
          inx
          jmp Booting
-    
+          
+         
 DETECT:
+         ldx #0
+         ldy #60
+wait_2:
+         lda #$f0
+         cmp $d012
+         bne *-3
+         dex
+         bne *-1
+         dey
+         bne wait_2
+
          ldx #0
 DETECTION_STATUS_OFF:
          lda REU_NOT_FOUND,   x
          beq CHECK_LOOP
-         sta $0400 + 160   ,   x
-         lda #WHITE
-         sta $d800 + 160   ,   x
+         sta $0400 + 200   ,   x
+         lda #LIGHT_GRAY
+         sta $d800 + 200   ,   x
          inx
          jmp DETECTION_STATUS_OFF
 
@@ -87,9 +113,9 @@ check_reu_byte:
 DETECTION_STATUS_ON:
          lda REU_FOUND,   x
          beq LEAVE
-         sta $0400 + 160   ,   x
-         lda #WHITE
-         sta $d800 + 160  ,   x
+         sta $0400 + 200   ,   x
+         lda #LIGHT_GRAY
+         sta $d800 + 200  ,   x
          inx
          jmp DETECTION_STATUS_ON
 
@@ -104,7 +130,8 @@ logoloop:
 logoptr:
          lsr logo
          bcc notchar
-         asl $053e,x
+         lda #$64
+         sta $053e,x
 notchar:
          dex
          dey
@@ -119,6 +146,8 @@ GetSlogan:
          lda Slogan ,x
          beq wait_logo
          sta $0600 + 138 ,x
+         lda #DARK_GRAY
+         sta $da00 + 138 ,x
          inx
          bne GetSlogan
          
@@ -131,6 +160,8 @@ GetLoading:
          lda Loading   ,x
          beq leave_loading
          sta $0600 + 24,x
+         lda #CYAN
+         sta $da00 + 24,x
          inx
          jmp GetLoading
 
@@ -194,7 +225,7 @@ CLEARSCREEN:
          sta $0600,x
          sta $06f8,x
 
-         lda #WHITE
+         lda #GRAY
          sta $d800,x
          sta $d900,x
          sta $da00,x

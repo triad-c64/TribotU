@@ -20,6 +20,7 @@ Check_input:
        beq check_Keyboard
        ldy #0
        sty first_key_press
+       sty keypos
        pha 
 clear_input_first:
        lda #$20

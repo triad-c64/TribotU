@@ -22,6 +22,20 @@ BasicUpstart(PROGRAMM)
           lda #$ff
           cmp $d012
           bne *-3
+          
+          ldx #0
+          lda #$20
+init_cls:
+          sta $0400,x
+          sta $0500,x
+          sta $0600,x
+          sta $06f7,x
+          inx
+          bne init_cls
+
+          lda #$ff
+          cmp $d012
+          bne *-3
           lda #$01
           cmp $d012
           bne *-3
@@ -803,12 +817,12 @@ commando:
   .text "/quit@      "
 
 ask_me_place_holder:
-  .text "          Ask me anything...@"
+  .text "Ask me anything...@"
 UnknownCommand:
   .text "Unknown command@"
 
 InitPlaceHolder:
-  ldx #1
+  ldx #0
 plot_place_holder:
   lda ask_me_place_holder,x
   beq return_from_placeHolder
@@ -818,4 +832,6 @@ plot_place_holder:
   inx
   bne plot_place_holder
 return_from_placeHolder:
+  lda #18
+  sta keypos
   rts
