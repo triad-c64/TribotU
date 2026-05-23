@@ -10,7 +10,7 @@
 .const MAXLENGHT          = 38
 .const ELIZA_QUEST        = 16
 .const ELIZA_ANSW         = 50
-.const DELAYTIME          = 10
+.const DELAYTIME          = 170
 .const SCROLLSCREENS      = 8
 .const TOTALLINES         = 25
 .const LASTLINE           = 23
@@ -47,7 +47,7 @@
 .const MUSIC               = $1000
 .const CHARSET             = $2800
 .const COMMANDS            = $c700
-.const EXTRACTKEYWORDS     = $ca10
+.const EXTRACTKEYWORDS     = $cb00
 .const HELPSCREENS         = $cf00
 
 .var DATARAM               = $0e00                  // Adresse des DATABLOCKS

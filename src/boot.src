@@ -13,10 +13,18 @@ checkForREU:
          jsr CLEAR_SCREEN
           
          ldx #0
+initing:
+         lda tri_init,x
+         beq print_booting
+         sta $0400, x
+         inx
+         jmp initing
+print_booting:
+         ldx #0
 Booting:
          lda booting,x
          beq DETECT
-         sta $0400 +40 ,   x
+         sta $0400 +120 ,   x
          inx
          jmp Booting
     
@@ -25,9 +33,9 @@ DETECT:
 DETECTION_STATUS_OFF:
          lda REU_NOT_FOUND,   x
          beq CHECK_LOOP
-         sta $0400 + 80   ,   x
+         sta $0400 + 160   ,   x
          lda #WHITE
-         sta $d800 + 80   ,   x
+         sta $d800 + 160   ,   x
          inx
          jmp DETECTION_STATUS_OFF
 
@@ -79,9 +87,9 @@ check_reu_byte:
 DETECTION_STATUS_ON:
          lda REU_FOUND,   x
          beq LEAVE
-         sta $0400 + 80   ,   x
+         sta $0400 + 160   ,   x
          lda #WHITE
-         sta $d800 + 80   ,   x
+         sta $d800 + 160  ,   x
          inx
          jmp DETECTION_STATUS_ON
 
@@ -155,6 +163,9 @@ Loading:
 booting:
  .text "Booting...@"
 
+tri_init:
+ .text "Tribot Plus, Triad@"
+
 DELAY:
          lda #0 
          sta frames_wait_REU
@@ -172,7 +183,6 @@ delay:
          lda frames_wait_REU
          cmp #DELAYTIME
          bne WAIT
-
          rts
 
 CLEAR_SCREEN:
@@ -204,4 +214,3 @@ logo:
 	.byte $c1, $b0, $61, $61, $18   
 	.byte $01, $e0, $60, $01, $18  
 	.byte $fe, $40, $60, $7e, $ff 
-

@@ -127,7 +127,21 @@ finalize_query:
           lda #$00
           sta string1,x
           stx len1
-         
+
+          ldx #0
+check_leading_space:
+          lda string1,x
+          inx
+          cmp #$20
+          beq check_leading_space
+          cmp #$0
+          bne start_veryfying
+          lda #0
+          sta searchflag
+          sta stop_input
+          jmp botloop
+
+start_veryfying:
           lda #1
           sta searchflag
           jsr ShortPhrase
@@ -459,6 +473,10 @@ GetCharset:
         sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
         lda #>CHARSET
         sta REUC64RAM+1
+         
+        lda #$f0
+        cmp $d012
+        bne *-3
 
         lda #REU_FETCH_A__            
         sta REUCOMMAND 
@@ -656,8 +674,8 @@ select_tune_1:
         tay
         tax
         jsr $1000
-        lda #1
-        sta music_play
+       // lda #1
+        //sta music_play
         ldx #1
         rts
 select_tune_2:
@@ -674,8 +692,8 @@ select_tune_2:
         tay
         tax
         jsr $1000
-        lda #1
-        sta music_play
+       // lda #1
+       // sta music_play
 
         ldx #1
         rts
@@ -780,16 +798,18 @@ commando:
   .text "/quit@      "
 
 ask_me_place_holder:
-  .text "          Ask me anything@"
+  .text "          Ask me anything...@"
 UnknownCommand:
   .text "Unknown command@"
 
 InitPlaceHolder:
-  ldx #0
+  ldx #1
 plot_place_holder:
   lda ask_me_place_holder,x
   beq return_from_placeHolder
-  sta SCREEN,x
+  sta SCREEN  ,x
+  lda #DARK_GRAY
+  sta COLORRAM,x
   inx
   bne plot_place_holder
 return_from_placeHolder:

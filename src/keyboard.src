@@ -20,10 +20,12 @@ Check_input:
        beq check_Keyboard
        ldy #0
        sty first_key_press
-       pha
-       lda #$20
+       pha 
 clear_input_first:
+       lda #$20
        sta SCREEN + 1,y
+       lda #YELLOW
+       sta COLORRAM  ,y
        iny
        cpy #MAXLENGHT - 1
        bne clear_input_first
