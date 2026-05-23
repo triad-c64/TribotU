@@ -130,10 +130,10 @@ Markiere Einträge mit `[x]`, wenn bestätigt. Lasse `[ ]` offen, wenn noch nich
 ### Antwortfarbverhalten
 
 - [x] [Taper] [2026/05/17] Die Antwort ist weiß
-- [x] [IMPOSSIBLE] [2026/05/23] Schlüsselwort-Hervorhebung gilt nur für die Antwort
-- [x] [IMPOSSIBLE] [2026/05/23] Schlüsselwörter werden aus der Benutzerfrage durch exakte Übereinstimmung extrahiert
-- [x] [IMPOSSIBLE] [2026/05/23] Häufige Stoppwörter werden vor dem Schlüsselwortabgleich ausgeschlossen
-- [x] [IMPOSSIBLE] [2026/05/23] Jede Schlüsselwortübereinstimmung in der Antwort wird gelb gefärbt
+- [x] [IMPOS] [2026/05/23] Schlüsselwort-Hervorhebung gilt nur für die Antwort
+- [x] [IMPOS] [2026/05/23] Schlüsselwörter werden aus der Benutzerfrage durch exakte Übereinstimmung extrahiert
+- [x] [IMPOS] [2026/05/23] Häufige Stoppwörter werden vor dem Schlüsselwortabgleich ausgeschlossen
+- [x] [IMPOS] [2026/05/23] Jede Schlüsselwortübereinstimmung in der Antwort wird gelb gefärbt
 
 ### Musik
 
@@ -173,7 +173,7 @@ Markiere Einträge mit `[x]`, wenn bestätigt. Lasse `[ ]` offen, wenn noch nich
 - [x] [Adder] [2026/05/23] Beim Laden: Bildschirm wird schwarz, bevor eine Ausgabe erscheint
 - [x] [Adder] [2026/05/23] „Tribot Plus, Triad" ist der erste angezeigte Text, mit korrekter Groß-/Kleinschreibung
 - [x] [Adder] [2026/05/23] Genau eine Leerzeile trennt den Titel von „Booting..."
-- [x] [HOw]   [2026/05/23] Hardwareprüfungsergebnisse werden zeilenweise ausgegeben, sobald jede Prüfung abgeschlossen ist
+- [x] [HOW]   [2026/05/23] Hardwareprüfungsergebnisse werden zeilenweise ausgegeben, sobald jede Prüfung abgeschlossen ist
 - [x] [Adder] [2026/05/23] „REU Detected" erscheint, wenn REU eingebunden ist
 - [x] [Adder] [2026/05/23] „REU Not found!" erscheint, wenn REU nicht eingebunden ist
 - [x] [Taper] [2026/05/17] TRIAD-Logo wird korrekt dargestellt, nachdem Hardwareprüfungen den Bildschirm geleert haben
@@ -214,8 +214,8 @@ Markiere Einträge mit `[x]`, wenn bestätigt. Lasse `[ ]` offen, wenn noch nich
 - [x] [Taper] [2026/05/17] F7 bewegt die Ausgabeansicht genau 1 Zeile pro Druck vor
 - [x] [Taper] [2026/05/17] F1 an der oberen Grenze stoppt das Scrollen (kein Überlauf oder Fehler)
 - [x] [Taper] [2026/05/17] F7 an der unteren Grenze stoppt das Scrollen (kein Überlauf oder Fehler)
-- [x] [IMPOSS] [2026/05/23] Halten von F1 erzeugt kontinuierliches Rückwärtsscrollen
-- [x] [IMPOSS] [2026/05/23] Halten von F7 erzeugt kontinuierliches Vorwärtsscrollen
+- [x] [IMPOS] [2026/05/23] Halten von F1 erzeugt kontinuierliches Rückwärtsscrollen
+- [x] [IMPOS] [2026/05/23] Halten von F7 erzeugt kontinuierliches Vorwärtsscrollen
 - [x] [Taper] [2026/05/17] Absenden einer neuen Frage beim Zurückgscrollen: Ansicht springt zur neuesten Ausgabe, dann wird neue Antwort angehängt
 
 ### Befehlsbehandlung
@@ -313,7 +313,7 @@ Markiere Einträge mit `[x]`, wenn bestätigt. Lasse `[ ]` offen, wenn noch nich
 
 ### Grenzfälle des Scrollbacks
 
-- [X] [Taper] 2026/05/17] F1 gedrückt, wenn bereits am oberen Rand der Ausgabe, führt nicht zu Absturz oder Bildschirmkorruption
+- [X] [Taper] [2026/05/17] F1 gedrückt, wenn bereits am oberen Rand der Ausgabe, führt nicht zu Absturz oder Bildschirmkorruption
 - [X] [Taper] [2026/05/17] F7 gedrückt, wenn bereits am unteren Rand der Ausgabe, führt nicht zu Absturz oder Bildschirmkorruption
 - [X] [Taper] [2026/05/17] F1/F7 verwendet, wenn der Ausgabebereich weniger als 12 Inhaltszeilen hat, scrollt korrekt zur Grenze
 - [X] [Taper] [2026/05/17] Scrollback-Zustand wird korrekt zurückgesetzt, nachdem eine neue Frage gesendet wurde
@@ -322,7 +322,7 @@ Markiere Einträge mit `[x]`, wenn bestätigt. Lasse `[ ]` offen, wenn noch nich
 
 - [X] [Taper] [2026/05/17] Eine Antwort, die genau 40 Zeichen pro Zeile füllt, bricht korrekt zur nächsten Zeile um
 - [X] [Taper] [2026/05/17] Eine Antwort, die länger als die sichtbare Ausgabebereichshöhe ist, ist über F1/F7 scrollbar
-- [x] [IMPOSS] [2026/05/23] Schlüsselwort-Hervorhebung funktioniert korrekt, wenn das übereinstimmende Wort mehrfach in der Antwort vorkommt
+- [x] [IMPOS] [2026/05/23] Schlüsselwort-Hervorhebung funktioniert korrekt, wenn das übereinstimmende Wort mehrfach in der Antwort vorkommt
 - [x] [Adder] [2026/05/23] Keine Hervorhebungsartefakte erscheinen in überholten Antworten
 
 ### Grenzfälle der Musik
@@ -333,7 +333,7 @@ Markiere Einträge mit `[x]`, wenn bestätigt. Lasse `[ ]` offen, wenn noch nich
 
 ### Grenzfälle des Zeichensatzes
 
-- [x][Adder] [2026/05/23] Wechseln des Zeichensatzes während Text auf dem Bildschirm ist: Bestehende Ausgabe wird korrekt im neuen Zeichensatz neu gerendert
+- [x] [Adder] [2026/05/23] Wechseln des Zeichensatzes während Text auf dem Bildschirm ist: Bestehende Ausgabe wird korrekt im neuen Zeichensatz neu gerendert
 - [x] [Adder] [2026/05/23] Wechseln des Zeichensatzes während eine Antwort auf den Bildschirm geschrieben wird, korrumpiert die Ausgabe nicht
 - [x] [Adder] [2026/05/23] Mehrmaliges Wechseln zwischen Zeichensatz 1 und 2 in einer Sitzung erzeugt keine dauerhaften Artefakte
 
