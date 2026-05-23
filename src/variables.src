@@ -10,7 +10,7 @@
 .const MAXLENGHT          = 38
 .const ELIZA_QUEST        = 16
 .const ELIZA_ANSW         = 50
-.const DELAYTIME          = 10 // 170
+.const DELAYTIME          = 170
 .const SCROLLSCREENS      = 8
 .const TOTALLINES         = 25
 .const LASTLINE           = 23
