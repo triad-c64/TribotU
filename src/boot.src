@@ -137,8 +137,6 @@ GetLoading:
 leave_loading:
          jsr DELAY
          jsr CLEAR_SCREEN
-
-         jsr PaintStart
     
          ldx #1
          rts

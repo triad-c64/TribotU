@@ -51,6 +51,9 @@ REU_CHECK:
           lda #LOCATION_MUSIC_A
           jsr GetMusic
         
+          jsr PaintStartScreen
+          jsr Init
+
           jsr InitPlaceHolder
 
           lda #0
@@ -58,7 +61,6 @@ REU_CHECK:
           tay
           jsr $1000
            
-
           lda #0
           sta $dd0e
 
@@ -661,6 +663,8 @@ switch_music:
         rts
 
 select_tune_1:
+        lda music_play
+        pha
         lda #0
         sta music_play
         lda #$80
@@ -674,11 +678,13 @@ select_tune_1:
         tay
         tax
         jsr $1000
-       // lda #1
-        //sta music_play
+        pla
+        sta music_play
         ldx #1
         rts
 select_tune_2:
+        lda music_play
+        pha
         lda #0
         sta music_play
         lda #$80
@@ -692,9 +698,8 @@ select_tune_2:
         tay
         tax
         jsr $1000
-       // lda #1
-       // sta music_play
-
+        pla
+        sta music_play
         ldx #1
         rts
 select_charset_1:

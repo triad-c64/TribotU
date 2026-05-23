@@ -175,7 +175,7 @@ s_to_d_color:
     rts
 
 
-PaintStart:
+PaintStartScreen:
          ldx #$0
          ldy #$0
          lda #$20
@@ -194,93 +194,60 @@ SetColorClear:
          cpy #SCROLLSCREENS 
          bne SetScreensClear
 
-         ldx #$0
-GetTribotLogo:
-         lda inrtoduce        ,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*0,x
+PlotStart:
+        lda #LOCATION_HELP
+        sta REUBANK
 
-         lda tribot_plus_logo,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*2,x
-         lda tribot_plus_logo + 26,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*3,x
-         lda tribot_plus_logo + 26 *2,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*4,x
-         lda tribot_plus_logo + 26 *3,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*5,x
-         lda tribot_plus_logo + 26 *4,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*6,x
-         lda tribot_plus_logo + 26 *5,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*7,x
-         lda tribot_plus_logo + 26 *6,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*8,x
-         lda tribot_plus_logo + 26 *7,x
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*9,x
+        lda #<($0100)                      // Die Anzahl der BYTEs ($0100)
+        sta REUBYTES                       // je Aktion der REU bekannt machen
+        lda #>($0100)
+        sta REUBYTES+1
 
-         lda #GREY
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*0,x
-         lda tribot_plus_logo + 26*8,x
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*2,x
-         lda tribot_plus_logo + 26*9,x
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*3,x
-         lda tribot_plus_logo + 26*10,x
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*4,x
-         lda tribot_plus_logo + 26*11,x
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*5,x
-         lda tribot_plus_logo + 26*12,x
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*6,x
-         lda tribot_plus_logo + 26*13,x
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*7,x
-         lda tribot_plus_logo + 26*14,x
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*8,x
-         lda tribot_plus_logo + 26*15,x
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*9,x
-         inx  
-         cpx #26
-         bne GetTribotLogo
+        lda #<HELPSCREENS                        // Beginn des Speichers der  
+        sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
+        lda #>HELPSCREENS
+        sta REUC64RAM+1
 
-         ldy #0
-PrintInfo:
-         ldx #0
-Info: 
-         lda Infotext,x
-info_location:
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*11, x
-         lda #LIGHT_GREY
-info_color:
-         sta COLORS  + $2000 - ((SCROLLSCREENS - 1) * 1000) - 40*11, x
-         inx
-         cpx #40
-         bne Info
+        ldy #75
+plot_start:
+        ldx #0
+        sty REURAM + 1
 
-         lda info_location + 1
-         sec
-         sbc #40
-         sta info_location + 1
-         lda info_location + 2
-         sbc #0
-         sta info_location +2
+        lda #REU_FETCH_A__            
+        sta REUCOMMAND 
+getStartInfo:
+        lda HELPSCREENS      ,    x
+setStartInfo:
+        sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) + 23 * 40, x
+getStartColor:
+        lda HELPSCREENS + 128,    x
+setStartColor:
+        sta COLORS  + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) + 23 * 40, x
+        inx
+        cpx #40
+        bne getStartInfo
+        
+        lda setStartInfo + 1
+        sec
+        sbc #40
+        sta setStartInfo + 1
+        lda setStartInfo + 2
+        sbc #0
+        sta setStartInfo + 2
 
-         lda info_color + 1
-         sec
-         sbc #40
-         sta info_color + 1
-         lda info_color + 2
-         sbc #0
-         sta info_color + 2
-         
-         lda Info + 1
-         clc
-         adc #40
-         sta Info + 1
-         lda Info + 2
-         adc #0
-         sta Info + 2
+        lda setStartColor + 1
+        sec
+        sbc #40
+        sta setStartColor + 1
+        lda setStartColor + 2
+        sbc #0
+        sta setStartColor + 2
 
-         iny 
-         cpy #5
-         bne PrintInfo
-
-         jsr PlotScreen
+        iny
+        cpy #98
+        bne plot_start
+      
+        jsr PlotScreen
 
          ldx #0 
 limiter:
@@ -679,33 +646,10 @@ mark:
 inrtoduce:
   .text "Tribot Plus, Triad                          "
 
-
-Infotext:
-  .text "This scene database includes embedding  based similarity search and an ELIZA -  style conversational system for simple  natural language interaction.                                      type: /help                                                                                                      "
-
-
 lines_used:
   .byte 0
 lines_scrolled:
   .byte 0
-
-tribot_plus_logo:
-.byte 160,160,160,46,254,160,252,46,160,46,254,160,252,46,254,160,252,46,160,160,160,46,32,32,32,32
-.byte 32,160,112,125,160,46,160,93,64,125,160,32,160,93,160,46,160,93,32,160,112,125,32,32,32,32
-.byte 32,160,93,32,160,93,160,93,160,46,160,32,160,93,160,93,160,93,32,160,93,32,32,160,32,32
-.byte 32,160,93,32,160,160,236,93,160,93,160,160,236,32,160,93,160,93,32,160,93,32,160,160,160,46
-.byte 32,160,93,32,160,46,160,93,160,93,160,32,160,93,160,93,160,93,32,160,93,32,32,160,112,125
-.byte 32,160,93,32,160,93,160,93,160,93,160,32,160,93,160,93,160,93,32,160,93,32,32,64,125,32
-.byte 32,160,93,32,160,93,160,93,160,93,251,160,236,46,251,160,236,46,32,160,93,32,32,32,32,32
-.byte 32,64,125,32,64,125,64,125,64,125,32,64,64,32,32,64,64,32,32,64,125,32,32,32,32,32
-.byte 3,3,3,11,3,3,3,11,3,11,3,3,3,11,3,3,3,11,3,3,3,11,14,14,14,14
-.byte 14,3,11,11,3,11,3,11,11,11,3,14,3,11,3,11,3,11,14,3,11,11,14,14,14,14
-.byte 14,3,11,14,3,11,3,11,3,11,3,14,3,11,3,11,3,11,14,3,11,14,14,3,14,14
-.byte 14,3,11,14,3,3,3,11,3,11,3,3,3,14,3,11,3,11,14,3,11,14,3,3,3,11
-.byte 14,3,11,14,3,11,3,11,3,11,3,14,3,11,3,11,3,11,14,3,11,14,14,3,11,11
-.byte 14,3,11,14,3,11,3,11,3,11,3,14,3,11,3,11,3,11,14,3,11,14,14,11,11,14
-.byte 14,3,11,14,3,11,3,11,3,11,3,3,3,11,3,3,3,11,14,3,11,14,14,14,14,14
-.byte 14,11,11,14,11,11,11,11,11,11,14,11,11,14,14,11,11,14,14,11,11,14,14,14,14,14
 
 thinking:
     .text "* Thinking...@     "
