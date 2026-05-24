@@ -22,7 +22,7 @@
 .const LOCATION_MUSIC_B   = $D0
 .const LOCATION_HELP      = $E0
 .const THINKSTATI         = 26
-.const NUMBEROFPHRASES    = 56
+.const NUMBEROFPHRASES    = 59
 
 
 
