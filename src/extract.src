@@ -145,10 +145,11 @@ output:
    ldy #0
 WriteResult:
    lda string1                 ,x
-   cmp #63
+   // cmp #63
    beq set_len
 printf:  
    sta string1                 ,y
+   sta input_eliza             ,y
  //  Debug 
  //  sta $0400    + 40 *23          ,y 
 

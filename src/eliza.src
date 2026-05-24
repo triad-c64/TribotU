@@ -18,9 +18,11 @@
         sta clean_rest_answer + 2
 
         ldx #0 
-        lda #$20
 clean_up_final_eliza_answer:
+        lda #$20
         sta final_answer      ,x
+        lda #$00
+        sta EXTRACTED_ELIZA   ,x
         inx
         bne clean_up_final_eliza_answer
         
@@ -63,15 +65,15 @@ matches:
         ldx #0          
 
 search_loop:
-        lda string2           ,x
+        lda input_eliza       ,x
         beq quit_w_no_match     
         ldy #0                 
 match_pattern:
         lda DATARAM           ,y
-        beq pattern_matched    
-        cmp #$30
+        // beq pattern_matched    
+        cmp #$30                   // auf '0' prüfen
         beq pattern_matched
-        lda string2           ,x
+        lda input_eliza       ,x
         cmp DATARAM           ,y
         bne next_char
         iny
@@ -81,14 +83,18 @@ match_pattern:
 pattern_matched:
         ldy #0
 copy_rest:
-        lda string2           ,x
-        sta EXTRACTED_ELIZA   ,y
+        lda input_eliza       ,x
         beq return_from_extr
+        cmp #' '
+        beq return_from_extr
+        sta EXTRACTED_ELIZA   ,y
         iny
         inx
         jmp copy_rest
 
 return_from_extr:
+        lda #$00
+        sta EXTRACTED_ELIZA   ,y
         ldx #1
         rts
 
@@ -159,8 +165,7 @@ out_answer_e:
         inc out_answer_e      + 1
         inc out_answer_n      + 1
         inc clean_rest_answer + 1
-        inx
-        cpx #DIM           
+        inx      
         bne replace_loop
 continue_with_answer:
         iny 
@@ -176,7 +181,7 @@ out_answer_n:
         bne plot_response
         inc clean_rest_answer + 1
 return_from_response:
-        lda #0
+        lda #$0
 clean_rest_answer:
         sta final_answer
         lda #1 
@@ -283,3 +288,6 @@ mark_eliza:
 fallback:
         .text "please tell me more "
         .byte 0
+
+replaced:
+  .byte 0

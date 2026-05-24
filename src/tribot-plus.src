@@ -270,8 +270,8 @@ worker:
           cpx #1                       // valid command
           beq return_from_worker
 
-          jsr save_eliza_input_string
           jsr PlotQuestions
+          // jsr save_eliza_input_string
           jsr tokenize
           jsr Embeddings
           jsr start_check
@@ -443,7 +443,15 @@ Init:
           lda #>($0100)
           sta REUBYTES+1
 
-          ldx #0     
+          ldx #0  
+          txa
+cls_input_strings:
+          sta input   ,x
+          sta string1 ,x
+          sta correct ,x
+          inx
+          bne cls_input_strings
+
 cls_input:
           lda #$20
           sta SCREEN  ,x
@@ -452,25 +460,6 @@ cls_input:
           inx 
           cpx #MAXLENGHT
           bne cls_input
-
-          ldx #0
-          lda #0
-cls_input_strings:
-          sta input   ,x
-          sta string1 ,x
-          sta correct ,x
-          inx
-          bne cls_input_strings
-          rts
-
-save_eliza_input_string:
-          ldx #0
-eliza_string_save:
-          lda string1, x
-          sta string2, x
-          inx
-          cpx #40
-          bne eliza_string_save
           rts
 
 .pc = COMMANDS "Commando handling"

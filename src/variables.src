@@ -50,6 +50,7 @@
 .const EXTRACTKEYWORDS     = $cb00
 .const HELPSCREENS         = $cf00
 
+
 .var DATARAM               = $0e00                  // Adresse des DATABLOCKS
 .var EMBEDDING_REU         = DATARAM
 .var BOT_ANSWER_REU        = EMBEDDING_REU  + DIM
