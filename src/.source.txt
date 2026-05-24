@@ -591,6 +591,7 @@ complete_command:
         lda #1
         sta was_command
         sty sy
+        jsr ColorizeYellow
         jsr scroll_up
         jsr ClearLine
         jsr scroll_up

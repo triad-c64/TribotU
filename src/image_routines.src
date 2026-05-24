@@ -338,7 +338,7 @@ ClearLine:
 clear_line:
          lda #$20
          sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-         lda #WHITE
+         lda #YELLOW
          sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
          inx
          cpx #40
@@ -637,6 +637,15 @@ getInfoColor:
     jsr ClearLine
     rts
 
+ColorizeYellow:
+    ldx #0
+    lda #YELLOW
+Yellow:
+    sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+    inx 
+    cpx #40
+    bne Yellow
+    rts
 scroll_pos:
     .byte 0,0
 
