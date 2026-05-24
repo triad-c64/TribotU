@@ -37,6 +37,7 @@ Markiere Einträge mit `[x]`, wenn bestätigt. Lasse `[ ]` offen, wenn noch nich
 - [x] [Taper] [2026/05/17] Zeichensatz 1 (Highres_1x1_#8 von Tao/Triad) ist implementiert
 - [x] [Adder] [2026/05/17] Zeichensatz 2 (Highres_1x1_#6 von Tao/Triad) ist implementiert
 - [x] [Taper] [2026/05/17] Zeichensatz 1 ist der Standard beim Programmstart
+- [ ] [     ] [          ] Entferne den Text "Tribot plus, Triad" über dem PETSCII-Logo.
 
 ### Layout
 

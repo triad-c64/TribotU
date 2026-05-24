@@ -37,7 +37,7 @@ Mark items `[x]` when confirmed. Leave `[ ]` open when not yet done or not yet v
 - [x] [Taper] [2026/05/17] Charset 1 (Highres_1x1_#8 by Tao/Triad) is implemented
 - [x] [Adder] [2026/05/17] Charset 2 (Highres_1x1_#6 by Tao/Triad) is implemented
 - [x] [Taper] [2026/05/17] Charset 1 is the default on program load
-
+- [ ] [     ] [          ] Remove text "Tribot plus, Triad" above the PETSCII logo.
 ### Layout
 
 - [x] [Taper] [2026/05/09] Screen is split into an output area (above divider) and input field (below divider)
