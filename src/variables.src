@@ -10,7 +10,7 @@
 .const MAXLENGHT          = 38
 .const ELIZA_QUEST        = 16
 .const ELIZA_ANSW         = 50
-.const DELAYTIME          = 170
+.const DELAYTIME          = 150
 .const SCROLLSCREENS      = 8
 .const TOTALLINES         = 25
 .const LASTLINE           = 23
@@ -41,7 +41,7 @@
 .const LOGO                = $6200
 .const BOOT                = $6400
 .const EXTRACTED_ELIZA     = $6500
-.const SCROLLING           = $6680
+.const SCROLLING           = $66e0
 .const SCREENS             = $7000                  // + $2000
 .const COLORS              = $9000                  // + $2000
 .const MUSIC               = $1000

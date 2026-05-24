@@ -130,6 +130,7 @@ initialized:
          jmp DETECTION_STATUS_ON
 
 CHECKFORSYSTEM:
+         jsr DELAY
          jsr detect_machine
          ldx #0
          lda machine_flags
@@ -137,45 +138,68 @@ CHECKFORSYSTEM:
          beq PRINT_VICE
          cmp #1
          beq PRINT_ULTIMATE
-    //     cmp #2
-    //     beq PRINT_C128
-
+ 
 PRINT_STOCK:
          lda STOCK,   x
-         beq LEAVE
-         sta $0400 + 240   ,   x
+         beq PRINT_KEYBOARD
+         sta $0400 + 200   ,   x
          lda #LIGHT_GRAY
-         sta $d800 + 240   ,   x
+         sta $d800 + 200   ,   x
          inx 
          jmp PRINT_STOCK
 
 PRINT_VICE:
          lda VICE,   x
-         beq LEAVE
-         sta $0400 + 240   ,   x
+         beq PRINT_KEYBOARD
+         sta $0400 + 200   ,   x
          lda #LIGHT_GRAY
-         sta $d800 + 240   ,   x
+         sta $d800 + 200   ,   x
          inx 
          jmp PRINT_VICE
 
 PRINT_ULTIMATE:
          lda ULTIMATE,   x
-         beq LEAVE
-         sta $0400 + 240   ,   x
+         beq PRINT_KEYBOARD
+         sta $0400 + 200   ,   x
          lda #LIGHT_GRAY
-         sta $d800 + 240   ,   x
+         sta $d800 + 200   ,   x
          inx 
          jmp PRINT_ULTIMATE
-/*
-PRINT_C128:
-         lda C128,   x
-         beq LEAVE
+
+PRINT_KEYBOARD:
+         jsr DELAY
+         ldx #$00
+GetKeyboardInfo:
+         lda KEYBOARD_INIT,   x
+         beq PRINT_SOUND
          sta $0400 + 240   ,   x
+keyboard_initialized:
          lda #LIGHT_GRAY
          sta $d800 + 240   ,   x
          inx 
-         jmp PRINT_C128
-*/
+         cpx #23
+         bne GetKeyboardInfo
+         lda #GREEN
+         sta keyboard_initialized +1
+         jmp GetKeyboardInfo
+
+PRINT_SOUND:
+         jsr DELAY
+         ldx #$00
+GetSoundInfo:
+         lda SOUND_INIT    ,   x
+         beq LEAVE
+         sta $0400 + 280   ,   x
+sound_initialized:
+         lda #LIGHT_GRAY
+         sta $d800 + 280   ,   x
+         inx 
+         cpx #23
+         bne GetSoundInfo
+         lda #GREEN
+         sta sound_initialized +1
+         jmp GetSoundInfo
+
 LEAVE:
          jsr DELAY
          
@@ -235,7 +259,7 @@ exit_check:
 frames_wait_REU:
  .byte 0
 REU_FOUND:
- .text "- REU 16MB detected and intitialized @"
+ .text "- REU 16MB detected and initialized@"
  
 REU_NOT_FOUND:
  .text "- REU 16MB not detected@"
@@ -258,8 +282,10 @@ ULTIMATE:
   .text "- Ultimate 64 @"
 VICE: 
   .text "- C64 VICE EMULATOR@"
-//C128:
-//  .text "- C128 Computer@"
+KEYBOARD_INIT:
+  .text "- Keyboard              initialized@"
+SOUND_INIT:
+  .text "- Sound device          initialized@"
 
 DELAY:
          lda #0 
