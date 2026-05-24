@@ -137,8 +137,8 @@ CHECKFORSYSTEM:
          beq PRINT_VICE
          cmp #1
          beq PRINT_ULTIMATE
-         cmp #2
-         beq PRINT_C128
+    //     cmp #2
+    //     beq PRINT_C128
 
 PRINT_STOCK:
          lda STOCK,   x
@@ -166,7 +166,7 @@ PRINT_ULTIMATE:
          sta $d800 + 240   ,   x
          inx 
          jmp PRINT_ULTIMATE
-
+/*
 PRINT_C128:
          lda C128,   x
          beq LEAVE
@@ -175,7 +175,7 @@ PRINT_C128:
          sta $d800 + 240   ,   x
          inx 
          jmp PRINT_C128
-
+*/
 LEAVE:
          jsr DELAY
          
@@ -258,8 +258,8 @@ ULTIMATE:
   .text "- Ultimate 64 @"
 VICE: 
   .text "- C64 VICE EMULATOR@"
-C128:
-  .text "- C128 Computer@"
+//C128:
+//  .text "- C128 Computer@"
 
 DELAY:
          lda #0 
