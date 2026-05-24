@@ -62,6 +62,9 @@ count_phrases:
 phrases:
 .text "tell me a joke about @       "
 .text "what is an @                 "
+.text "what if @                    "
+.text "name some @                  "
+.text "name @                       "
 .text "what is a @                  "
 .text "what is the deal with @      "
 .text "whats the deal with @        "
