@@ -110,3 +110,6 @@ phrases:
 .text "define @                     "
 .text "list some @                  "
 .text "list @                       "
+.text "recommend an @               "
+.text "recommend a  @               "
+.text "recommend @                  "
