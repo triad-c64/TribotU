@@ -208,7 +208,7 @@ PlotStart:
         lda #>HELPSCREENS
         sta REUC64RAM+1
 
-        ldy #75
+        ldy #76
 plot_start:
         ldx #0
         sty REURAM + 1
@@ -527,7 +527,7 @@ PlotHelp:
     lda #>HELPSCREENS
     sta REUC64RAM+1
 
-    ldy #4
+    ldy #5
 
 plot_hlp:
     ldx #0
@@ -569,7 +569,7 @@ PlotTunes:
     lda #>HELPSCREENS
     sta REUC64RAM+1
 
-    ldy #50 +16
+    ldy #50 +17
 plot_tunes:
     ldx #0
     sty REURAM + 1
@@ -610,7 +610,7 @@ PlotInfo:
     lda #>HELPSCREENS
     sta REUC64RAM+1
 
-    ldy #25
+    ldy #27
 plot_nfo:
     ldx #0
     sty REURAM + 1
@@ -632,7 +632,7 @@ getInfoColor:
     ldy save_Y
 
     iny
-    cpy #48
+    cpy #49
     bne plot_nfo
     jsr ClearLine
     rts

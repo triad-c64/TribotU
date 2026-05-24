@@ -36,9 +36,9 @@ wait_1:
 Booting:
          lda booting,x
          beq DETECT
-         sta $0400 +120 ,   x
+         sta $0400 +80 ,   x
          lda #CYAN
-         sta $d800 +120 ,   x
+         sta $d800 +80 ,   x
          inx
          jmp Booting
           
@@ -59,10 +59,15 @@ wait_2:
 DETECTION_STATUS_OFF:
          lda REU_NOT_FOUND,   x
          beq CHECK_LOOP
-         sta $0400 + 200   ,   x
+         sta $0400 + 160   ,   x
+not_detected:
          lda #LIGHT_GRAY
-         sta $d800 + 200   ,   x
+         sta $d800 + 160   ,   x
          inx
+         cpx #10
+         bne DETECTION_STATUS_OFF
+         lda #RED
+         sta not_detected + 1
          jmp DETECTION_STATUS_OFF
 
 CHECK_LOOP:
@@ -112,12 +117,64 @@ check_reu_byte:
          ldx #0
 DETECTION_STATUS_ON:
          lda REU_FOUND,   x
-         beq LEAVE
-         sta $0400 + 200   ,   x
+         beq CHECKFORSYSTEM
+         sta $0400 + 160   ,   x
+initialized:
          lda #LIGHT_GRAY
-         sta $d800 + 200  ,   x
+         sta $d800 + 160  ,   x
          inx
+         cpx #23
+         bne DETECTION_STATUS_ON
+         lda #GREEN
+         sta initialized + 1
          jmp DETECTION_STATUS_ON
+
+CHECKFORSYSTEM:
+         jsr detect_machine
+         ldx #0
+         lda machine_flags
+         cmp #8
+         beq PRINT_VICE
+         cmp #1
+         beq PRINT_ULTIMATE
+         cmp #2
+         beq PRINT_C128
+
+PRINT_STOCK:
+         lda STOCK,   x
+         beq LEAVE
+         sta $0400 + 240   ,   x
+         lda #LIGHT_GRAY
+         sta $d800 + 240   ,   x
+         inx 
+         jmp PRINT_STOCK
+
+PRINT_VICE:
+         lda VICE,   x
+         beq LEAVE
+         sta $0400 + 240   ,   x
+         lda #LIGHT_GRAY
+         sta $d800 + 240   ,   x
+         inx 
+         jmp PRINT_VICE
+
+PRINT_ULTIMATE:
+         lda ULTIMATE,   x
+         beq LEAVE
+         sta $0400 + 240   ,   x
+         lda #LIGHT_GRAY
+         sta $d800 + 240   ,   x
+         inx 
+         jmp PRINT_ULTIMATE
+
+PRINT_C128:
+         lda C128,   x
+         beq LEAVE
+         sta $0400 + 240   ,   x
+         lda #LIGHT_GRAY
+         sta $d800 + 240   ,   x
+         inx 
+         jmp PRINT_C128
 
 LEAVE:
          jsr DELAY
@@ -178,10 +235,10 @@ exit_check:
 frames_wait_REU:
  .byte 0
 REU_FOUND:
- .text "REU Detected     @"
+ .text "- REU 16MB detected and intitialized @"
  
 REU_NOT_FOUND:
- .text "REU Not found!@"
+ .text "- REU 16MB not detected@"
 
 Slogan:
  .text "Dealer Quality Botnet@"
@@ -194,6 +251,15 @@ booting:
 
 tri_init:
  .text "Tribot Plus, Triad@"
+
+STOCK: 
+  .text "- Stock C64@"
+ULTIMATE:
+  .text "- Ultimate 64 @"
+VICE: 
+  .text "- C64 VICE EMULATOR@"
+C128:
+  .text "- C128 Computer@"
 
 DELAY:
          lda #0 
@@ -243,3 +309,63 @@ logo:
 	.byte $c1, $b0, $61, $61, $18   
 	.byte $01, $e0, $60, $01, $18  
 	.byte $fe, $40, $60, $7e, $ff 
+
+
+machine_flags:
+    .byte 0
+
+detect_machine:
+
+    lda #0
+    sta machine_flags
+// ----------------------------------------
+// 1. ULTIMATE 64 CHECK
+// ----------------------------------------
+
+    lda $d7ff
+    cmp #$a5
+    bne no_u64
+
+    lda machine_flags
+    ora #$01
+    sta machine_flags
+    rts
+no_u64:
+
+
+// ----------------------------------------
+// 2. C128 CHECK (VDC presence)
+// ----------------------------------------
+
+    lda #$12
+    sta $d600
+    lda $d600
+    cmp #$12
+    bne no_c128
+
+    lda machine_flags
+    ora #$02
+    sta machine_flags
+    rts
+no_c128:
+
+// ----------------------------------------
+// 4. VICE SUSPECT HEURISTIC
+// ----------------------------------------
+// Weak signal: VIC-II register edge behavior
+
+    lda $d011
+    and #$07
+    cmp #$07
+    bne no_vice
+
+    lda machine_flags
+    ora #$08
+    sta machine_flags
+
+no_vice:
+
+// ----------------------------------------
+// 5. RETURN RESULT
+// ----------------------------------------
+    rts
