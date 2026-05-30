@@ -41,7 +41,7 @@
 .const LOGO                = $6200
 .const BOOT                = $6400
 .const EXTRACTED_ELIZA     = $6500
-.const SCROLLING           = $66e0
+.const SCROLLING           = $66f0
 .const SCREENS             = $7000                  // + $2000
 .const COLORS              = $9000                  // + $2000
 .const MUSIC               = $1000
