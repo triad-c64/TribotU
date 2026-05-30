@@ -447,9 +447,10 @@ Init:
           ldx #0  
           txa
 cls_input_strings:
-          sta input   ,x
-          sta string1 ,x
-          sta correct ,x
+          sta input      ,x
+          sta input_eliza,x
+          sta string1    ,x
+          sta correct    ,x
           inx
           bne cls_input_strings
 
@@ -606,7 +607,7 @@ complete_command:
         cpy #2 
         beq switch_music
         cpy #3
-        beq tunes_info
+        beq credits_info
         cpy #4
         beq select_tune_A
         cpy #5
@@ -646,8 +647,8 @@ clean_viewer:
         jsr scroll_up
         ldx #1
         rts
-tunes_info:
-        jsr PlotTunes
+credits_info:
+        jsr PlotCredits
         ldx #1
         rts
 print_help:
@@ -796,7 +797,7 @@ commando:
   .text "/help@      "
   .text "/man@       "
   .text "/music@     "
-  .text "/tunes@     "
+  .text "/credits@   "
   .text "/tune 1@    "
   .text "/tune 2@    "
   .text "/char 1@    "

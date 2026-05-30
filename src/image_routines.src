@@ -555,7 +555,7 @@ getHelpColor:
     jsr ClearLine
     rts
 
-PlotTunes:
+PlotCredits:
     lda #LOCATION_HELP
     sta REUBANK
 
@@ -570,21 +570,21 @@ PlotTunes:
     sta REUC64RAM+1
 
     ldy #50 +17
-plot_tunes:
+plot_credits:
     ldx #0
     sty REURAM + 1
 
     lda #REU_FETCH_A__            
     sta REUCOMMAND 
-getTunesInfo:
+getCreditsInfo:
     lda HELPSCREENS      ,    x
     sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-getTunesColor:
+getCreditsColor:
     lda HELPSCREENS + 128,    x
     sta COLORS  + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
     inx
     cpx #40
-    bne getTunesInfo
+    bne getCreditsInfo
     
     sty save_Y
     jsr scroll_up
@@ -592,7 +592,7 @@ getTunesColor:
 
     iny
     cpy #73
-    bne plot_tunes
+    bne plot_credits
     jsr ClearLine
     rts
 

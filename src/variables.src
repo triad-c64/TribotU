@@ -14,7 +14,7 @@
 .const SCROLLSCREENS      = 8
 .const TOTALLINES         = 25
 .const LASTLINE           = 23
-.const ELIZA_THRESHOLD    = $3b
+.const ELIZA_THRESHOLD    = $39
 .const COMMAND_NUMBERS    = 13
 .const LOCATION_CHARSET_A = $B0
 .const LOCATION_CHARSET_B = $A0
@@ -22,7 +22,7 @@
 .const LOCATION_MUSIC_B   = $D0
 .const LOCATION_HELP      = $E0
 .const THINKSTATI         = 26
-.const NUMBEROFPHRASES    = 59
+.const NUMBEROFPHRASES    = 70
 
 
 

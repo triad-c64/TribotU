@@ -1,292 +1,132 @@
 /*********************************************************
  *     coded by Adder of Triad in 2026 for X2026         *
  *********************************************************/
-#importonce 
+#import "variables.src"
 
-.const ngram_min          = 1
-.const ngram_max          = 3
-.const DIM                = 64
-.const ANSWER_LENGTH      = 256 - DIM
-.const MAXLENGHT          = 38
-.const ELIZA_QUEST        = 16
-.const ELIZA_ANSW         = 50
-.const DELAYTIME          = 150
-.const SCROLLSCREENS      = 8
-.const TOTALLINES         = 25
-.const LASTLINE           = 23
-.const ELIZA_THRESHOLD    = $3b
-.const COMMAND_NUMBERS    = 13
-.const LOCATION_CHARSET_A = $B0
-.const LOCATION_CHARSET_B = $A0
-.const LOCATION_MUSIC_A   = $C0
-.const LOCATION_MUSIC_B   = $D0
-.const LOCATION_HELP      = $E0
-.const THINKSTATI         = 26
-.const NUMBEROFPHRASES    = 59
+.pc = Phrases "shorten phrases"
+ShortPhrase:
+        
+        ldx #$0
+        stx count_phrases
 
+        lda #>phrases
+        sta phrase  + 2
+        lda #<phrases
+        sta phrase  + 1
 
+phrase:
+        lda phrases,        x
+        beq equal_phrases
+compare_string:
+        cmp string1,        x
+        bne unequal_phrase
+        inx 
+        cpx #29
+        bne phrase
+        jmp unequal_phrase
 
+equal_phrases:
+        ldy #0
+set_new_question:
+        lda string1,         x
+        sta string1,         y
+        beq return_from_phrases
+        inx
+        iny
+        jmp set_new_question
 
-//*******************************************************************************
-//*** REMEMBER REU-FILE-SIZE HAS TO BE IDENTICAL WITH THE CHOOSEN VALUE IN VICE  
-//*******************************************************************************
-.const EMBEDDER            = $0810
-.const MATH                = $3500
-.const TOKENIZER           = $0c00
-.const MY_HASH16           = $0d00
-.const PROGRAMM            = $c200
-.const KEYBOARD            = $c500
-.const LoadTab             = $2700
-.const ELIZA               = $6000
-.const LOGO                = $6200
-.const BOOT                = $6400
-.const EXTRACTED_ELIZA     = $6500
-.const SCROLLING           = $66e0
-.const SCREENS             = $7000                  // + $2000
-.const COLORS              = $9000                  // + $2000
-.const MUSIC               = $1000
-.const CHARSET             = $2800
-.const COMMANDS            = $c700
-.const EXTRACTKEYWORDS     = $cb00
-.const HELPSCREENS         = $cf00
+unequal_phrase:
+        lda phrase        + 1
+        clc
+        adc #29
+        sta phrase        + 1
+        lda phrase        + 2
+        adc #0
+        sta phrase        + 2
 
+        inc count_phrases
+        lda count_phrases
+        cmp #NUMBEROFPHRASES
+        beq ret_from_phrases
+        ldx #0
+        jmp phrase
 
-.var DATARAM               = $0e00                  // Adresse des DATABLOCKS
-.var EMBEDDING_REU         = DATARAM
-.var BOT_ANSWER_REU        = EMBEDDING_REU  + DIM
+return_from_phrases:
+        sty len1
+ret_from_phrases:
+        rts
 
-.const SCREEN              = $0400 + 40 * 24 + 2         // SCREENRAM Adress
-.const COLORRAM            = $d800 + 40 * 24 + 2         // SCREENRAM Adress
-.const THINKANIM           = $0400 + 21 * 40
+count_phrases:
+ .byte 0
 
-
-.const embeddingA          = $ff00
-.const STRING_FUNKTION     = $c000
-.const temporer            = $e500
-.const tokens              = $e600  // buffer für die tokens  "who\0is\0adder\0"
-.const final_answer        = $e900
-
-
-.const string1             = $b000
-.const string2             = $b100
-.const correct             = $b200
-.const input               = $b300
-.const input_eliza         = $b400
-.const Phrases             = $b500
-
-
-.var lookUpx127Lo          = $e000 
-.var lookUpx127Hi          = lookUpx127Lo + $0100
-.var lookUpAxALo           = lookUpx127Hi + $0100 
-.var lookUpAxAHi           = lookUpAxALo  + $0100 
-.var lookUpClamp           = lookUpAxAHi  + $0100
-/*
-.var square1_lo            = lookUpClamp  + $0100
-.var square1_hi            = square1_lo   + $0200
-.var square2_lo            = square1_hi   + $0200
-.var square2_hi            = square2_lo   + $0200
-.var modulo                = square2_hi   + $0200
-// */
-// String Funktionen
-.var extrpos               = $ce00
-.var text_rest_pos         = extrpos                 +  1
-.var possible_match        = text_rest_pos           +  1
-.var inputpos              = possible_match          +  1
-.var firstoccur            = inputpos                +  1 
-.var extractLenght         = firstoccur              +  1 
-.var text_rest_pos_plus_1  = extractLenght           +  1
-.var new_pos               = text_rest_pos_plus_1    +  1
-.var inp_char_nr           = new_pos                 +  1
-.var occur                 = inp_char_nr             +  1
-
-
-//*******************************************************************************
-//*** REU-Register
-//*******************************************************************************
-.const REUSTATUS           = $df00         //Statusregister (nur lesen, wird dann gelöscht!)
-.const REUCOMMAND          = $df01         //Befehlsregister
-.const REUC64RAM           = $df02         //RAM-Adresse im C64 (LSB/MSB)
-.const REURAM              = $df04         //Speicher Adresse in der REU (LSB/MSB)
-.const REUBANK             = $df06         //Bank in der REU
-.const REUBYTES            = $df07         //Anzahl der betroffenen BYTES (LSB/MSB)
-.const REUIRQMASK          = $df09         //Interruptmaske
-.const REUADRCONTROL       = $df0a         //Adress-Kontroll-Register
-
-//*******************************************************************************
-//*** REU-Befehle
-//*******************************************************************************
- 
-//*** Standardbefehle mit AUTOLOAD, ohne $ff00
-//.const REU_STASH_A__       = $fc           // kopiere C64 -> REU
-.const REU_FETCH_A__         = $fd           // kopiere REU -> C64
-//.const REU_SWAP_A__        = $fe           // Speicherbereich tauschen
-//.const REU_VERIFY_A__      = $ff           // Speicherbereich vergleichen
- 
-//*** mit AUTOLOAD und mit $ff00
-//.const REU_STASH_A_F       = $ec           // kopiere C64 -> REU
-//.const REU_FETCH_A_F       = $ed           // kopiere REU -> C64
-//.const REU_SWAP_A_F        = $ee           // Speicherbereich tauschen
-//.const REU_VERIFY_A_F      = $ef           // Speicherbereich vergleichen
- 
-//*** ohne AUTOLOAD, ohne $ff00
-//.const REU_STASH____       = $dc           // kopiere C64 -> REU
-//.const REU_FETCH____       = $dd           // kopiere REU -> C64
-//.const REU_SWAP____        = $de           // Speicherbereich tauschen
-//.const REU_VERIFY____      = $df           // Speicherbereich vergleichen
- 
-//*** ohne AUTOLOAD, mit $ff00
-//.const REU_STASH___F       = $cc           // kopiere C64 -> REU
-//.const REU_FETCH___F       = $cd           // kopiere REU -> C64
-//.const REU_SWAP___F        = $ce           // Speicherbereich tauschen
-//.const REU_VERIFY___F      = $cf           // Speicherbereich vergleichen
-
-.var o0         = $10
-.var o1         = $11
-
-.var a0         = $18
-.var a1         = $19
-
-
-.var b0         = $20
-.var b1         = $21
-
-.var T1         = $22
-.var T2         = $23
-.var PRODUCT    = $24
-.var PRODUCTHI  = $25
-
-
-.var t0         = $28
-.var t1         = $29
-
-.var tt0        = $2a
-.var tt1        = $2b
-
-.var quotient   = $2c
-.var quotientHi = $2d
-.var signflag   = $2e
-
-
-.var tmp        = $30
-.var length     = $31
-.var CHAR       = $32
-
-.var FAC1       = $33
-.var FAC2       = $34
-
-.var d0         = $35  // DIVIDEND  ALSO DOT PRODUCT
-.var d1         = $36
-.var d2         = $37
-.var d3         = $38
-
-.var v0         = $39  // DIVISOR
-.var v1         = $3a
-
-.var q0         = $3b  // QUOTIENT ALSO ERGEBNIS
-.var q1         = $3c
-.var q2         = $3d
-.var q3         = $3e
-
-.var r0         = $3f
-.var r1         = $40
-
-.var count      = $41
-
-.var x_save     = $42
-.var y_save     = $43
-
-.var normALO    = $44
-.var normAHI    = $45
-
-.var normBLO    = $46
-.var normBHI    = $47
-
-.var sign       = $48
-
-.var bufptr     = $49
-.var bufptrHi   = $4a
-
-.var tokptr     = $4b
-.var tokptrHi   = $4c
-  // aktueller Token-Pointer
-.var tokidx      = $4d     // Index in tokens[]
-.var i           = $4e
-.var n           = $4f
-.var L           = $50
-.var hash_lo     = $51
-.var hash_hi     = $52
-.var idx         = $53
-
-.var LineZero_LO = $54
-.var LineZero_HI = $55   
-
-.var norm2       = $56
-.var norm2Hi     = $57
-
-.var lo_SqrtIn   = $59
-.var hi_SqrtIn   = $5a
-.var lsby        = $5b
-.var msby        = $5c
-
-
-.var LineOne_LO  = $5e
-.var LineOne_HI  = $5f
-
-.var val         = $60
-.var High_Byte   = $61
-
-// 16 bit division
-.var remainder   = $62
-.var remainderHi = $63
-.var dividend    = $64
-.var dividendHi  = $65
-.var divisor     = $66
-
-.var dist0                 = $67
-.var position_answer       = dist0                   + 1
-.var bestBank              = position_answer         + 1
-.var bestram               = bestBank                + 1
-.var reuram                = bestram                 + 1  
-.var reubank               = reuram                  + 1
-.var hasAnAnswer           = reubank                 + 1
-.var diff_lo               = hasAnAnswer             + 1
-.var diff_hi               = diff_lo                 + 1
-.var neg_diff_lo           = diff_hi                 + 1
-.var neg_diff_hi           = neg_diff_lo             + 1
-.var token_length          = neg_diff_hi             + 1
-.var n_gram                = token_length            + 1
-.var i_token               = n_gram                  + 1
-.var frame                 = i_token                 + 1
-.var inputdone             = frame                   + 1
-.var cursor                = inputdone               + 1
-.var len1_unextracted      = cursor                  + 1 
-.var musicplay             = len1_unextracted        + 1 
-.var key_return            = musicplay               + 1
-.var active_music          = key_return              + 1
-.var keypos                = active_music            + 1
-.var just_music            = keypos                  + 1
-.var actkey	               = just_music              + 1
-.var keyblock              = actkey                  + 1
-.var keyflag               = keyblock                + 1 
-.var lastkey	             = keyflag                 + 1
-.var extract_addr          = lastkey                 + 1
-.var extract_addr_Hi       = extract_addr            + 1
-.var occour_in_query       = extract_addr_Hi         + 1
-.var len1                  = occour_in_query         + 1
-.var check_summe           = len1                    + 1
-.var COUNT_ENTRIES_LO      = check_summe             + 1
-.var COUNT_ENTRIES_HI      = COUNT_ENTRIES_LO        + 1
-.var eliza_answer          = COUNT_ENTRIES_HI        + 1
-.var ELIZA_ENTRIES         = eliza_answer            + 1
-.var active_bot            = ELIZA_ENTRIES           + 1
-.var ColorLineZero_LO      = active_bot              + 1
-.var ColorLineZero_HI      = ColorLineZero_LO        + 1
-.var ColorLineOne_LO       = ColorLineZero_HI        + 1
-.var ColorLineOne_HI       = ColorLineOne_LO         + 1
-.var scroll_LO             = ColorLineOne_HI         + 1
-.var scroll_HI             = scroll_LO               + 1
-.var searchflag            = scroll_HI               + 1
-.var think_anim            = searchflag              + 1
-
-.pc = LoadTab "x127 && AxA && clamp && multab"
-  .import binary "../data/lookup_tables.bin"
+phrases:
+.text "tell me a joke about @       "
+.text "what is an @                 "
+.text "what if @                    "
+.text "what has @                   "
+.text "name some @                  "
+.text "name @                       "
+.text "what is a @                  "
+.text "what is the deal with @      "
+.text "whats the deal with @        "
+.text "what is meant by @           "
+.text "what is the definition of @  "
+.text "what constitutes an @        "
+.text "what constitutes a @         "
+.text "what constitutes @           "
+.text "how would you describe an @  "
+.text "how would you describe a @   "
+.text "how would you describe @     "
+.text "how do i @                   "
+.text "what can be described as @   "
+.text "what is going on with an @   "
+.text "what is going on with a @    "
+.text "what is going on with @      "
+.text "whats going on with @        "
+.text "can you explain @            "
+.text "can you tell me about @      "
+.text "can you @                    "
+.text "define the @                 "
+.text "define a @                   "
+.text "explain what is @            "
+.text "explain who is @             "
+.text "explain @                    "
+.text "what do you know about @     "
+.text "whats can you tell me about @"
+.text "give me info on @            "
+.text "give me information on @     "
+.text "give me info about @         "
+.text "give me information about @  "
+.text "what would you call @        "
+.text "tell me what is @            "
+.text "what was @                   "
+.text "tell me who is @             "
+.text "describe who is @            "
+.text "who was @                    "
+.text "do you know @                "
+.text "have you heard of @          "
+.text "is there a @                 "
+.text "who created @                "
+.text "who are @                    "
+.text "who is a @                   "
+.text "who is @                     "
+.text "who created @                "
+.text "who developed @              "
+.text "who wrote @                  "
+.text "what do you mean by an @     "
+.text "what do you mean by a @      "
+.text "what do you mean by @        "
+.text "whats @                      "
+.text "what is @                    "
+.text "what @                       " 
+.text "define an@                   "
+.text "define a @                   "
+.text "define @                     "
+.text "list some @                  "
+.text "list a@                      "
+.text "list @                       "
+.text "recommend an @               "
+.text "recommend a  @               "
+.text "recommend @                  "
+.text "rank @                       "
+.text "where is @                   "

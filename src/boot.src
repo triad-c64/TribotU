@@ -277,7 +277,7 @@ tri_init:
  .text "Tribot Plus, Triad@"
 
 STOCK: 
-  .text "- Stock C64@"
+  .text "- C64 variant@"
 ULTIMATE:
   .text "- Ultimate 64 @"
 VICE: 
