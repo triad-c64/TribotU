@@ -569,7 +569,7 @@ PlotCredits:
     lda #>HELPSCREENS
     sta REUC64RAM+1
 
-    ldy #50 +17
+    ldy #50 +12
 plot_credits:
     ldx #0
     sty REURAM + 1
