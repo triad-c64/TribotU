@@ -1,689 +1,829 @@
-
 /*********************************************************
  *     coded by Adder of Triad in 2026 for X2026         *
+ *     especially 'plus' because with ELIZA              *
  *********************************************************/
-#import "variables.src"
+#import "tokenize.src"
+#import "keyboard.src"
+#import "embedder.src"
+#import "extract.src"
+#import "phrases.src"
 
-.pc = SCROLLING "SCROLL SCREENS"
+.pc = $0801 "Basic Upstart"
+BasicUpstart(PROGRAMM) 
+ 
+.pc = PROGRAMM "TRIBOT ULTIMATE"
+          
+          sei
+          lda #$7f
+          sta $dc0d
 
-scroll_up:
-    lda #>SCREENS
-    clc
-    adc #$20                  // 8 screens
-    sta LineZero_HI
-    sta LineOne_HI
+          lda #$35
+          sta $01
+          
+          lda #$ff
+          cmp $d012
+          bne *-3
+          
+          ldx #0
+          lda #$20
+init_cls:
+          sta $0400,x
+          sta $0500,x
+          sta $0600,x
+          sta $06f7,x
+          inx
+          bne init_cls
 
-    lda #<SCREENS
-    sta LineZero_LO
-    sec
-    sbc #40
-    sta LineOne_LO
+          lda #$ff
+          cmp $d012
+          bne *-3
+          lda #$01
+          cmp $d012
+          bne *-3
+          lda #0
+          cmp $d012
+          bne *-3
 
-    lda LineOne_HI
-    sbc #0
-    sta LineOne_HI
+          lda #0
+          sta $d020
+          sta $d021
+          sta searchflag
+          jsr CleanView
+          jsr Init
+REU_CHECK:
+          jsr checkForREU                    // prüfen ob eine REU vorhanden ist
+          cpx #0
+          beq REU_CHECK
+          
+          jsr Init
+          jsr CleanUp
 
+          jsr CopyCharset
 
-    lda #>COLORS
-    clc
-    adc #$20                  // 8 screens
-    sta ColorLineZero_HI
-    sta ColorLineOne_HI
+          lda #LOCATION_CHARSET_A
+          jsr GetCharset
 
-    lda #<COLORS
-    sta ColorLineZero_LO
-    sec
-    sbc #40
-    sta ColorLineOne_LO
+          lda #LOCATION_MUSIC_A
+          jsr GetMusic
+        
+          jsr PaintStartScreen
+          jsr Init
 
-    lda ColorLineOne_HI
-    sbc #0
-    sta ColorLineOne_HI
+          jsr InitPlaceHolder
 
-    ldx #$0
-ScrollArea:
-    ldy #$0
-loop_scroll:
-    lda (LineOne_LO) ,y     
-    sta (LineZero_LO),y
-    lda (ColorLineOne_LO) ,y     
-    sta (ColorLineZero_LO),y
-    iny
-    cpy #40
-    bne loop_scroll  
+          lda #0
+          tax
+          tay
+          jsr $1000
+           
+          lda #0
+          sta $dd0e
 
-    lda LineOne_LO
-    sec
-    sbc #40
-    sta LineOne_LO
-    lda LineOne_HI
-    sbc #0
-    sta LineOne_HI
+          ldx $DD0D                        // aktuelle IRQs des CIA-2 merken 
+          lda #%01111111                   // und dann alle
+          sta $DD0D                        // deaktivieren
+         
+          lda #<nmi                        //Adresse des NMI
+          sta $fffa                        //in den RAM-Vector schreiben
+          lda #>nmi
+          sta $fffb
+         
+          lda #$c7                           //LO-BYTE für             c7
+          sta $DD04                         //Timer-A vom CIA-2 setzen
+          lda #$4c                         //und auch das HI-BYTE      4c
+          sta $DD05                         //setzen
+   
+          txa                               //gemerkte IRQs vom CIA-2 in den Akku
+          ora #%10000001                    //alle IRQs + dem für Timer-A 
+          sta $DD0D                         //wieder aktivieren
 
-    lda LineZero_LO
-    sec
-    sbc #40
-    sta LineZero_LO
-    lda LineZero_HI
-    sbc #0
-    sta LineZero_HI
-
-
-    lda ColorLineOne_LO
-    sec
-    sbc #40
-    sta ColorLineOne_LO
-    lda ColorLineOne_HI
-    sbc #0
-    sta ColorLineOne_HI
-
-    lda ColorLineZero_LO
-    sec
-    sbc #40
-    sta ColorLineZero_LO
-    lda ColorLineZero_HI
-    sbc #0
-    sta ColorLineZero_HI
-
-    inx 
-    cpx #198
-    bne ScrollArea 
-
-    inc lines_used
-
-    jsr PlotScreen
-    rts
-
-
-
-PlotScreen:
-    lda #$0
-    sta s_to_d           + 1
-    sta s_to_d_color     + 1
-    lda #$04
-    sta s_to_d           + 2
-    lda #$d8
-    sta s_to_d_color     + 2
+          lda #%00000001                    //Timer-A im CIA-2
+          sta $DD0E                         //starten
 
 
-    lda #<(SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000))
-    sta source_to_dest   + 1
-    lda #>(SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000))    
-    sta source_to_dest   + 2
+          ldx #0
+PROMPT:
+          lda prompt    ,x
+          beq SetIRQ
+          sta SCREEN - 2,x
+          lda #GREY
+          sta COLORRAM-2,x
+          inx
+          bne PROMPT
+SetIRQ:
+          lda #<irq
+          sta $fffe
+          lda #>irq
+          sta $ffff
 
-    lda #<(COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000))
-    sta source_to_dest_color   + 1
-    lda #>(COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000))    
-    sta source_to_dest_color   + 2
+          lda #$a1
+          sta $d012
+          lda #$1b
+          sta $d011
+          lda #1
+          sta $d019
+          sta $d01a
+          cli
+botloop:   
+          jsr Input
+          
+          lda #1
+          sta stop_input
+  
+          ldx #0
+setQuery:
+          lda SCREEN,x
+          //cmp #63 // fragezeichen
+          beq finalize_query
+sta_input:
+          sta string1,x
+          inx
+          bne setQuery
+          
+finalize_query:
+          lda #$00
+          sta string1,x
+          stx len1
 
-PLOT_SCREEN_HERE:
+          ldx #0
+check_leading_space:
+          lda string1,x
+          inx
+          cmp #$20
+          beq check_leading_space
+          cmp #$0
+          bne start_veryfying
+          lda #0
+          sta searchflag
+          sta stop_input
+          jmp botloop
 
-    ldx #$0
-SOURCE_TO_DESTINATION:
-    ldy #$0
-source_to_dest:
-    lda SCREENS         ,y
-s_to_d:
-    sta $0400           ,y
-source_to_dest_color:
-    lda COLORS          ,y
-s_to_d_color:
-    sta $d800           ,y
-    
-    iny
-    cpy #40
-    bne source_to_dest
+start_veryfying:
+          lda #1
+          sta searchflag
+          jsr ShortPhrase
+          jsr ExtractString
+          
+          jsr worker 
 
-    lda source_to_dest  + 1
-    sec
-    sbc #40
-    sta source_to_dest  + 1
-    lda source_to_dest  + 2
-    sbc #0
-    sta source_to_dest  + 2
+          lda #0
+          sta searchflag
+ready:
+          jmp botloop                                
+                      // zurück
+stop_input:
+ .byte 0
+// ****************************************************************************************
+irq: 
+         pha
+         txa
+         pha
+         tya
+         pha
+  
+         lda #$9f
+         cmp $d012
+         bne *-3
+         lda searchflag
+         bne returnIrq
+     
+         lda stop_input
+         bne returnIrq
+   
+         jsr if6bc
 
+         lda keyblock 
+         beq NormalizedInput
 
-    lda s_to_d          + 1
-    clc
-    adc #40
-    sta s_to_d          + 1
-    lda s_to_d          + 2
-    adc #0
-    sta s_to_d          + 2
+         lda #0
+         sta keyblock
 
+NormalizedInput:
+         lda inputdone
+         bne returnIrq
 
-    lda source_to_dest_color  + 1
-    sec
-    sbc #40
-    sta source_to_dest_color  + 1
-    lda source_to_dest_color  + 2
-    sbc #0
-    sta source_to_dest_color  + 2
-
-
-    lda s_to_d_color          + 1
-    clc
-    adc #40
-    sta s_to_d_color          + 1
-    lda s_to_d_color          + 2
-    adc #0
-    sta s_to_d_color          + 2
-    
-    inx 
-    cpx #LASTLINE
-    bne SOURCE_TO_DESTINATION
-    rts
-
-
-PaintStartScreen:
-         ldx #$0
-         ldy #$0
+         inc frame
+         lda frame
+         cmp #10
+         bne returnIrq
+        
+         lda cursor
+         eor #$1
+         sta cursor
+         
+         beq ClearCursor
+            
+         ldy keypos
+         lda #100
+         sta SCREEN   ,y
+         jmp SetKeyboardBack
+ClearCursor:
+         ldy keypos
          lda #$20
-SetScreensClear:
-         sta SCREENS      ,x
-         lda #WHITE
-SetColorClear:
-         sta COLORS       ,x
-         lda #$20
+         sta SCREEN   ,y
+SetKeyboardBack:
+         lda #0
+         sta frame
+         sta keyflag
+         sta lastkey
+        
+returnIrq: 
+         lda think_anim
+         beq leave_irq
+         inc think_delay
+         lda think_delay
+         cmp #$10
+         bne leave_irq
+         lda #0
+         sta think_delay
+         inc think_frames
+         ldx think_frames
+         cpx #4
+         bne animate_thinking
+         ldx #0
+         sta think_frames
+animate_thinking:         
+         lda think_signs,x
+         sta THINKANIM
+leave_irq:
+         lda #$9e
+         sta $d012
+         asl $d019
+         
+         pla
+         tay
+         pla
+         tax
+         pla
 
-         inx 
-         bne SetScreensClear
-         inc SetScreensClear + 2
-         inc SetColorClear + 2
-         iny
-         cpy #SCROLLSCREENS 
-         bne SetScreensClear
+         rti
+think_signs:
+ .text "*+-+"
+think_frames:
+ .byte 0
+think_delay:
+ .byte 0
+// ************************************
+// ** Worker                         **
+// ************************************
+worker: 
+          jsr check_for_command
+          cpx #1                       // valid command
+          beq return_from_worker
 
-PlotStart:
-        lda #LOCATION_HELP
+          jsr PlotQuestions
+          // jsr save_eliza_input_string
+          jsr tokenize
+          jsr Embeddings
+          jsr start_check
+return_from_worker:
+          jsr Init
+          rts
+
+start_check:
+  
+GETNODES:
+          lda reubank
+          sta REUBANK
+          lda reuram
+          sta REURAM + 1
+
+          lda #REU_FETCH_A__           // Befehl fürs Kopieren von der REU zum C64
+          sta REUCOMMAND               // mit AUTOLOAD ausführen
+           
+          jsr cosine_approximation
+          cpx #DIM                     // in x - register dot product
+          bne check_dist
+    
+          stx dist0
+          // found direct hit
+          lda reubank
+          sta bestBank 
+          lda reuram
+          sta bestram
+          jmp MatchFound
+   
+diff_bne:  // help jmp
+          jmp GETNODES
+
+check_dist:
+          cpx dist0
+          bcc continue_iterative_search      // carry=1 → a >= b → hier: größer
+update_founded:
+          stx dist0
+
+set_latest_entry:
+          lda reubank
+          sta bestBank 
+          lda reuram
+          sta bestram
+  
+continue_iterative_search:
+          lda reuram
+          cmp COUNT_ENTRIES_LO
+          beq check_bank
+          inc reuram
+          bne diff_bne
+          inc reubank
+          bne diff_bne
+          jmp check_founded
+check_bank:
+          lda reubank
+          cmp COUNT_ENTRIES_HI
+          beq check_founded
+          inc reuram
+          bne diff_bne
+          inc reubank
+          bne diff_bne
+          
+check_founded:
+          lda bestram
+          bne MatchFound
+          lda bestBank
+          bne MatchFound
+
+MatchFound: 
+          ldx dist0
+          cpx #ELIZA_THRESHOLD
+          bcc Ask_ELIZA
+          //*/
+
+          lda bestBank
+          sta REUBANK
+          lda bestram
+          sta REURAM + 1
+
+          lda #REU_FETCH_A__           // Befehl fürs Kopieren von der REU zum C64
+          sta REUCOMMAND               // mit AUTOLOAD ausführen
+          lda #0 
+          sta think_anim
+PlotAnswer:
+          jsr PlotAlignedLines
+          jsr Init
+          rts
+
+Ask_ELIZA:
+          jsr ELIZA
+          lda #0 
+          sta think_anim
+          jsr Plot_ELIZA_ANSWER
+          jsr Init
+          rts
+
+CleanView:
+          ldx #0
+          stx lines_used
+          lda #>SCREENS
+          sta _scr_  + 2
+          lda #>COLORS
+          sta _col_  + 2
+clear_view:
+          lda #$20
+_scr_:
+          sta SCREENS,x
+          lda #BLACK
+_col_:
+          sta COLORS,x
+          inx 
+          bne clear_view
+          inc _scr_ + 2
+          inc _col_ + 2
+          lda _scr_ + 2
+          cmp #$90
+          bne clear_view
+          rts
+
+CleanUp:
+          ldx #0
+       
+GetLoadLookup:
+          lda LoadTab        ,x
+SetLookup:
+          sta lookUpx127Lo   ,x
+          inx  
+          bne GetLoadLookup
+          inc GetLoadLookup  + 2
+          inc SetLookup      + 2
+          lda GetLoadLookup  + 2
+          cmp #$2c
+          bne GetLoadLookup
+          rts
+
+Init:
+          lda #0
+          sta keypos
+          sta keyflag
+          sta keyblock
+          sta reuram
+          sta reubank
+          sta bestBank
+          sta bestram
+          sta REUBANK                     // 1. Bank (lfd.-Nr. 0)
+          sta REURAM                      // und beginnen auch direkt ab Adresse $0000
+          sta REURAM+1                    // in der Bank
+          sta frame                      
+          sta inputdone            
+          sta cursor 
+          sta stop_input
+          sta key_return
+          sta musicplay
+          sta dist0
+          sta check_summe
+          sta scroll_pos
+          sta scroll_pos + 1
+          sta lines_scrolled
+          sta think_anim
+
+          lda #<DATARAM                      // Beginn des Speichers der  
+          sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
+          lda #>DATARAM
+          sta REUC64RAM+1
+
+          lda #<($0100)                      // Die Anzahl der BYTEs ($0100)
+          sta REUBYTES                       // je Aktion der REU bekannt machen
+          lda #>($0100)
+          sta REUBYTES+1
+
+          ldx #0  
+          txa
+cls_input_strings:
+          sta input      ,x
+          sta input_eliza,x
+          sta string1    ,x
+          sta correct    ,x
+          inx
+          bne cls_input_strings
+
+cls_input:
+          lda #$20
+          sta SCREEN  ,x
+          lda #YELLOW
+          sta COLORRAM,x
+          inx 
+          cpx #MAXLENGHT
+          bne cls_input
+          rts
+
+.pc = COMMANDS "Commando handling"
+
+GetCharset:
         sta REUBANK
+        lda #0
+        sta REURAM + 1
 
-        lda #<($0100)                      // Die Anzahl der BYTEs ($0100)
+        lda #<($0300)                      // Die Anzahl der BYTEs ($0100)
         sta REUBYTES                       // je Aktion der REU bekannt machen
-        lda #>($0100)
+        lda #>($0300)
         sta REUBYTES+1
 
-        lda #<HELPSCREENS                        // Beginn des Speichers der  
+        lda #<CHARSET                      // Beginn des Speichers der  
         sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
-        lda #>HELPSCREENS
+        lda #>CHARSET
         sta REUC64RAM+1
-
-        ldy #76
-plot_start:
-        ldx #0
-        sty REURAM + 1
+         
+        lda #$f0
+        cmp $d012
+        bne *-3
 
         lda #REU_FETCH_A__            
         sta REUCOMMAND 
-getStartInfo:
-        lda HELPSCREENS      ,    x
-setStartInfo:
-        sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) + 23 * 40, x
-getStartColor:
-        lda HELPSCREENS + 128,    x
-setStartColor:
-        sta COLORS  + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) + 23 * 40, x
-        inx
-        cpx #40
-        bne getStartInfo
-        
-        lda setStartInfo + 1
-        sec
-        sbc #40
-        sta setStartInfo + 1
-        lda setStartInfo + 2
-        sbc #0
-        sta setStartInfo + 2
 
-        lda setStartColor + 1
-        sec
-        sbc #40
-        sta setStartColor + 1
-        lda setStartColor + 2
-        sbc #0
-        sta setStartColor + 2
+        lda $01
+        pha
+        and #%11111011
+        sta $01
+        ldx #$00
+copy_singles:
+        lda $d000  + $170,x
+        sta CHARSET +$170,x
+        lda $d000  + $2E8,x
+        sta CHARSET +$2E8,x
+        lda $d000  + $3E8,x
+        sta CHARSET +$3E8,x
+        lda $d000  + $200,x
+        sta CHARSET +$200,x
+        inx
+        cpx #8
+        bne copy_singles
+        pla
+        sta $01
+
+        lda #%00011010
+        sta $d018
+        jsr Init     
+        rts
+
+GetMusic:
+        sta REUBANK
+        lda #0
+        sta REURAM + 1
+
+        lda #<($1700)                      // Die Anzahl der BYTEs ($0100)
+        sta REUBYTES                       // je Aktion der REU bekannt machen
+        lda #>($1700)
+        sta REUBYTES+1
+
+        lda #<MUSIC                        // Beginn des Speichers der  
+        sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
+        lda #>MUSIC
+        sta REUC64RAM+1
+
+        lda #REU_FETCH_A__            
+        sta REUCOMMAND 
+        jsr Init     
+        rts
+was_command:
+ .byte 0
+check_for_command:
+        lda string1
+        cmp #'/'
+        beq isStartingCommand
+        ldx #$00
+        rts
+isStartingCommand:
+        ldy #$0
+next_command:
+        ldx #$ff
+loop_check_command:
+        inx
+        lda string1,         x
+        beq complete_command
+cmds:
+        cmp commando,        x
+        sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
+        beq loop_check_command
+
+        lda cmds + 1
+        clc
+        adc #12
+        sta cmds + 1
+        lda cmds + 2
+        adc #0
+        sta cmds + 2
 
         iny
-        cpy #98
-        bne plot_start
-      
-        jsr PlotScreen
+        cpy #COMMAND_NUMBERS
+        bne next_command
+       
+        lda #>commando
+        sta cmds + 2
+        lda #<commando
+        sta cmds + 1
 
-         ldx #0 
-limiter:
-         lda #99
-         sta SCREEN - 42   , x
-         lda #DARK_GREY
-         sta $d800 + 23 *40, x
-         inx
-         cpx #40
-         bne limiter
-         rts
-
-
-PlotAlignedLines:
-         ldx #0
-         ldy #0
-         sty start_row      + 1
-         sty onRow
-GET_FINAL_ANWER:
-         lda BOT_ANSWER_REU        , y
-         cmp #' '
-         beq setMark
-         inx
-         iny
-         cpy #ANSWER_LENGTH
-         bne GET_FINAL_ANWER
-         jsr scroll_up
-return_from_plot_aligned:
-         rts
-
-setMark:
-         cpx #39
-         bcc on_this_row
-          
-         lda mark
-         sta curr_mark +1
-         
-start_row:
-         ldy #0
-         ldx #0
-GiveOutRow:
-         lda BOT_ANSWER_REU        , y
-         beq last_word
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-         inx
-         iny
-curr_mark:
-         cpy #0
-         bne GiveOutRow
-
-         lda #$20
-fill_up:
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-         inx
-         cpx #40
-         bcc fill_up
-        
-         sty start_row      + 1
-
-         jsr scroll_up
-         
-         ldy start_row + 1
-         dey
-         ldx #0
-         jmp GET_FINAL_ANWER
-
-last_word:
-         lda onRow
-         beq return_from_last_word
-
-         lda #$20
-fill_up_last:
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-         inx
-         cpx #40
-         bcc fill_up_last
-
-         jsr scroll_up
-         jsr ClearLine
-         jsr scroll_up
-         rts 
-return_from_last_word:
-         jsr ClearLine
-         jsr scroll_up
-         rts
-ClearLine:
-         ldx #0
-clear_line:
-         lda #$20
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-         lda #YELLOW
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-         inx
-         cpx #40
-         bne clear_line
-         rts
-on_this_row:
-         inc onRow
-         iny
-         sty mark
-         inx
-         jmp GET_FINAL_ANWER
-         rts
-onRow:
+        ldy #$00
+        sty was_command
+GetUnknownCommand:
+        lda UnknownCommand,                                                    y
+        beq return_from_unknown_command
+        sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , y
+        lda #YELLOW
+        sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) ,  y
+        iny
+        jmp GetUnknownCommand
+return_from_unknown_command:      
+        jsr scroll_up
+        jsr ClearLine  
+        jsr scroll_up
+        ldx #$01
+        rts
+sy:
  .byte 0
+complete_command:
+        lda #1
+        sta was_command
+        sty sy
+        jsr ColorizeYellow
+        jsr scroll_up
+        jsr ClearLine
+        jsr scroll_up
+        ldy sy
+        lda #>commando
+        sta cmds + 2
+        lda #<commando
+        sta cmds + 1
+        
+        cpy #2
+        bcc print_help
+        cpy #2 
+        beq switch_music
+        cpy #3
+        beq credits_info
+        cpy #4
+        beq select_tune_A
+        cpy #5
+        beq select_tune_B
+        cpy #6
+        beq select_charset_A
+        cpy #7
+        beq select_charset_B
+        cpy #8
+        beq show_informations
+        cpy #11
+        bcc clean_viewer
+        cpy #13
+        bcc exit_tribot
+        ldx #0
+        rts 
+exit_tribot:
+        lda #1
+        sta music_play
+        jsr switch_music
+        sei 
+        lda #$37
+        sta $01
+        jmp $fce2
+select_tune_A:
+        jmp select_tune_1
+select_tune_B:
+        jmp select_tune_2
+select_charset_A:
+        jmp select_charset_1
+select_charset_B:
+        jmp select_charset_2
+show_informations:  
+        jmp show_information
+clean_viewer:
+        jsr CleanView
+        jsr scroll_up
+        ldx #1
+        rts
+credits_info:
+        jsr PlotCredits
+        ldx #1
+        rts
+print_help:
+        jsr PlotHelp
+        ldx #1
+        rts
+switch_music:
+        lda music_play
+        eor #1
+        sta music_play
 
-PlotQuestions:
-         ldx #0
-GetQ:
-         lda #$20 // this should clear garbage shown above the question
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - ((LASTLINE - 1) * 40) , x
-         lda #BLACK
-         sta COLORS  + $2000 - ((SCROLLSCREENS - 1) * 1000) - ((LASTLINE - 1) * 40) , x
-         inx
-         cpx #40
-         bne GetQ
-         ldx #0
-Get_Quest:
-         lda SCREEN - 2,x
-         beq return_from_question
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-         lda #YELLOW
-         sta COLORS  + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40)  , x
-         inx
-         cpx #40
-         bne Get_Quest
-return_from_question:
-         jsr scroll_up
-         ldx #0
-         lda #$20
-clear_row:
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-         sta SCREEN,x
-         inx
-         cpx #40
-         bne clear_row
-         jsr scroll_up
-         
-         lda #>thinking
-         sta think + 2
-         lda #<thinking
-         sta think + 1
+        lda #$80
+        cmp $d012
+        bne *-3
+        lda #0
+        sta $d418
+        ldx #1
+        rts
 
-         lda $d012
-         and #31
-         cmp #THINKSTATI
-         bcc mul_to_think
-         lda #0
-mul_to_think:
+select_tune_1:
+        lda music_play
+        pha
+        lda #0
+        sta music_play
+        lda #$80
+        cmp $d012
+        bne *-3
+        lda #0
+        sta $d418
+        lda #LOCATION_MUSIC_A
+        jsr GetMusic
+        lda #0
+        tay
+        tax
+        jsr $1000
+        pla
+        sta music_play
+        ldx #1
+        rts
+select_tune_2:
+        lda music_play
+        pha
+        lda #0
+        sta music_play
+        lda #$80
+        cmp $d012
+        bne *-3
+        lda #0
+        sta $d418
+        lda #LOCATION_MUSIC_B
+        jsr GetMusic
+        lda #0
+        tay
+        tax
+        jsr $1000
+        pla
+        sta music_play
+        ldx #1
+        rts
+select_charset_1:
+        lda #LOCATION_CHARSET_A              // OFFSET CHARSET 1
+        jsr GetCharset
+        ldx #1
+        rts
+select_charset_2:
+        lda #LOCATION_CHARSET_B              // OFFSET CHARSET 1
+        jsr GetCharset
+        ldx #1
+        rts
+show_information:
+        jsr PlotInfo
+        ldx #1
+        rts
+CopyCharset:     
+        lda $01
+        pha
+        and #%11111011
+        sta $01
+        ldx #$00
+copy_charset:
+        lda $d000,x
+        sta CHARSET,x
+        lda $d100,x
+        sta CHARSET+$100,x
+        lda $d200,x
+        sta CHARSET+$200,x
+        lda $d300,x
+        sta CHARSET+$300,x
+        lda $d400,x
+        sta CHARSET+$400,x
+        lda $d500,x
+        sta CHARSET+$500,x
+        lda $d600,x
+        sta CHARSET+$600,x
+        lda $d700,x
+        sta CHARSET+$700,x
+        inx
+        bne copy_charset
+        pla
+        sta $01
+        rts
+
+prompt:
+   .text "> "
+   .byte 0
+
+nmi:
+         pha                               //Akku
+         txa                               //X-Register
+         pha
+         tya                               //und Y-Reg
+         pha                               //auf dem Stack merken
+          
+         lda $01
+         sta rom
+
+         lda #$35
+         sta $01
+
+
+         lda $DD0D                         //IRQs bestätigen
+         and #%00000001                    //Timer IRQ?
+         beq nmi_exit                      //wenn nicht -> ENDE 
+
+         lda  music_play
+         beq  nmi_exit
+
+         jsr $1003                         //sonst Hintergrundfarbe ändern
+       
+nmi_exit: 
+         lda rom
+         sta $01
+         pla                               //Register vom Stack holen
+         tay
+         pla
          tax
-mul_loop:
-         dex
-         bmi write_thinking
-         lda think + 1
-         clc
-         adc #19
-         sta think + 1
-         lda think + 2 
-         adc #0
-         sta think + 2
-         jmp mul_loop
-
-write_thinking: 
-         ldx #0
-think:
-         lda thinking,x
-         beq return_from_thinking
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-         lda #CYAN
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-         inx
-         cpx #31
-         bne think
-return_from_thinking:
-         lda #$20
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-         lda #CYAN
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-         inx
-         cpx #40
-         bne return_from_thinking
-
-         jsr scroll_up     
-
-         ldx #0
-possible_color:
-         lda #$20
-         sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-         lda #WHITE
-         sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-         inx
-         cpx #40
-         bne possible_color
-         jsr scroll_up    
-         lda #1
-         sta think_anim  
-        // inc lines_used
-         rts
-
-scroll_F1:
-         lda lines_scrolled
-         cmp lines_used
-         bcc scrollup
-         rts
-scrollup:
-         inc lines_scrolled
-         lda scroll_pos 
-         sec
-         sbc #40
-         sta scroll_pos 
-         lda scroll_pos +1
-         sbc #0
-         sta scroll_pos +1
-         jsr PlotScrolledScreen
-ret_from_downer:
-         rts
-scroll_F7:
-         lda lines_scrolled
-         bne scrolldown
-         rts
-scrolldown:
-         dec lines_scrolled
-         lda scroll_pos 
-         clc
-         adc #40
-         sta scroll_pos 
-         lda scroll_pos +1
-         adc #0
-         sta scroll_pos +1
-         jsr PlotScrolledScreen
-         rts
-
-PlotScrolledScreen:
-    lda #$0
-    sta s_to_d           + 1
-    sta s_to_d_color     + 1
-    lda #$04
-    sta s_to_d           + 2
-    lda #$d8
-    sta s_to_d_color     + 2
-
-
-    lda #<(SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000))
-    sec
-    sbc scroll_pos       + 0
-    sta source_to_dest   + 1
-    lda #>(SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000)) 
-    sbc scroll_pos       + 1   
-    sta source_to_dest   + 2
-
-    lda #<(COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000))
-    sec
-    sbc scroll_pos             + 0
-    sta source_to_dest_color   + 1
-    lda #>(COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000))  
-    sbc scroll_pos            + 1     
-    sta source_to_dest_color  + 2
-     
-    jsr PLOT_SCREEN_HERE
-
-    rts
-
-save_Y:
+         pla
+         
+         rti                               //und zurück
+music_play: 
+  .byte 1
+rom:
   .byte 0
 
-PlotHelp:
-    lda #LOCATION_HELP
-    sta REUBANK
+commando:
+  .text "/help@      "
+  .text "/man@       "
+  .text "/music@     "
+  .text "/credits@   "
+  .text "/tune 1@    "
+  .text "/tune 2@    "
+  .text "/char 1@    "
+  .text "/char 2@    "
+  .text "/info@      "
+  .text "/clear@     "
+  .text "/reset@     "
+  .text "/exit@      "
+  .text "/quit@      "
 
-    lda #<($0100)                      // Die Anzahl der BYTEs ($0100)
-    sta REUBYTES                       // je Aktion der REU bekannt machen
-    lda #>($0100)
-    sta REUBYTES+1
+ask_me_place_holder:
+  .text "Ask me anything...@"
+UnknownCommand:
+  .text "Unknown command@"
 
-    lda #<HELPSCREENS                        // Beginn des Speichers der  
-    sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
-    lda #>HELPSCREENS
-    sta REUC64RAM+1
-
-    ldy #5
-
-plot_hlp:
-    ldx #0
-    sty REURAM + 1
-
-    lda #REU_FETCH_A__            
-    sta REUCOMMAND 
-getHelp:
-    lda HELPSCREENS      ,    x
-    sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-getHelpColor:
-    lda HELPSCREENS + 128,    x
-    sta COLORS  + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-    inx
-    cpx #40
-    bne getHelp
-    
-    sty save_Y
-    jsr scroll_up
-    ldy save_Y
-
-    iny
-    cpy #23
-    bne plot_hlp
-    jsr ClearLine
-    rts
-
-PlotCredits:
-    lda #LOCATION_HELP
-    sta REUBANK
-
-    lda #<($0100)                      // Die Anzahl der BYTEs ($0100)
-    sta REUBYTES                       // je Aktion der REU bekannt machen
-    lda #>($0100)
-    sta REUBYTES+1
-
-    lda #<HELPSCREENS                        // Beginn des Speichers der  
-    sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
-    lda #>HELPSCREENS
-    sta REUC64RAM+1
-
-    ldy #50 +12
-plot_credits:
-    ldx #0
-    sty REURAM + 1
-
-    lda #REU_FETCH_A__            
-    sta REUCOMMAND 
-getCreditsInfo:
-    lda HELPSCREENS      ,    x
-    sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-getCreditsColor:
-    lda HELPSCREENS + 128,    x
-    sta COLORS  + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-    inx
-    cpx #40
-    bne getCreditsInfo
-    
-    sty save_Y
-    jsr scroll_up
-    ldy save_Y
-
-    iny
-    cpy #73
-    bne plot_credits
-    jsr ClearLine
-    rts
-
-PlotInfo:
-    lda #LOCATION_HELP
-    sta REUBANK
-
-    lda #<($0100)                      // Die Anzahl der BYTEs ($0100)
-    sta REUBYTES                       // je Aktion der REU bekannt machen
-    lda #>($0100)
-    sta REUBYTES+1
-
-    lda #<HELPSCREENS                        // Beginn des Speichers der  
-    sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
-    lda #>HELPSCREENS
-    sta REUC64RAM+1
-
-    ldy #27
-plot_nfo:
-    ldx #0
-    sty REURAM + 1
-
-    lda #REU_FETCH_A__            
-    sta REUCOMMAND 
-getInfo:
-    lda HELPSCREENS      ,    x
-    sta SCREENS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-getInfoColor:
-    lda HELPSCREENS + 128,    x
-    sta COLORS  + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-    inx
-    cpx #40
-    bne getInfo
-    
-    sty save_Y
-    jsr scroll_up
-    ldy save_Y
-
-    iny
-    cpy #49
-    bne plot_nfo
-    jsr ClearLine
-    rts
-
-ColorizeYellow:
-    ldx #0
-    lda #YELLOW
-Yellow:
-    sta COLORS + $2000 - ((SCROLLSCREENS - 1) * 1000) - (LASTLINE * 40) , x
-    inx 
-    cpx #40
-    bne Yellow
-    rts
-scroll_pos:
-    .byte 0,0
-
-
-mark:
-  .byte 0 
-inrtoduce:
-  .text "Tribot Plus, Triad                          "
-
-lines_used:
-  .byte 0
-lines_scrolled:
-  .byte 0
-
-thinking:
-    .text "* Thinking...@     "
-    .text "* Cogitating...@   "
-    .text "* Contemplating...@"
-    .text "* Deliberating...@ "
-    .text "* Ruminating...@   "
-    .text "* Pondering...@    "
-    .text "* Mulling...@      "
-    .text "* Musing...@       "
-    .text "* Percolating...@  "
-    .text "* Noodling...@     "
-    .text "* Simmering...@    "
-    .text "* Marinating...@   "
-    .text "* Incubating...@   "
-    .text "* Concocting...@   "
-    .text "* Scheming...@     "
-    .text "* Hatching...@     "
-    .text "* Brewing...@      "
-    .text "* Calculating...@  "
-    .text "* Computing...@    "
-    .text "* Churning...@     "
-    .text "* Crunching...@    "
-    .text "* Coalescing...@   "
-    .text "* Deciphering...@  "
-    .text "* Germinating...@  "
-    .text "* Manifesting...@  "
-    .text "* Reticulating...@ "
+InitPlaceHolder:
+  ldx #0
+plot_place_holder:
+  lda ask_me_place_holder,x
+  beq return_from_placeHolder
+  sta SCREEN  ,x
+  lda #DARK_GRAY
+  sta COLORRAM,x
+  inx
+  bne plot_place_holder
+return_from_placeHolder:
+  lda #18
+  sta keypos
+  rts
