@@ -202,9 +202,6 @@ sound_initialized:
 
 LEAVE:
          jsr DELAY
-         jsr DELAY
-         jsr DELAY
-         
          jsr CLEAR_SCREEN
 
          ldx #$f1
@@ -235,6 +232,8 @@ GetSlogan:
          bne GetSlogan
          
 wait_logo:
+         jsr DELAY
+         jsr DELAY
          jsr DELAY
          jsr CLEAR_SCREEN
          

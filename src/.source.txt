@@ -1,132 +1,398 @@
-/*********************************************************
- *     coded by Adder of Triad in 2026 for X2026         *
- *********************************************************/
+// *******************************************
+// implemented by Adder Triad 2026
+// *******************************************
+
 #import "variables.src"
+#import "eliza.src"
 
-.pc = Phrases "shorten phrases"
-ShortPhrase:
+.pc = BOOT "BOOT SEQUENCE"
+checkForREU:
+         
+         lda #23
+         sta $d018
+         jsr CLEAR_SCREEN
+          
+         ldx #0
+initing:
+         lda tri_init,x
+         beq print_booting
+         sta $0400, x
+         inx
+         jmp initing
+print_booting:
+         
+         ldx #0
+         ldy #60
+wait_1:
+         lda #$f0
+         cmp $d012
+         bne *-3
+         dex
+         bne *-1
+         dey
+         bne wait_1
+
+         ldx #0
+Booting:
+         lda booting,x
+         beq DETECT
+         sta $0400 +80 ,   x
+         lda #CYAN
+         sta $d800 +80 ,   x
+         inx
+         jmp Booting
+          
+         
+DETECT:
+         ldx #0
+         ldy #60
+wait_2:
+         lda #$f0
+         cmp $d012
+         bne *-3
+         dex
+         bne *-1
+         dey
+         bne wait_2
+
+         ldx #0
+DETECTION_STATUS_OFF:
+         lda REU_NOT_FOUND,   x
+         beq CHECK_LOOP
+         sta $0400 + 160   ,   x
+not_detected:
+         lda #LIGHT_GRAY
+         sta $d800 + 160   ,   x
+         inx
+         cpx #10
+         bne DETECTION_STATUS_OFF
+         lda #RED
+         sta not_detected + 1
+         jmp DETECTION_STATUS_OFF
+
+CHECK_LOOP:
+         lda $d012
+         cmp #$f0
+         bne CHECK_LOOP
+
+         lda #<DATARAM                      // Beginn des Speichers der  
+         sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
+         lda #>DATARAM
+         sta REUC64RAM+1
+
+         lda #<($0100)                      // Die Anzahl der BYTEs ($0100)
+         sta REUBYTES                       // je Aktion der REU bekannt machen
+         lda #>($0100)
+         sta REUBYTES+1
+
+         // GETNROFENTRIES
+         lda #255
+         sta REUBANK
+         lda #255
+         sta REURAM + 1
+
+         lda #REU_FETCH_A__           // Befehl fürs Kopieren von der REU zum C64
+         sta REUCOMMAND               // mit AUTOLOAD ausführen
         
-        ldx #$0
-        stx count_phrases
+         lda DATARAM
+         sta COUNT_ENTRIES_LO
+         lda DATARAM + 1
+         sta COUNT_ENTRIES_HI
 
-        lda #>phrases
-        sta phrase  + 2
-        lda #<phrases
-        sta phrase  + 1
+         lda DATARAM + 2
+         sta ELIZA_ENTRIES
 
-phrase:
-        lda phrases,        x
-        beq equal_phrases
-compare_string:
-        cmp string1,        x
-        bne unequal_phrase
-        inx 
-        cpx #29
-        bne phrase
-        jmp unequal_phrase
+         //check for REU
+         ldx #0
+scan_REU:
+         stx check_reu_byte + 1
+         lda DATARAM + 3,x
+check_reu_byte:
+         cmp #0
+         bne CHECK_LOOP
+         inx
+         cpx #16
+         bne scan_REU
 
-equal_phrases:
-        ldy #0
-set_new_question:
-        lda string1,         x
-        sta string1,         y
-        beq return_from_phrases
-        inx
-        iny
-        jmp set_new_question
+         ldx #0
+DETECTION_STATUS_ON:
+         lda REU_FOUND,   x
+         beq CHECKFORSYSTEM
+         sta $0400 + 160   ,   x
+initialized:
+         lda #LIGHT_GRAY
+         sta $d800 + 160  ,   x
+         inx
+         cpx #23
+         bne DETECTION_STATUS_ON
+         lda #GREEN
+         sta initialized + 1
+         jmp DETECTION_STATUS_ON
 
-unequal_phrase:
-        lda phrase        + 1
-        clc
-        adc #29
-        sta phrase        + 1
-        lda phrase        + 2
-        adc #0
-        sta phrase        + 2
+CHECKFORSYSTEM:
+         jsr DELAY
+         jsr detect_machine
+         ldx #0
+         lda machine_flags
+         cmp #8
+         beq PRINT_VICE
+         cmp #1
+         beq PRINT_ULTIMATE
+ 
+PRINT_STOCK:
+         lda STOCK,   x
+         beq PRINT_KEYBOARD
+         sta $0400 + 200   ,   x
+         lda #LIGHT_GRAY
+         sta $d800 + 200   ,   x
+         inx 
+         jmp PRINT_STOCK
 
-        inc count_phrases
-        lda count_phrases
-        cmp #NUMBEROFPHRASES
-        beq ret_from_phrases
-        ldx #0
-        jmp phrase
+PRINT_VICE:
+         lda VICE,   x
+         beq PRINT_KEYBOARD
+         sta $0400 + 200   ,   x
+         lda #LIGHT_GRAY
+         sta $d800 + 200   ,   x
+         inx 
+         jmp PRINT_VICE
 
-return_from_phrases:
-        sty len1
-ret_from_phrases:
-        rts
+PRINT_ULTIMATE:
+         lda ULTIMATE,   x
+         beq PRINT_KEYBOARD
+         sta $0400 + 200   ,   x
+         lda #LIGHT_GRAY
+         sta $d800 + 200   ,   x
+         inx 
+         jmp PRINT_ULTIMATE
 
-count_phrases:
+PRINT_KEYBOARD:
+         jsr DELAY
+         ldx #$00
+GetKeyboardInfo:
+         lda KEYBOARD_INIT,   x
+         beq PRINT_SOUND
+         sta $0400 + 240   ,   x
+keyboard_initialized:
+         lda #LIGHT_GRAY
+         sta $d800 + 240   ,   x
+         inx 
+         cpx #23
+         bne GetKeyboardInfo
+         lda #GREEN
+         sta keyboard_initialized +1
+         jmp GetKeyboardInfo
+
+PRINT_SOUND:
+         jsr DELAY
+         ldx #$00
+GetSoundInfo:
+         lda SOUND_INIT    ,   x
+         beq LEAVE
+         sta $0400 + 280   ,   x
+sound_initialized:
+         lda #LIGHT_GRAY
+         sta $d800 + 280   ,   x
+         inx 
+         cpx #23
+         bne GetSoundInfo
+         lda #GREEN
+         sta sound_initialized +1
+         jmp GetSoundInfo
+
+LEAVE:
+         jsr DELAY
+         jsr CLEAR_SCREEN
+
+         ldx #$f1
+logoloop:    
+         ldy #7
+logoptr:
+         lsr logo
+         bcc notchar
+         lda #$64
+         sta $053e,x
+notchar:
+         dex
+         dey
+         bpl logoptr
+         inc logoptr+1
+         lda logoptr+1
+         cmp #$1E
+         bne logoloop
+
+         ldx #0 
+GetSlogan:
+         lda Slogan ,x
+         beq wait_logo
+         sta $0600 + 138 ,x
+         lda #DARK_GRAY
+         sta $da00 + 138 ,x
+         inx
+         bne GetSlogan
+         
+wait_logo:
+         jsr DELAY
+         jsr DELAY
+         jsr DELAY
+         jsr CLEAR_SCREEN
+         
+         ldx #0
+GetLoading:
+         lda Loading   ,x
+         beq leave_loading
+         sta $0600 + 24,x
+         lda #CYAN
+         sta $da00 + 24,x
+         inx
+         jmp GetLoading
+
+leave_loading:
+         jsr DELAY
+         jsr CLEAR_SCREEN
+    
+         ldx #1
+         rts
+exit_check:
+         ldx #0
+         rts          
+
+frames_wait_REU:
  .byte 0
+REU_FOUND:
+ .text "- REU 16MB detected and initialized@"
+ 
+REU_NOT_FOUND:
+ .text "- REU 16MB not detected@"
 
-phrases:
-.text "tell me a joke about @       "
-.text "what is an @                 "
-.text "what if @                    "
-.text "what has @                   "
-.text "name some @                  "
-.text "name @                       "
-.text "what is a @                  "
-.text "what is the deal with @      "
-.text "whats the deal with @        "
-.text "what is meant by @           "
-.text "what is the definition of @  "
-.text "what constitutes an @        "
-.text "what constitutes a @         "
-.text "what constitutes @           "
-.text "how would you describe an @  "
-.text "how would you describe a @   "
-.text "how would you describe @     "
-.text "how do i @                   "
-.text "what can be described as @   "
-.text "what is going on with an @   "
-.text "what is going on with a @    "
-.text "what is going on with @      "
-.text "whats going on with @        "
-.text "can you explain @            "
-.text "can you tell me about @      "
-.text "can you @                    "
-.text "define the @                 "
-.text "define a @                   "
-.text "explain what is @            "
-.text "explain who is @             "
-.text "explain @                    "
-.text "what do you know about @     "
-.text "whats can you tell me about @"
-.text "give me info on @            "
-.text "give me information on @     "
-.text "give me info about @         "
-.text "give me information about @  "
-.text "what would you call @        "
-.text "tell me what is @            "
-.text "what was @                   "
-.text "tell me who is @             "
-.text "describe who is @            "
-.text "who was @                    "
-.text "do you know @                "
-.text "have you heard of @          "
-.text "is there a @                 "
-.text "who created @                "
-.text "who are @                    "
-.text "who is a @                   "
-.text "who is @                     "
-.text "who created @                "
-.text "who developed @              "
-.text "who wrote @                  "
-.text "what do you mean by an @     "
-.text "what do you mean by a @      "
-.text "what do you mean by @        "
-.text "whats @                      "
-.text "what is @                    "
-.text "what @                       " 
-.text "define an@                   "
-.text "define a @                   "
-.text "define @                     "
-.text "list some @                  "
-.text "list a@                      "
-.text "list @                       "
-.text "recommend an @               "
-.text "recommend a  @               "
-.text "recommend @                  "
-.text "rank @                       "
-.text "where is @                   "
+Slogan:
+ .text "Dealer Quality Botnet@"
+
+Loading:
+ .text "Loading...@"
+
+booting:
+ .text "Booting...@"
+
+tri_init:
+ .text "Tribot Plus, Triad@"
+
+STOCK: 
+  .text "- C64 variant@"
+ULTIMATE:
+  .text "- Ultimate 64 @"
+VICE: 
+  .text "- C64 VICE EMULATOR@"
+KEYBOARD_INIT:
+  .text "- Keyboard              initialized@"
+SOUND_INIT:
+  .text "- Sound device          initialized@"
+
+DELAY:
+         lda #0 
+         sta frames_wait_REU
+WAIT:      
+         lda $d012
+         cmp #$f0
+         bne WAIT
+
+         ldx #0 
+delay:
+         inx
+         bne delay
+
+         inc frames_wait_REU
+         lda frames_wait_REU
+         cmp #DELAYTIME
+         bne WAIT
+         rts
+
+CLEAR_SCREEN:
+      
+         ldx #0
+         stx frames_wait_REU
+CLEARSCREEN:
+         lda #$20
+         sta $0400,x
+         sta $0500,x
+         sta $0600,x
+         sta $06f8,x
+
+         lda #GRAY
+         sta $d800,x
+         sta $d900,x
+         sta $da00,x
+         sta $daf8,x
+
+         inx 
+         bne CLEARSCREEN
+         rts
+
+.pc = LOGO "LOGO"
+logo:      
+	.byte $fe, $fe, $6f, $61, $18 
+	.byte $c1, $0c, $66, $66, $18   
+	.byte $c1, $18, $63, $7c, $18    
+	.byte $c1, $b0, $61, $61, $18   
+	.byte $01, $e0, $60, $01, $18  
+	.byte $fe, $40, $60, $7e, $ff 
+
+
+machine_flags:
+    .byte 0
+
+detect_machine:
+
+    lda #0
+    sta machine_flags
+// ----------------------------------------
+// 1. ULTIMATE 64 CHECK
+// ----------------------------------------
+
+    lda $d7ff
+    cmp #$a5
+    bne no_u64
+
+    lda machine_flags
+    ora #$01
+    sta machine_flags
+    rts
+no_u64:
+
+
+// ----------------------------------------
+// 2. C128 CHECK (VDC presence)
+// ----------------------------------------
+
+    lda #$12
+    sta $d600
+    lda $d600
+    cmp #$12
+    bne no_c128
+
+    lda machine_flags
+    ora #$02
+    sta machine_flags
+    rts
+no_c128:
+
+// ----------------------------------------
+// 4. VICE SUSPECT HEURISTIC
+// ----------------------------------------
+// Weak signal: VIC-II register edge behavior
+
+    lda $d011
+    and #$07
+    cmp #$07
+    bne no_vice
+
+    lda machine_flags
+    ora #$08
+    sta machine_flags
+
+no_vice:
+
+// ----------------------------------------
+// 5. RETURN RESULT
+// ----------------------------------------
+    rts
