@@ -1,398 +1,292 @@
-// *******************************************
-// implemented by Adder Triad 2026
-// *******************************************
+/*********************************************************
+ *     coded by Adder of Triad in 2026 for X2026         *
+ *********************************************************/
+#importonce 
 
-#import "variables.src"
-#import "eliza.src"
+.const ngram_min          = 1
+.const ngram_max          = 3
+.const DIM                = 64
+.const ANSWER_LENGTH      = 256 - DIM
+.const MAXLENGHT          = 38
+.const ELIZA_QUEST        = 16
+.const ELIZA_ANSW         = 50
+.const DELAYTIME          = 150
+.const SCROLLSCREENS      = 8
+.const TOTALLINES         = 25
+.const LASTLINE           = 23
+.const ELIZA_THRESHOLD    = $39
+.const COMMAND_NUMBERS    = 13
+.const LOCATION_CHARSET_A = $B0
+.const LOCATION_CHARSET_B = $A0
+.const LOCATION_MUSIC_A   = $C0
+.const LOCATION_MUSIC_B   = $D0
+.const LOCATION_HELP      = $E0
+.const THINKSTATI         = 26
+.const NUMBEROFPHRASES    = 70
 
-.pc = BOOT "BOOT SEQUENCE"
-checkForREU:
-         
-         lda #23
-         sta $d018
-         jsr CLEAR_SCREEN
-          
-         ldx #0
-initing:
-         lda tri_init,x
-         beq print_booting
-         sta $0400, x
-         inx
-         jmp initing
-print_booting:
-         
-         ldx #0
-         ldy #60
-wait_1:
-         lda #$f0
-         cmp $d012
-         bne *-3
-         dex
-         bne *-1
-         dey
-         bne wait_1
 
-         ldx #0
-Booting:
-         lda booting,x
-         beq DETECT
-         sta $0400 +80 ,   x
-         lda #CYAN
-         sta $d800 +80 ,   x
-         inx
-         jmp Booting
-          
-         
-DETECT:
-         ldx #0
-         ldy #60
-wait_2:
-         lda #$f0
-         cmp $d012
-         bne *-3
-         dex
-         bne *-1
-         dey
-         bne wait_2
 
-         ldx #0
-DETECTION_STATUS_OFF:
-         lda REU_NOT_FOUND,   x
-         beq CHECK_LOOP
-         sta $0400 + 160   ,   x
-not_detected:
-         lda #LIGHT_GRAY
-         sta $d800 + 160   ,   x
-         inx
-         cpx #10
-         bne DETECTION_STATUS_OFF
-         lda #RED
-         sta not_detected + 1
-         jmp DETECTION_STATUS_OFF
 
-CHECK_LOOP:
-         lda $d012
-         cmp #$f0
-         bne CHECK_LOOP
+//*******************************************************************************
+//*** REMEMBER REU-FILE-SIZE HAS TO BE IDENTICAL WITH THE CHOOSEN VALUE IN VICE  
+//*******************************************************************************
+.const EMBEDDER            = $0810
+.const MATH                = $3500
+.const TOKENIZER           = $0c00
+.const MY_HASH16           = $0d00
+.const PROGRAMM            = $c200
+.const KEYBOARD            = $c500
+.const LoadTab             = $2700
+.const ELIZA               = $6000
+.const LOGO                = $6200
+.const BOOT                = $6400
+.const EXTRACTED_ELIZA     = $6500
+.const SCROLLING           = $66f0
+.const SCREENS             = $7000                  // + $2000
+.const COLORS              = $9000                  // + $2000
+.const MUSIC               = $1000
+.const CHARSET             = $2800
+.const COMMANDS            = $c700
+.const EXTRACTKEYWORDS     = $cb00
+.const HELPSCREENS         = $cf00
 
-         lda #<DATARAM                      // Beginn des Speichers der  
-         sta REUC64RAM                      // REU als C64-Speicherbereich mitteilen
-         lda #>DATARAM
-         sta REUC64RAM+1
 
-         lda #<($0100)                      // Die Anzahl der BYTEs ($0100)
-         sta REUBYTES                       // je Aktion der REU bekannt machen
-         lda #>($0100)
-         sta REUBYTES+1
+.var DATARAM               = $0e00                  // Adresse des DATABLOCKS
+.var EMBEDDING_REU         = DATARAM
+.var BOT_ANSWER_REU        = EMBEDDING_REU  + DIM
 
-         // GETNROFENTRIES
-         lda #255
-         sta REUBANK
-         lda #255
-         sta REURAM + 1
+.const SCREEN              = $0400 + 40 * 24 + 2         // SCREENRAM Adress
+.const COLORRAM            = $d800 + 40 * 24 + 2         // SCREENRAM Adress
+.const THINKANIM           = $0400 + 21 * 40
 
-         lda #REU_FETCH_A__           // Befehl fürs Kopieren von der REU zum C64
-         sta REUCOMMAND               // mit AUTOLOAD ausführen
-        
-         lda DATARAM
-         sta COUNT_ENTRIES_LO
-         lda DATARAM + 1
-         sta COUNT_ENTRIES_HI
 
-         lda DATARAM + 2
-         sta ELIZA_ENTRIES
+.const embeddingA          = $ff00
+.const STRING_FUNKTION     = $c000
+.const temporer            = $e500
+.const tokens              = $e600  // buffer für die tokens  "who\0is\0adder\0"
+.const final_answer        = $e900
 
-         //check for REU
-         ldx #0
-scan_REU:
-         stx check_reu_byte + 1
-         lda DATARAM + 3,x
-check_reu_byte:
-         cmp #0
-         bne CHECK_LOOP
-         inx
-         cpx #16
-         bne scan_REU
 
-         ldx #0
-DETECTION_STATUS_ON:
-         lda REU_FOUND,   x
-         beq CHECKFORSYSTEM
-         sta $0400 + 160   ,   x
-initialized:
-         lda #LIGHT_GRAY
-         sta $d800 + 160  ,   x
-         inx
-         cpx #23
-         bne DETECTION_STATUS_ON
-         lda #GREEN
-         sta initialized + 1
-         jmp DETECTION_STATUS_ON
+.const string1             = $b000
+.const string2             = $b100
+.const correct             = $b200
+.const input               = $b300
+.const input_eliza         = $b400
+.const Phrases             = $b500
 
-CHECKFORSYSTEM:
-         jsr DELAY
-         jsr detect_machine
-         ldx #0
-         lda machine_flags
-         cmp #8
-         beq PRINT_VICE
-         cmp #1
-         beq PRINT_ULTIMATE
+
+.var lookUpx127Lo          = $e000 
+.var lookUpx127Hi          = lookUpx127Lo + $0100
+.var lookUpAxALo           = lookUpx127Hi + $0100 
+.var lookUpAxAHi           = lookUpAxALo  + $0100 
+.var lookUpClamp           = lookUpAxAHi  + $0100
+/*
+.var square1_lo            = lookUpClamp  + $0100
+.var square1_hi            = square1_lo   + $0200
+.var square2_lo            = square1_hi   + $0200
+.var square2_hi            = square2_lo   + $0200
+.var modulo                = square2_hi   + $0200
+// */
+// String Funktionen
+.var extrpos               = $ce00
+.var text_rest_pos         = extrpos                 +  1
+.var possible_match        = text_rest_pos           +  1
+.var inputpos              = possible_match          +  1
+.var firstoccur            = inputpos                +  1 
+.var extractLenght         = firstoccur              +  1 
+.var text_rest_pos_plus_1  = extractLenght           +  1
+.var new_pos               = text_rest_pos_plus_1    +  1
+.var inp_char_nr           = new_pos                 +  1
+.var occur                 = inp_char_nr             +  1
+
+
+//*******************************************************************************
+//*** REU-Register
+//*******************************************************************************
+.const REUSTATUS           = $df00         //Statusregister (nur lesen, wird dann gelöscht!)
+.const REUCOMMAND          = $df01         //Befehlsregister
+.const REUC64RAM           = $df02         //RAM-Adresse im C64 (LSB/MSB)
+.const REURAM              = $df04         //Speicher Adresse in der REU (LSB/MSB)
+.const REUBANK             = $df06         //Bank in der REU
+.const REUBYTES            = $df07         //Anzahl der betroffenen BYTES (LSB/MSB)
+.const REUIRQMASK          = $df09         //Interruptmaske
+.const REUADRCONTROL       = $df0a         //Adress-Kontroll-Register
+
+//*******************************************************************************
+//*** REU-Befehle
+//*******************************************************************************
  
-PRINT_STOCK:
-         lda STOCK,   x
-         beq PRINT_KEYBOARD
-         sta $0400 + 200   ,   x
-         lda #LIGHT_GRAY
-         sta $d800 + 200   ,   x
-         inx 
-         jmp PRINT_STOCK
-
-PRINT_VICE:
-         lda VICE,   x
-         beq PRINT_KEYBOARD
-         sta $0400 + 200   ,   x
-         lda #LIGHT_GRAY
-         sta $d800 + 200   ,   x
-         inx 
-         jmp PRINT_VICE
-
-PRINT_ULTIMATE:
-         lda ULTIMATE,   x
-         beq PRINT_KEYBOARD
-         sta $0400 + 200   ,   x
-         lda #LIGHT_GRAY
-         sta $d800 + 200   ,   x
-         inx 
-         jmp PRINT_ULTIMATE
-
-PRINT_KEYBOARD:
-         jsr DELAY
-         ldx #$00
-GetKeyboardInfo:
-         lda KEYBOARD_INIT,   x
-         beq PRINT_SOUND
-         sta $0400 + 240   ,   x
-keyboard_initialized:
-         lda #LIGHT_GRAY
-         sta $d800 + 240   ,   x
-         inx 
-         cpx #23
-         bne GetKeyboardInfo
-         lda #GREEN
-         sta keyboard_initialized +1
-         jmp GetKeyboardInfo
-
-PRINT_SOUND:
-         jsr DELAY
-         ldx #$00
-GetSoundInfo:
-         lda SOUND_INIT    ,   x
-         beq LEAVE
-         sta $0400 + 280   ,   x
-sound_initialized:
-         lda #LIGHT_GRAY
-         sta $d800 + 280   ,   x
-         inx 
-         cpx #23
-         bne GetSoundInfo
-         lda #GREEN
-         sta sound_initialized +1
-         jmp GetSoundInfo
-
-LEAVE:
-         jsr DELAY
-         jsr CLEAR_SCREEN
-
-         ldx #$f1
-logoloop:    
-         ldy #7
-logoptr:
-         lsr logo
-         bcc notchar
-         lda #$64
-         sta $053e,x
-notchar:
-         dex
-         dey
-         bpl logoptr
-         inc logoptr+1
-         lda logoptr+1
-         cmp #$1E
-         bne logoloop
-
-         ldx #0 
-GetSlogan:
-         lda Slogan ,x
-         beq wait_logo
-         sta $0600 + 138 ,x
-         lda #DARK_GRAY
-         sta $da00 + 138 ,x
-         inx
-         bne GetSlogan
-         
-wait_logo:
-         jsr DELAY
-         jsr DELAY
-         jsr DELAY
-         jsr CLEAR_SCREEN
-         
-         ldx #0
-GetLoading:
-         lda Loading   ,x
-         beq leave_loading
-         sta $0600 + 24,x
-         lda #CYAN
-         sta $da00 + 24,x
-         inx
-         jmp GetLoading
-
-leave_loading:
-         jsr DELAY
-         jsr CLEAR_SCREEN
-    
-         ldx #1
-         rts
-exit_check:
-         ldx #0
-         rts          
-
-frames_wait_REU:
- .byte 0
-REU_FOUND:
- .text "- REU 16MB detected and initialized@"
+//*** Standardbefehle mit AUTOLOAD, ohne $ff00
+//.const REU_STASH_A__       = $fc           // kopiere C64 -> REU
+.const REU_FETCH_A__         = $fd           // kopiere REU -> C64
+//.const REU_SWAP_A__        = $fe           // Speicherbereich tauschen
+//.const REU_VERIFY_A__      = $ff           // Speicherbereich vergleichen
  
-REU_NOT_FOUND:
- .text "- REU 16MB not detected@"
+//*** mit AUTOLOAD und mit $ff00
+//.const REU_STASH_A_F       = $ec           // kopiere C64 -> REU
+//.const REU_FETCH_A_F       = $ed           // kopiere REU -> C64
+//.const REU_SWAP_A_F        = $ee           // Speicherbereich tauschen
+//.const REU_VERIFY_A_F      = $ef           // Speicherbereich vergleichen
+ 
+//*** ohne AUTOLOAD, ohne $ff00
+//.const REU_STASH____       = $dc           // kopiere C64 -> REU
+//.const REU_FETCH____       = $dd           // kopiere REU -> C64
+//.const REU_SWAP____        = $de           // Speicherbereich tauschen
+//.const REU_VERIFY____      = $df           // Speicherbereich vergleichen
+ 
+//*** ohne AUTOLOAD, mit $ff00
+//.const REU_STASH___F       = $cc           // kopiere C64 -> REU
+//.const REU_FETCH___F       = $cd           // kopiere REU -> C64
+//.const REU_SWAP___F        = $ce           // Speicherbereich tauschen
+//.const REU_VERIFY___F      = $cf           // Speicherbereich vergleichen
 
-Slogan:
- .text "Dealer Quality Botnet@"
+.var o0         = $10
+.var o1         = $11
 
-Loading:
- .text "Loading...@"
-
-booting:
- .text "Booting...@"
-
-tri_init:
- .text "Tribot Plus, Triad@"
-
-STOCK: 
-  .text "- C64 variant@"
-ULTIMATE:
-  .text "- Ultimate 64 @"
-VICE: 
-  .text "- C64 VICE EMULATOR@"
-KEYBOARD_INIT:
-  .text "- Keyboard              initialized@"
-SOUND_INIT:
-  .text "- Sound device          initialized@"
-
-DELAY:
-         lda #0 
-         sta frames_wait_REU
-WAIT:      
-         lda $d012
-         cmp #$f0
-         bne WAIT
-
-         ldx #0 
-delay:
-         inx
-         bne delay
-
-         inc frames_wait_REU
-         lda frames_wait_REU
-         cmp #DELAYTIME
-         bne WAIT
-         rts
-
-CLEAR_SCREEN:
-      
-         ldx #0
-         stx frames_wait_REU
-CLEARSCREEN:
-         lda #$20
-         sta $0400,x
-         sta $0500,x
-         sta $0600,x
-         sta $06f8,x
-
-         lda #GRAY
-         sta $d800,x
-         sta $d900,x
-         sta $da00,x
-         sta $daf8,x
-
-         inx 
-         bne CLEARSCREEN
-         rts
-
-.pc = LOGO "LOGO"
-logo:      
-	.byte $fe, $fe, $6f, $61, $18 
-	.byte $c1, $0c, $66, $66, $18   
-	.byte $c1, $18, $63, $7c, $18    
-	.byte $c1, $b0, $61, $61, $18   
-	.byte $01, $e0, $60, $01, $18  
-	.byte $fe, $40, $60, $7e, $ff 
+.var a0         = $18
+.var a1         = $19
 
 
-machine_flags:
-    .byte 0
+.var b0         = $20
+.var b1         = $21
 
-detect_machine:
-
-    lda #0
-    sta machine_flags
-// ----------------------------------------
-// 1. ULTIMATE 64 CHECK
-// ----------------------------------------
-
-    lda $d7ff
-    cmp #$a5
-    bne no_u64
-
-    lda machine_flags
-    ora #$01
-    sta machine_flags
-    rts
-no_u64:
+.var T1         = $22
+.var T2         = $23
+.var PRODUCT    = $24
+.var PRODUCTHI  = $25
 
 
-// ----------------------------------------
-// 2. C128 CHECK (VDC presence)
-// ----------------------------------------
+.var t0         = $28
+.var t1         = $29
 
-    lda #$12
-    sta $d600
-    lda $d600
-    cmp #$12
-    bne no_c128
+.var tt0        = $2a
+.var tt1        = $2b
 
-    lda machine_flags
-    ora #$02
-    sta machine_flags
-    rts
-no_c128:
+.var quotient   = $2c
+.var quotientHi = $2d
+.var signflag   = $2e
 
-// ----------------------------------------
-// 4. VICE SUSPECT HEURISTIC
-// ----------------------------------------
-// Weak signal: VIC-II register edge behavior
 
-    lda $d011
-    and #$07
-    cmp #$07
-    bne no_vice
+.var tmp        = $30
+.var length     = $31
+.var CHAR       = $32
 
-    lda machine_flags
-    ora #$08
-    sta machine_flags
+.var FAC1       = $33
+.var FAC2       = $34
 
-no_vice:
+.var d0         = $35  // DIVIDEND  ALSO DOT PRODUCT
+.var d1         = $36
+.var d2         = $37
+.var d3         = $38
 
-// ----------------------------------------
-// 5. RETURN RESULT
-// ----------------------------------------
-    rts
+.var v0         = $39  // DIVISOR
+.var v1         = $3a
+
+.var q0         = $3b  // QUOTIENT ALSO ERGEBNIS
+.var q1         = $3c
+.var q2         = $3d
+.var q3         = $3e
+
+.var r0         = $3f
+.var r1         = $40
+
+.var count      = $41
+
+.var x_save     = $42
+.var y_save     = $43
+
+.var normALO    = $44
+.var normAHI    = $45
+
+.var normBLO    = $46
+.var normBHI    = $47
+
+.var sign       = $48
+
+.var bufptr     = $49
+.var bufptrHi   = $4a
+
+.var tokptr     = $4b
+.var tokptrHi   = $4c
+  // aktueller Token-Pointer
+.var tokidx      = $4d     // Index in tokens[]
+.var i           = $4e
+.var n           = $4f
+.var L           = $50
+.var hash_lo     = $51
+.var hash_hi     = $52
+.var idx         = $53
+
+.var LineZero_LO = $54
+.var LineZero_HI = $55   
+
+.var norm2       = $56
+.var norm2Hi     = $57
+
+.var lo_SqrtIn   = $59
+.var hi_SqrtIn   = $5a
+.var lsby        = $5b
+.var msby        = $5c
+
+
+.var LineOne_LO  = $5e
+.var LineOne_HI  = $5f
+
+.var val         = $60
+.var High_Byte   = $61
+
+// 16 bit division
+.var remainder   = $62
+.var remainderHi = $63
+.var dividend    = $64
+.var dividendHi  = $65
+.var divisor     = $66
+
+.var dist0                 = $67
+.var position_answer       = dist0                   + 1
+.var bestBank              = position_answer         + 1
+.var bestram               = bestBank                + 1
+.var reuram                = bestram                 + 1  
+.var reubank               = reuram                  + 1
+.var hasAnAnswer           = reubank                 + 1
+.var diff_lo               = hasAnAnswer             + 1
+.var diff_hi               = diff_lo                 + 1
+.var neg_diff_lo           = diff_hi                 + 1
+.var neg_diff_hi           = neg_diff_lo             + 1
+.var token_length          = neg_diff_hi             + 1
+.var n_gram                = token_length            + 1
+.var i_token               = n_gram                  + 1
+.var frame                 = i_token                 + 1
+.var inputdone             = frame                   + 1
+.var cursor                = inputdone               + 1
+.var len1_unextracted      = cursor                  + 1 
+.var musicplay             = len1_unextracted        + 1 
+.var key_return            = musicplay               + 1
+.var active_music          = key_return              + 1
+.var keypos                = active_music            + 1
+.var just_music            = keypos                  + 1
+.var actkey	               = just_music              + 1
+.var keyblock              = actkey                  + 1
+.var keyflag               = keyblock                + 1 
+.var lastkey	             = keyflag                 + 1
+.var extract_addr          = lastkey                 + 1
+.var extract_addr_Hi       = extract_addr            + 1
+.var occour_in_query       = extract_addr_Hi         + 1
+.var len1                  = occour_in_query         + 1
+.var check_summe           = len1                    + 1
+.var COUNT_ENTRIES_LO      = check_summe             + 1
+.var COUNT_ENTRIES_HI      = COUNT_ENTRIES_LO        + 1
+.var eliza_answer          = COUNT_ENTRIES_HI        + 1
+.var ELIZA_ENTRIES         = eliza_answer            + 1
+.var active_bot            = ELIZA_ENTRIES           + 1
+.var ColorLineZero_LO      = active_bot              + 1
+.var ColorLineZero_HI      = ColorLineZero_LO        + 1
+.var ColorLineOne_LO       = ColorLineZero_HI        + 1
+.var ColorLineOne_HI       = ColorLineOne_LO         + 1
+.var scroll_LO             = ColorLineOne_HI         + 1
+.var scroll_HI             = scroll_LO               + 1
+.var searchflag            = scroll_HI               + 1
+.var think_anim            = searchflag              + 1
+
+.pc = LoadTab "x127 && AxA && clamp && multab"
+  .import binary "../data/lookup_tables.bin"
